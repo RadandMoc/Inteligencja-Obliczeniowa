@@ -58,10 +58,10 @@ def checkRouteWithNeighbour(distanceMatrix,cityOrder,index):
 
 def ClimbingAlghoritmBySwapping(distanceMatrix,howManyIteration):
     cityOrder = getRandomRouteCities(distance_matrix.shape[0]) #ile wierszy
-    lenght = len(cityOrder)
+    
     for i in range(howManyIteration):
         newCityOrder = swapCities(cityOrder)
-        cityOrder = checkIfWeGetBetterRoute(distanceMatrix,cityOrder,newCityOrder[0],newCityOrder[1],newCityOrder[2],lenght)
+        cityOrder = checkIfWeGetBetterRoute(distanceMatrix,cityOrder,newCityOrder[0],newCityOrder[1],newCityOrder[2])
     return cityOrder    
     
     
