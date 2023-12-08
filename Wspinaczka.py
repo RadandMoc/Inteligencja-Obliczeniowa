@@ -46,14 +46,22 @@ def ifSwapNeighbour(firstIndexSwapping,SecondIndexSwapping):
 def checkRouteWithNeighbour(distanceMatrix,cityOrder,index):
     lenght = len(cityOrder)
     return distanceMatrix[cityOrder[index],cityOrder[(index-1+lenght)%lenght]]+distanceMatrix[cityOrder[index],cityOrder[(index+1+lenght)%lenght]]
-	
-
+ 
+"""
+def checkRouteWithNeighbour(distanceMatrix,cityOrder,index):
+    if index > 0 and index < len(cityOrder)-1:
+        return distanceMatrix[cityOrder[index],cityOrder[index+1]]+distanceMatrix[cityOrder[index],cityOrder[index-1]]
+    elif index == 0:
+        return distanceMatrix[cityOrder[index],cityOrder[-1]]+distanceMatrix[cityOrder[index],cityOrder[index+1]]
+    return distanceMatrix[cityOrder[index],cityOrder[index-1]]+distanceMatrix[cityOrder[index],cityOrder[0]]
+"""
 
 def ClimbingAlghoritmBySwapping(distanceMatrix,howManyIteration):
     cityOrder = getRandomRouteCities(distance_matrix.shape[0]) #ile wierszy
+    lenght = len(cityOrder)
     for i in range(howManyIteration):
         newCityOrder = swapCities(cityOrder)
-        cityOrder = checkIfWeGetBetterRoute(distanceMatrix,cityOrder,newCityOrder[0],newCityOrder[1],newCityOrder[2])
+        cityOrder = checkIfWeGetBetterRoute(distanceMatrix,cityOrder,newCityOrder[0],newCityOrder[1],newCityOrder[2],lenght)
     return cityOrder    
     
     
