@@ -23,7 +23,7 @@ def getRandomRouteCities(numberOfCities):
     
 def swapCities(cityOrder):
     indexOfTable = random.sample(range(0, len(cityOrder)), 2)
-    newCityOrder = copy.deepcopy(cityOrder) 
+    newCityOrder = np.copy(cityOrder) 
     firstCity = cityOrder[indexOfTable[0]]
     newCityOrder[indexOfTable[0]] = cityOrder[indexOfTable[1]]
     newCityOrder[indexOfTable[1]] = firstCity
@@ -47,9 +47,6 @@ def checkRouteWithNeighbour(distanceMatrix,cityOrder,index):
     lenght = len(cityOrder)
     return distanceMatrix[cityOrder[index],cityOrder[(index-1+lenght)%lenght]]+distanceMatrix[cityOrder[index],cityOrder[(index+1+lenght)%lenght]]
 	
-
-def randomNumberAndDelete(array):
-    print("kot")
 
 
 def ClimbingAlghoritmBySwapping(distanceMatrix,howManyIteration):
@@ -95,7 +92,7 @@ readData = ChangeCommaToPoint(readData)
 distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
 start_time = time.time()
 
-dobry = ClimbingAlghoritmBySwapping(distance_matrix,100000)
+dobry = ClimbingAlghoritmBySwapping(distance_matrix,1000000)
 print(dobry)
 print(getSumOfCities(distance_matrix,dobry))
 # The block of code to time
