@@ -20,8 +20,8 @@ def ChangeCommaToPoint(text):
 def getRandomRouteCities(numberOfCities):
     return random.sample(range(0, numberOfCities), numberOfCities)
 
-
-
 readData = pd.read_csv("Dane_TSP_127.csv",sep=";")
 readData = ChangeCommaToPoint(readData)
-print(readData.iloc[1,1])
+distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
+print(distance_matrix[1,:])
+#print(getRandomRouteCities(5))

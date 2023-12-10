@@ -86,12 +86,12 @@ def getSumOfCities(distanceMatrix,cityOrders):
         
 
 def makeIteration(repetition,distanceMatrix,howManyIteration,acceptanceValue):
-    for i in range (1):
-        cityOrder = getRandomRouteCities(distance_matrix.shape[0]) #ile wierszy
+    for i in range (repetition):
+        cityOrder = getRandomRouteCities(distanceMatrix.shape[0]) #ile wierszy
      
         cities = range(len(cityOrder))
-        dobry = ClimbingAlghoritmBySwapping(distance_matrix,cityOrder,howManyIteration,cities)
-        wynik = getSumOfCities(distance_matrix,dobry)
+        dobry = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIteration,cities)
+        wynik = getSumOfCities(distanceMatrix,dobry)
         print(dobry)
         print(wynik)
         if wynik < acceptanceValue:
@@ -130,14 +130,14 @@ def checkIfWeGetBetterRouteNotOptimal(distanceMatrix,cityOrder,getNeighbourCitie
 
 
 #readData=pd.read_csv("Miasta29.csv",sep=";")
-readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
+readData=pd.read_csv("Miasta29.csv",sep=";")
 readData = ChangeCommaToPoint(readData)
 distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
 start_time = time.time()
 
 
 
-makeIteration(1,distance_matrix,100000,160000)
+makeIteration(20,distance_matrix,100000,160000)
 
 
 
