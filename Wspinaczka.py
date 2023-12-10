@@ -130,7 +130,7 @@ def checkIfWeGetBetterRouteNotOptimal(distanceMatrix,cityOrder,getNeighbourCitie
 
 
 #readData=pd.read_csv("Miasta29.csv",sep=";")
-readData=pd.read_csv("Miasta29.csv",sep=";")
+readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
 readData = ChangeCommaToPoint(readData)
 distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
 start_time = time.time()
