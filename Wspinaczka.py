@@ -59,7 +59,7 @@ def checkIfWeGetBetterRoute(
     idx = firstIndexSwapping
     if SecondIndexSwapping < firstIndexSwapping:
         idx = SecondIndexSwapping
-    distanceChange = calculate_route_change(distanceMatrix, cityOrder, idx)
+    distanceChange = calculate_route_change_for_neighbour(distanceMatrix, cityOrder, idx)
     if distanceChange < 0:
         return swapCities(cityOrder,firstIndexSwapping,SecondIndexSwapping)
     return cityOrder
