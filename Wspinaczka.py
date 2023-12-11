@@ -75,8 +75,7 @@ def ifSwapNeighbour(lenght,firstIndexSwapping,SecondIndexSwapping):
 def checkRouteWithNeighbour(distanceMatrix,cityOrder,index,neighbourCities):
     return distanceMatrix[cityOrder[index],neighbourCities[0]]+distanceMatrix[cityOrder[index],neighbourCities[1]]
 
-def calculate_route_change(distanceMatrix, cityOrder, i):
-    # Sprawdzenie warunków brzegowych
+def calculate_route_change_for_neighbour(distanceMatrix, cityOrder, i):
     lenght = len(cityOrder) - 1
     if i == 0 or i >= len(cityOrder) - 1:
         if i == 0:
@@ -91,7 +90,7 @@ def calculate_route_change(distanceMatrix, cityOrder, i):
             length_after = (distanceMatrix[cityOrder[0], cityOrder[-2]]+
                             distanceMatrix[cityOrder[-1], cityOrder[1]])
             return length_after - length_before
-        return None  # lub obsłuż tę sytuację inaczej
+        return None  
 
     # Długość przed zmianą
     length_before = (distanceMatrix[cityOrder[i-1], cityOrder[i]] +
@@ -139,9 +138,10 @@ def makeIteration(repetition,distanceMatrix,howManyIteration,acceptanceValue):
         cities = range(len(cityOrder))
         finalCitiesOrder = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIteration,cities)
         sumOfFinalResult = getSumOfCities(distanceMatrix,finalCitiesOrder)
-        print(finalCitiesOrder) 
-        print(sumOfFinalResult)
+        
         if sumOfFinalResult < acceptanceValue:
+            print(finalCitiesOrder) 
+            print(sumOfFinalResult)
             
             actual_datetime = datetime.datetime.now()
             date_Format = "%Y-%m-%d-%H-%M-%S-%f"
@@ -158,7 +158,6 @@ def ClimbingAlghoritmBySwappingNotOptimal(distanceMatrix,howManyIteration):
     cityOrder = getRandomRouteCities(distance_matrix.shape[0]) #ile wierszy
     for i in range(howManyIteration):
         #newcityOrder = swapCities(cityOrder)
-        
         cityOrder = checkIfWeGetBetterRouteNotOptimal(distanceMatrix,cityOrder,newcityOrder[0],newcityOrder[1],newcityOrder[2])
     return cityOrder  
     
@@ -175,15 +174,15 @@ def checkIfWeGetBetterRouteNotOptimal(distanceMatrix,cityOrder,getNeighbourCitie
 
 
 
-#readData=pd.read_csv("Miasta29.csv",sep=";")
-readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
-readData = ChangeCommaToPoint(readData)
+readData=pd.read_csv("Miasta29.csv",sep=";")
+#readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
+#readData = ChangeCommaToPoint(readData)
 distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
 start_time = time.time()
 
 
 
-makeIteration(10,distance_matrix,30000000,160000)
+makeIteration(3000,distance_matrix,350000,2050)
 
 
 
