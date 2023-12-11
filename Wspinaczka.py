@@ -145,34 +145,45 @@ def getSumOfCities(distanceMatrix,cityOrders):
     return sum
         
 
-def makeIteration(repetition,distanceMatrix,acceptanceValue):
+def makeIteration(iteration,HowManyPossibleImprovement,distanceMatrix,acceptanceValue):
     lenght = distanceMatrix.shape[0]
-    maxSum = 0
+    minSum = math.inf
+    bestCityOrder = []
     
-    cityOrder = getRandomRouteCities(distanceMatrix.shape[0]) #ile wierszy
-    for i in range (repetition):
-        
-        bestIndex = (0,0)
-        bestChangeRoute = 0
-        bestIndex = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,lenght,bestIndex,bestChangeRoute)
-        
-        cityOrder = swapCities(cityOrder,bestIndex[0],bestIndex[1])
-        
-        sumOfFinalResult = getSumOfCities(distanceMatrix,cityOrder)
-      
-        if sumOfFinalResult < acceptanceValue:
-            print(finalCitiesOrder) 
-            print(sumOfFinalResult)
+    for j in range(iteration):
+        cityOrder = getRandomRouteCities(distanceMatrix.shape[0]) #ile wierszy
+
+        for i in range (HowManyPossibleImprovement):
             
-            actual_datetime = datetime.datetime.now()
-            date_Format = "%Y-%m-%d-%H-%M-%S-%f"
-            filename = f"plik_{actual_datetime.strftime(date_Format)}.txt"
-            with open(filename, 'w') as resultFile:
-                for element in finalCitiesOrder:
-                    resultFile.write(str(element) + ' ')
-                resultFile.write(str(sumOfFinalResult))
-    print(cityOrder)
-    print(getSumOfCities(distanceMatrix,cityOrder))
+            bestIndex = (0,0)
+            bestChangeRoute = 0
+            bestIndex = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,lenght,bestIndex,bestChangeRoute)
+            
+            
+            cityOrder = swapCities(cityOrder,bestIndex[0],bestIndex[1])
+            
+            sumOfFinalResult = getSumOfCities(distanceMatrix,cityOrder)
+          
+            if sumOfFinalResult < acceptanceValue:
+                print(cityOrder) 
+                print(sumOfFinalResult)
+                
+                actual_datetime = datetime.datetime.now()
+                date_Format = "%Y-%m-%d-%H-%M-%S-%f"
+                filename = f"plik_{actual_datetime.strftime(date_Format)}.txt"
+                with open(filename, 'w') as resultFile:
+                    for element in cityOrder:
+                        resultFile.write(str(element) + ' ')
+                    resultFile.write(str(sumOfFinalResult))
+                    
+            if bestIndex == (0,0) or i == HowManyPossibleImprovement-1:
+                if sumOfFinalResult < minSum:
+                    bestCityOrder = cityOrder
+                    minSum = sumOfFinalResult
+                print(cityOrder)
+                print(getSumOfCities(distanceMatrix,cityOrder))
+                break
+    return (bestCityOrder,minSum)
 
 """
 Not optimal function to show difference between two alghoritm
@@ -205,7 +216,7 @@ start_time = time.time()
 
 
 
-makeIteration(1000,distance_matrix,2050)
+print(makeIteration(10,20000,distance_matrix,2050))
 
 
 
