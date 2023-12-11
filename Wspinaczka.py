@@ -31,11 +31,12 @@ def swapCities(cityOrder,firstIdx,Secondidx):
 
 def GetCities(cityOrder,firstIdx,secondIdx):
     def city(index):
-        return cityOrder[index % len(cityOrder)]   
-    neighbourOfFirstIndex = [city(firstIdx-1),city(firstIdx+1)]
-    neighbourOfSecondIndex = [city(secondIdx-1),city(secondIdx+1)]
+        return cityOrder[index % len(cityOrder)] 
+    neighbourOfFirstIndex = [city(firstIdx-1),city(firstIdx+1)] #Zbieram sąsiadów dla pierwszego miasta w funkcji city jest modulo by uniknac błedu wyjscia indeksu poza zakres dla firstidx=len(cityOrder)-1
+    neighbourOfSecondIndex = [city(secondIdx-1),city(secondIdx+1)] #
     return neighbourOfFirstIndex, neighbourOfSecondIndex
-    
+
+
     
     
 def checkIfWeGetBetterRoute(
@@ -46,19 +47,65 @@ def checkIfWeGetBetterRoute(
     SecondIndexSwapping
  
     ):
-    previousRoute = checkRouteWithNeighbour(distanceMatrix,cityOrder,firstIndexSwapping,listOfNeighbour[0])+checkRouteWithNeighbour(distanceMatrix,cityOrder,SecondIndexSwapping,listOfNeighbour[1])
-    newRoute = checkRouteWithNeighbour(distanceMatrix,cityOrder,firstIndexSwapping,listOfNeighbour[1])+checkRouteWithNeighbour(distanceMatrix,cityOrder,SecondIndexSwapping,listOfNeighbour[0])
-    if newRoute < previousRoute:
+    if ifSwapNeighbour(len(cityOrder)-1,firstIndexSwapping,SecondIndexSwapping) == False:
+        previousRoute = checkRouteWithNeighbour(distanceMatrix,cityOrder,firstIndexSwapping,listOfNeighbour[0])+checkRouteWithNeighbour(distanceMatrix,cityOrder,SecondIndexSwapping,listOfNeighbour[1])
+        newRoute = checkRouteWithNeighbour(distanceMatrix,cityOrder,firstIndexSwapping,listOfNeighbour[1])+checkRouteWithNeighbour(distanceMatrix,cityOrder,SecondIndexSwapping,listOfNeighbour[0])
+    
+        if newRoute < previousRoute:
+            #print(listOfNeighbour)
+           
+            return swapCities(cityOrder,firstIndexSwapping,SecondIndexSwapping)
+        return cityOrder
+    idx = firstIndexSwapping
+    if SecondIndexSwapping < firstIndexSwapping:
+        idx = SecondIndexSwapping
+    distanceChange = calculate_route_change(distanceMatrix, cityOrder, idx)
+    if distanceChange < 0:
         return swapCities(cityOrder,firstIndexSwapping,SecondIndexSwapping)
     return cityOrder
-    
+
+
         
-def ifSwapNeighbour(firstIndexSwapping,SecondIndexSwapping):
-    return abs(SecondIndexSwapping-firstIndexSwapping) <= 1
+
+
+def ifSwapNeighbour(lenght,firstIndexSwapping,SecondIndexSwapping):
+    return abs(SecondIndexSwapping-firstIndexSwapping) <= 1 or (firstIndexSwapping==0 and SecondIndexSwapping==lenght) or (SecondIndexSwapping==0 and firstIndexSwapping==lenght)
     
 
 def checkRouteWithNeighbour(distanceMatrix,cityOrder,index,neighbourCities):
     return distanceMatrix[cityOrder[index],neighbourCities[0]]+distanceMatrix[cityOrder[index],neighbourCities[1]]
+
+def calculate_route_change(distanceMatrix, cityOrder, i):
+    # Sprawdzenie warunków brzegowych
+    lenght = len(cityOrder) - 1
+    if i == 0 or i >= len(cityOrder) - 1:
+        if i == 0:
+            length_before = (distanceMatrix[cityOrder[i], cityOrder[i+1]] +
+                            distanceMatrix[cityOrder[-1], cityOrder[-2]])
+            length_after = (distanceMatrix[cityOrder[i], cityOrder[-2]]+
+                            distanceMatrix[cityOrder[-1], cityOrder[i+1]])
+            return length_after - length_before
+        else:
+            length_before = (distanceMatrix[cityOrder[0], cityOrder[1]] +
+                            distanceMatrix[cityOrder[-1], cityOrder[-2]])
+            length_after = (distanceMatrix[cityOrder[0], cityOrder[-2]]+
+                            distanceMatrix[cityOrder[-1], cityOrder[1]])
+            return length_after - length_before
+        return None  # lub obsłuż tę sytuację inaczej
+
+    # Długość przed zmianą
+    length_before = (distanceMatrix[cityOrder[i-1], cityOrder[i]] +
+                     distanceMatrix[cityOrder[i+1], cityOrder[(i+2)%lenght]])
+
+    # Długość po zmianie
+    length_after = (distanceMatrix[cityOrder[i-1], cityOrder[i+1]] +
+                    distanceMatrix[cityOrder[i], cityOrder[(i+2)%lenght]])
+
+    # Zwraca różnicę długości
+    return length_after - length_before
+
+
+ 
  
 """
 def checkRouteWithNeighbour(distanceMatrix,cityOrder,index):
@@ -72,8 +119,9 @@ def checkRouteWithNeighbour(distanceMatrix,cityOrder,index):
 def ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIteration,cities):
     for i in range(howManyIteration):
         #newCityOrder = swapCities(cityOrder)
-        indexOfTable = random.sample(cities, 2)
+        indexOfTable = random.sample(cityOrder, 2)
         getNeighbourCities = GetCities(cityOrder,indexOfTable[0],indexOfTable[1])
+        
         cityOrder = checkIfWeGetBetterRoute(distanceMatrix,cityOrder,getNeighbourCities,indexOfTable[0],indexOfTable[1])
     return cityOrder    
     
@@ -88,22 +136,20 @@ def getSumOfCities(distanceMatrix,cityOrders):
 def makeIteration(repetition,distanceMatrix,howManyIteration,acceptanceValue):
     for i in range (repetition):
         cityOrder = getRandomRouteCities(distanceMatrix.shape[0]) #ile wierszy
-     
         cities = range(len(cityOrder))
-        dobry = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIteration,cities)
-        wynik = getSumOfCities(distanceMatrix,dobry)
-        print(dobry)
-        print(wynik)
-        if wynik < acceptanceValue:
-            print(dobry)
-            print(wynik)
+        finalCitiesOrder = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIteration,cities)
+        sumOfFinalResult = getSumOfCities(distanceMatrix,finalCitiesOrder)
+        print(finalCitiesOrder) 
+        print(sumOfFinalResult)
+        if sumOfFinalResult < acceptanceValue:
+            
             actual_datetime = datetime.datetime.now()
             date_Format = "%Y-%m-%d-%H-%M-%S-%f"
             filename = f"plik_{actual_datetime.strftime(date_Format)}.txt"
             with open(filename, 'w') as resultFile:
-                for element in dobry:
+                for element in finalCitiesOrder:
                     resultFile.write(str(element) + ' ')
-                resultFile.write(str(wynik))
+                resultFile.write(str(sumOfFinalResult))
 
 """
 Not optimal function to show difference between two alghoritm
@@ -137,7 +183,7 @@ start_time = time.time()
 
 
 
-makeIteration(20,distance_matrix,100000,160000)
+makeIteration(10,distance_matrix,30000000,160000)
 
 
 
@@ -154,7 +200,7 @@ print(end_time-start_time)
 
 start_time = time.time()
 
-"""dobry = ClimbingAlghoritmBySwappingNotOptimal(distance_matrix,100000)
+"""finalCitiesOrder = ClimbingAlghoritmBySwappingNotOptimal(distance_matrix,100000)
 # The block of code to time
 # [Your code here]
 
