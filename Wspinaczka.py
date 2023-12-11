@@ -1,4 +1,5 @@
 import numpy as np
+from itertools import combinations
 import pandas as pd
 import random
 import math
@@ -37,32 +38,40 @@ def GetCities(cityOrder,firstIdx,secondIdx):
     return neighbourOfFirstIndex, neighbourOfSecondIndex
 
 
-    
+
+
+def list_newton_combinations(n, k):
+    if k > n:
+        return "k cannot be greater than n."
+    return list(combinations(range(n), k))
     
 def checkIfWeGetBetterRoute(
     distanceMatrix,
     cityOrder,
     listOfNeighbour,
     firstIndexSwapping,
-    SecondIndexSwapping
+    SecondIndexSwapping,
+    bestIndex,bestChangeRoute
  
     ):
     if ifSwapNeighbour(len(cityOrder)-1,firstIndexSwapping,SecondIndexSwapping) == False:
         previousRoute = checkRouteWithNeighbour(distanceMatrix,cityOrder,firstIndexSwapping,listOfNeighbour[0])+checkRouteWithNeighbour(distanceMatrix,cityOrder,SecondIndexSwapping,listOfNeighbour[1])
         newRoute = checkRouteWithNeighbour(distanceMatrix,cityOrder,firstIndexSwapping,listOfNeighbour[1])+checkRouteWithNeighbour(distanceMatrix,cityOrder,SecondIndexSwapping,listOfNeighbour[0])
-    
-        if newRoute < previousRoute:
-            #print(listOfNeighbour)
-           
-            return swapCities(cityOrder,firstIndexSwapping,SecondIndexSwapping)
-        return cityOrder
+        changeRouteSum = newRoute - previousRoute
+        
+        if changeRouteSum < bestChangeRoute:
+         
+            bestChangeRoute = changeRouteSum
+            return [(firstIndexSwapping,SecondIndexSwapping),bestChangeRoute]
+        return [bestIndex,bestChangeRoute]
     idx = firstIndexSwapping
     if SecondIndexSwapping < firstIndexSwapping:
         idx = SecondIndexSwapping
     distanceChange = calculate_route_change_for_neighbour(distanceMatrix, cityOrder, idx)
-    if distanceChange < 0:
-        return swapCities(cityOrder,firstIndexSwapping,SecondIndexSwapping)
-    return cityOrder
+    if distanceChange < bestChangeRoute:
+        bestChangeRoute = distanceChange
+        return [(firstIndexSwapping,SecondIndexSwapping),bestChangeRoute]
+    return [bestIndex,bestChangeRoute]
 
 
         
@@ -115,14 +124,18 @@ def checkRouteWithNeighbour(distanceMatrix,cityOrder,index):
     return distanceMatrix[cityOrder[index],cityOrder[index-1]]+distanceMatrix[cityOrder[index],cityOrder[0]]
 """
 
-def ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIteration,cities):
-    for i in range(howManyIteration):
-        #newCityOrder = swapCities(cityOrder)
-        indexOfTable = random.sample(cityOrder, 2)
-        getNeighbourCities = GetCities(cityOrder,indexOfTable[0],indexOfTable[1])
-        
-        cityOrder = checkIfWeGetBetterRoute(distanceMatrix,cityOrder,getNeighbourCities,indexOfTable[0],indexOfTable[1])
-    return cityOrder    
+def ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,lenghtCity,bestIndex,bestRoute):
+    
+    for i in range(0,lenghtCity-1,1):
+        for j in range(i+1,lenghtCity,1):
+            #newCityOrder = swapCities(cityOrder)
+            getNeighbourCities = GetCities(cityOrder,i,j)
+            ifWeGetBetterRoute = checkIfWeGetBetterRoute(distanceMatrix,cityOrder,getNeighbourCities,i,j,bestIndex,bestRoute)
+            bestIndex = ifWeGetBetterRoute[0]
+            bestRoute = ifWeGetBetterRoute[1]
+            
+            
+    return bestIndex    
     
     
 def getSumOfCities(distanceMatrix,cityOrders):
@@ -132,13 +145,21 @@ def getSumOfCities(distanceMatrix,cityOrders):
     return sum
         
 
-def makeIteration(repetition,distanceMatrix,howManyIteration,acceptanceValue):
+def makeIteration(repetition,distanceMatrix,acceptanceValue):
+    lenght = distanceMatrix.shape[0]
+    maxSum = 0
+    
+    cityOrder = getRandomRouteCities(distanceMatrix.shape[0]) #ile wierszy
     for i in range (repetition):
-        cityOrder = getRandomRouteCities(distanceMatrix.shape[0]) #ile wierszy
-        cities = range(len(cityOrder))
-        finalCitiesOrder = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIteration,cities)
-        sumOfFinalResult = getSumOfCities(distanceMatrix,finalCitiesOrder)
         
+        bestIndex = (0,0)
+        bestChangeRoute = 0
+        bestIndex = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,lenght,bestIndex,bestChangeRoute)
+        
+        cityOrder = swapCities(cityOrder,bestIndex[0],bestIndex[1])
+        
+        sumOfFinalResult = getSumOfCities(distanceMatrix,cityOrder)
+      
         if sumOfFinalResult < acceptanceValue:
             print(finalCitiesOrder) 
             print(sumOfFinalResult)
@@ -150,6 +171,8 @@ def makeIteration(repetition,distanceMatrix,howManyIteration,acceptanceValue):
                 for element in finalCitiesOrder:
                     resultFile.write(str(element) + ' ')
                 resultFile.write(str(sumOfFinalResult))
+    print(cityOrder)
+    print(getSumOfCities(distanceMatrix,cityOrder))
 
 """
 Not optimal function to show difference between two alghoritm
@@ -174,15 +197,15 @@ def checkIfWeGetBetterRouteNotOptimal(distanceMatrix,cityOrder,getNeighbourCitie
 
 
 
-readData=pd.read_csv("Miasta29.csv",sep=";")
-#readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
-#readData = ChangeCommaToPoint(readData)
+#readData=pd.read_csv("Miasta29.csv",sep=";")
+readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
+readData = ChangeCommaToPoint(readData)
 distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
 start_time = time.time()
 
 
 
-makeIteration(3000,distance_matrix,350000,2050)
+makeIteration(1000,distance_matrix,2050)
 
 
 
