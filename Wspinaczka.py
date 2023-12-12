@@ -152,7 +152,7 @@ def makeIteration(iteration,HowManyPossibleImprovement,distanceMatrix,acceptance
     
     for j in range(iteration):
         cityOrder = getRandomRouteCities(distanceMatrix.shape[0]) #ile wierszy
-
+        
         for i in range (HowManyPossibleImprovement):
             
             bestIndex = (0,0)
@@ -180,8 +180,8 @@ def makeIteration(iteration,HowManyPossibleImprovement,distanceMatrix,acceptance
                 if sumOfFinalResult < minSum:
                     bestCityOrder = cityOrder
                     minSum = sumOfFinalResult
-                print(cityOrder)
-                print(getSumOfCities(distanceMatrix,cityOrder))
+                    print(cityOrder)
+                    print(getSumOfCities(distanceMatrix,cityOrder))
                 break
     return (bestCityOrder,minSum)
 
@@ -216,7 +216,7 @@ start_time = time.time()
 
 
 
-print(makeIteration(10,20000,distance_matrix,2050))
+print(makeIteration(10000,5000,distance_matrix,150550))
 
 
 
