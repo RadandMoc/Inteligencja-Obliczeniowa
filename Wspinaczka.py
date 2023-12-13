@@ -78,19 +78,12 @@ def checkRouteWithNeighbour(distanceMatrix,cityOrder,index,neighbourCities):
 def calculate_route_change_for_neighbour(distanceMatrix, cityOrder, i):
     lenght = len(cityOrder) - 1
     if i == 0 or i >= len(cityOrder) - 1:
-        if i == 0:
-            length_before = (distanceMatrix[cityOrder[i], cityOrder[i+1]] +
-                            distanceMatrix[cityOrder[-1], cityOrder[-2]])
-            length_after = (distanceMatrix[cityOrder[i], cityOrder[-2]]+
-                            distanceMatrix[cityOrder[-1], cityOrder[i+1]])
-            return length_after - length_before
-        else:
-            length_before = (distanceMatrix[cityOrder[0], cityOrder[1]] +
-                            distanceMatrix[cityOrder[-1], cityOrder[-2]])
-            length_after = (distanceMatrix[cityOrder[0], cityOrder[-2]]+
-                            distanceMatrix[cityOrder[-1], cityOrder[1]])
-            return length_after - length_before
-        return None  
+        length_before = (distanceMatrix[cityOrder[0], cityOrder[1]] +
+                        distanceMatrix[cityOrder[-1], cityOrder[-2]])
+        length_after = (distanceMatrix[cityOrder[0], cityOrder[-2]]+
+                        distanceMatrix[cityOrder[-1], cityOrder[1]])
+        return length_after - length_before
+
 
     # Długość przed zmianą
     length_before = (distanceMatrix[cityOrder[i-1], cityOrder[i]] +
