@@ -1,5 +1,4 @@
 import numpy as np
-from itertools import combinations
 import pandas as pd
 import random
 import math
@@ -38,40 +37,32 @@ def GetCities(cityOrder,firstIdx,secondIdx):
     return neighbourOfFirstIndex, neighbourOfSecondIndex
 
 
-
-
-def list_newton_combinations(n, k):
-    if k > n:
-        return "k cannot be greater than n."
-    return list(combinations(range(n), k))
+    
     
 def checkIfWeGetBetterRoute(
     distanceMatrix,
     cityOrder,
     listOfNeighbour,
     firstIndexSwapping,
-    SecondIndexSwapping,
-    bestIndex,bestChangeRoute
+    SecondIndexSwapping
  
     ):
     if ifSwapNeighbour(len(cityOrder)-1,firstIndexSwapping,SecondIndexSwapping) == False:
         previousRoute = checkRouteWithNeighbour(distanceMatrix,cityOrder,firstIndexSwapping,listOfNeighbour[0])+checkRouteWithNeighbour(distanceMatrix,cityOrder,SecondIndexSwapping,listOfNeighbour[1])
         newRoute = checkRouteWithNeighbour(distanceMatrix,cityOrder,firstIndexSwapping,listOfNeighbour[1])+checkRouteWithNeighbour(distanceMatrix,cityOrder,SecondIndexSwapping,listOfNeighbour[0])
-        changeRouteSum = newRoute - previousRoute
-        
-        if changeRouteSum < bestChangeRoute:
-         
-            bestChangeRoute = changeRouteSum
-            return [(firstIndexSwapping,SecondIndexSwapping),bestChangeRoute]
-        return [bestIndex,bestChangeRoute]
+    
+        if newRoute < previousRoute:
+            #print(listOfNeighbour)
+           
+            return swapCities(cityOrder,firstIndexSwapping,SecondIndexSwapping)
+        return cityOrder
     idx = firstIndexSwapping
     if SecondIndexSwapping < firstIndexSwapping:
         idx = SecondIndexSwapping
     distanceChange = calculate_route_change_for_neighbour(distanceMatrix, cityOrder, idx)
-    if distanceChange < bestChangeRoute:
-        bestChangeRoute = distanceChange
-        return [(firstIndexSwapping,SecondIndexSwapping),bestChangeRoute]
-    return [bestIndex,bestChangeRoute]
+    if distanceChange < 0:
+        return swapCities(cityOrder,firstIndexSwapping,SecondIndexSwapping)
+    return cityOrder
 
 
         
@@ -124,18 +115,14 @@ def checkRouteWithNeighbour(distanceMatrix,cityOrder,index):
     return distanceMatrix[cityOrder[index],cityOrder[index-1]]+distanceMatrix[cityOrder[index],cityOrder[0]]
 """
 
-def ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,lenghtCity,bestIndex,bestRoute):
-    
-    for i in range(0,lenghtCity-1,1):
-        for j in range(i+1,lenghtCity,1):
-            #newCityOrder = swapCities(cityOrder)
-            getNeighbourCities = GetCities(cityOrder,i,j)
-            ifWeGetBetterRoute = checkIfWeGetBetterRoute(distanceMatrix,cityOrder,getNeighbourCities,i,j,bestIndex,bestRoute)
-            bestIndex = ifWeGetBetterRoute[0]
-            bestRoute = ifWeGetBetterRoute[1]
-            
-            
-    return bestIndex    
+def ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIteration,cities):
+    for i in range(howManyIteration):
+        #newCityOrder = swapCities(cityOrder)
+        indexOfTable = random.sample(cityOrder, 2)
+        getNeighbourCities = GetCities(cityOrder,indexOfTable[0],indexOfTable[1])
+        
+        cityOrder = checkIfWeGetBetterRoute(distanceMatrix,cityOrder,getNeighbourCities,indexOfTable[0],indexOfTable[1])
+    return cityOrder    
     
     
 def getSumOfCities(distanceMatrix,cityOrders):
@@ -145,45 +132,23 @@ def getSumOfCities(distanceMatrix,cityOrders):
     return sum
         
 
-def makeIteration(iteration,HowManyPossibleImprovement,distanceMatrix,acceptanceValue):
-    lenght = distanceMatrix.shape[0]
-    minSum = math.inf
-    bestCityOrder = []
-    
-    for j in range(iteration):
+def makeIteration(repetition,distanceMatrix,howManyIteration,acceptanceValue):
+    for i in range (repetition):
         cityOrder = getRandomRouteCities(distanceMatrix.shape[0]) #ile wierszy
-        
-        for i in range (HowManyPossibleImprovement):
+        cities = range(len(cityOrder))
+        finalCitiesOrder = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIteration,cities)
+        sumOfFinalResult = getSumOfCities(distanceMatrix,finalCitiesOrder)
+        print(finalCitiesOrder) 
+        print(sumOfFinalResult)
+        if sumOfFinalResult < acceptanceValue:
             
-            bestIndex = (0,0)
-            bestChangeRoute = 0
-            bestIndex = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,lenght,bestIndex,bestChangeRoute)
-            
-            
-            cityOrder = swapCities(cityOrder,bestIndex[0],bestIndex[1])
-            
-            sumOfFinalResult = getSumOfCities(distanceMatrix,cityOrder)
-          
-            if sumOfFinalResult < acceptanceValue:
-                print(cityOrder) 
-                print(sumOfFinalResult)
-                
-                actual_datetime = datetime.datetime.now()
-                date_Format = "%Y-%m-%d-%H-%M-%S-%f"
-                filename = f"plik_{actual_datetime.strftime(date_Format)}.txt"
-                with open(filename, 'w') as resultFile:
-                    for element in cityOrder:
-                        resultFile.write(str(element) + ' ')
-                    resultFile.write(str(sumOfFinalResult))
-                    
-            if bestIndex == (0,0) or i == HowManyPossibleImprovement-1:
-                if sumOfFinalResult < minSum:
-                    bestCityOrder = cityOrder
-                    minSum = sumOfFinalResult
-                    print(cityOrder)
-                    print(getSumOfCities(distanceMatrix,cityOrder))
-                break
-    return (bestCityOrder,minSum)
+            actual_datetime = datetime.datetime.now()
+            date_Format = "%Y-%m-%d-%H-%M-%S-%f"
+            filename = f"plik_{actual_datetime.strftime(date_Format)}.txt"
+            with open(filename, 'w') as resultFile:
+                for element in finalCitiesOrder:
+                    resultFile.write(str(element) + ' ')
+                resultFile.write(str(sumOfFinalResult))
 
 """
 Not optimal function to show difference between two alghoritm
@@ -216,7 +181,7 @@ start_time = time.time()
 
 
 
-print(makeIteration(10000,5000,distance_matrix,150550))
+makeIteration(1000,distance_matrix,1000000,2050)
 
 
 
