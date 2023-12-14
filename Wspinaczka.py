@@ -29,40 +29,34 @@ def swapCities(cityOrder,firstIdx,Secondidx):
     return cityOrder
 
 
-def GetCities(cityOrder,firstIdx,secondIdx):
+def GetCities(cityOrder :np.array,firstIdx :int,secondIdx :int):
     def city(index):
         return cityOrder[index % len(cityOrder)] 
-    neighbourOfFirstIndex = [city(firstIdx-1),city(firstIdx+1)] #Zbieram sąsiadów dla pierwszego miasta w funkcji city jest modulo by uniknac błedu wyjscia indeksu poza zakres dla firstidx=len(cityOrder)-1
-    neighbourOfSecondIndex = [city(secondIdx-1),city(secondIdx+1)] #
+    neighbourOfFirstIndex = np.array([city(firstIdx-1),city(firstIdx+1)]) #Zbieram sąsiadów dla pierwszego miasta w funkcji city jest modulo by uniknac błedu wyjscia indeksu poza zakres dla firstidx=len(cityOrder)-1
+    neighbourOfSecondIndex = np.array([city(secondIdx-1),city(secondIdx+1)])
     return neighbourOfFirstIndex, neighbourOfSecondIndex
 
 
     
     
-def checkIfWeGetBetterRoute(
-    distanceMatrix,
-    cityOrder,
-    listOfNeighbour,
-    firstIndexSwapping,
-    SecondIndexSwapping
- 
-    ):
+def checkIfWeGetBetterRoute(distanceMatrix: np.array,cityOrder: np.array,listOfNeighbour,firstIndexSwapping,SecondIndexSwapping):
     if ifSwapNeighbour(len(cityOrder)-1,firstIndexSwapping,SecondIndexSwapping) == False:
         previousRoute = checkRouteWithNeighbour(distanceMatrix,cityOrder,firstIndexSwapping,listOfNeighbour[0])+checkRouteWithNeighbour(distanceMatrix,cityOrder,SecondIndexSwapping,listOfNeighbour[1])
         newRoute = checkRouteWithNeighbour(distanceMatrix,cityOrder,firstIndexSwapping,listOfNeighbour[1])+checkRouteWithNeighbour(distanceMatrix,cityOrder,SecondIndexSwapping,listOfNeighbour[0])
     
         if newRoute < previousRoute:
             #print(listOfNeighbour)
-           
-            return swapCities(cityOrder,firstIndexSwapping,SecondIndexSwapping)
-        return cityOrder
-    idx = firstIndexSwapping
+            return (swapCities(cityOrder,firstIndexSwapping,SecondIndexSwapping),True)
+        return (cityOrder,False)
+    firstIdx = firstIndexSwapping
+    secIdx = SecondIndexSwapping
     if SecondIndexSwapping < firstIndexSwapping:
-        idx = SecondIndexSwapping
-    distanceChange = calculate_route_change_for_neighbour(distanceMatrix, cityOrder, idx)
+        firstIdx = SecondIndexSwapping
+        secIdx = firstIndexSwapping
+    distanceChange = calculate_route_change_for_neighbour(distanceMatrix, cityOrder, firstIdx, secIdx)
     if distanceChange < 0:
-        return swapCities(cityOrder,firstIndexSwapping,SecondIndexSwapping)
-    return cityOrder
+        return (swapCities(cityOrder,firstIndexSwapping,SecondIndexSwapping),True)
+    return (cityOrder,False)
 
 
         
@@ -75,9 +69,9 @@ def ifSwapNeighbour(lenght,firstIndexSwapping,SecondIndexSwapping):
 def checkRouteWithNeighbour(distanceMatrix,cityOrder,index,neighbourCities):
     return distanceMatrix[cityOrder[index],neighbourCities[0]]+distanceMatrix[cityOrder[index],neighbourCities[1]]
 
-def calculate_route_change_for_neighbour(distanceMatrix, cityOrder, i):
-    lenght = len(cityOrder) - 1
-    if i == 0 or i >= len(cityOrder) - 1:
+def calculate_route_change_for_neighbour(distanceMatrix, cityOrder, i, j):
+    lenght = len(cityOrder)
+    if i == 0 and j == lenght-1:
         length_before = (distanceMatrix[cityOrder[0], cityOrder[1]] +
                         distanceMatrix[cityOrder[-1], cityOrder[-2]])
         length_after = (distanceMatrix[cityOrder[0], cityOrder[-2]]+
@@ -108,13 +102,22 @@ def checkRouteWithNeighbour(distanceMatrix,cityOrder,index):
     return distanceMatrix[cityOrder[index],cityOrder[index-1]]+distanceMatrix[cityOrder[index],cityOrder[0]]
 """
 
-def ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIteration,cities):
-    for i in range(howManyIteration):
+def ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIterationWithoutImprovement,cities):
+
+    i = 0
+    k = 0
+    while i < howManyIterationWithoutImprovement:
         #newCityOrder = swapCities(cityOrder)
         indexOfTable = random.sample(cityOrder, 2)
         getNeighbourCities = GetCities(cityOrder,indexOfTable[0],indexOfTable[1])
         
-        cityOrder = checkIfWeGetBetterRoute(distanceMatrix,cityOrder,getNeighbourCities,indexOfTable[0],indexOfTable[1])
+        changeCityOrder = checkIfWeGetBetterRoute(distanceMatrix,cityOrder,getNeighbourCities,indexOfTable[0],indexOfTable[1])
+        cityOrder = changeCityOrder[0]
+        i = i+1
+        if changeCityOrder[1] == True: #If change city order
+            i = 0
+        k=k+1
+    print(k)
     return cityOrder    
     
     
@@ -125,11 +128,11 @@ def getSumOfCities(distanceMatrix,cityOrders):
     return sum
         
 
-def makeIteration(repetition,distanceMatrix,howManyIteration,acceptanceValue):
+def makeIteration(repetition,distanceMatrix,howManyIterationWithoutImprovem,acceptanceValue):
     for i in range (repetition):
         cityOrder = getRandomRouteCities(distanceMatrix.shape[0]) #ile wierszy
         cities = range(len(cityOrder))
-        finalCitiesOrder = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIteration,cities)
+        finalCitiesOrder = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIterationWithoutImprovem,cities)
         sumOfFinalResult = getSumOfCities(distanceMatrix,finalCitiesOrder)
         print(finalCitiesOrder) 
         print(sumOfFinalResult)
@@ -166,18 +169,29 @@ def checkIfWeGetBetterRouteNotOptimal(distanceMatrix,cityOrder,getNeighbourCitie
 
 
 
-#readData=pd.read_csv("Miasta29.csv",sep=";")
-readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
-readData = ChangeCommaToPoint(readData)
-distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
+readData=pd.read_csv("Miasta29.csv",sep=";")
+#readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
+#readData = ChangeCommaToPoint(readData)
+distance_matrix = readData.iloc[:,1:].astype(int).to_numpy()
 start_time = time.time()
 
 
 
-makeIteration(1000,distance_matrix,1000000,2050)
+makeIteration(1000,distance_matrix,100000,2050)
+
+
+"""
+Test
+
+
+cityorder = np.array([20, 4, 8, 11, 5, 27, 7, 26, 23, 12, 0, 25, 28, 2, 1, 9, 3, 14, 18, 15, 22, 6, 24, 10, 21, 13, 16, 17, 19])
+print(calculate_route_change_for_neighbour(distance_matrix,cityorder,0,28)) expect 178 -> print(178)
+print(calculate_route_change_for_neighbour(distance_matrix,cityorder,27,28)) expect 264 -> 264
 
 
 
+
+"""
 
 
 # The block of code to time

@@ -61,4 +61,6 @@ readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
 readData = ChangeCommaToPoint(readData)
 
 distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
+
+
 print(FindMin(distance_matrix))
