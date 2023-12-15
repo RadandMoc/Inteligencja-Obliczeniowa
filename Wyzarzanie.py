@@ -64,11 +64,11 @@ def simulatedAnnealing(distance_matrix, initial_temperature, cooling_rate, num_i
             #new_distance = getSumOfCities(new_route, distance_matrix)
 
             if acceptanceProbability(current_distance, new_distance, temperature) > random.random():
-                current_route = copy.deepcopy(new_route)
+                current_route = np.copy(new_route)
                 current_distance = new_distance
 
             if current_distance < best:
-                global_best_route = copy.deepcopy(current_route)
+                global_best_route = np.copy(current_route)
                 global_best_list = [current_distance, global_best_route]
                 best = current_distance
 
