@@ -100,7 +100,7 @@ distance_matrix = readData.iloc[:, 1:].astype(float).to_numpy()
 
 # Uruchomienie algorytmu symulowanego wyżarzania 3000 razy
 start_time = time.time()
-best_route, best_distance, best_global = runSimulatedAnnealingMultipleTimes(distance_matrix, num_runs=1, initial_temperature=10000, cooling_rate=0.003, num_iterations=500, acc_value=200000,min_temp=0.11)
+best_route, best_distance, best_global = runSimulatedAnnealingMultipleTimes(distance_matrix, num_runs=4, initial_temperature=10000, cooling_rate=0.003, num_iterations=10000, acc_value=150000,min_temp=0.11)
 end_time = time.time()
 
 print("Najlepsza trasa zakończona:", best_route)
