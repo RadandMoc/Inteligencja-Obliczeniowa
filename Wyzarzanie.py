@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import random
 import math
-import copy
 import time
 import sys
 
@@ -14,13 +13,16 @@ def ChangeCommaToPoint(text):
     return df_skopiowany
 
 
-def save_data(best_overall, acc_value,filename=f"Wyzarzanie_records.txt"):
+def save_data(best_overall, initial_temperature, cooling_rate, num_iterations, min_temp, filename=f"Wyzarzanie_records.txt"):
         with open(filename, 'a') as resultFile:
             resultFile.write("\n" + "=" * 25 + "\n")  # Dodanie kreski oddzielającej dane
             for element in best_overall[1]:
                 resultFile.write(str(element+1) + ' ')
             resultFile.write(str(best_overall[0]))
-
+            resultFile.write("\n" + "Poczatkowa temparatura: " + str(initial_temperature))
+            resultFile.write("\n" + "Wsp. chlodzenia: " + str(cooling_rate))
+            resultFile.write("\n" + "Liczba iteracji dla jednej temperatury: " + str(num_iterations))
+            resultFile.write("\n" + "Minimalna temperatura: " + str(min_temp))
 def getRandomRouteCities(numberOfCities):
     return random.sample(range(0, numberOfCities), numberOfCities)
 
@@ -77,8 +79,8 @@ def simulatedAnnealing(distance_matrix, initial_temperature, cooling_rate, num_i
     return current_route, current_distance, global_best_list
 
 def runSimulatedAnnealingMultipleTimes(distance_matrix, num_runs, initial_temperature, cooling_rate, num_iterations, min_temp, acc_value, best_result=sys.maxsize):
-    best_finished = [sys.maxsize, 21212121] # Najlepsza odległość pod koniec
-    best_overall = [sys.maxsize, 21212121] # Najlepsza odległość ogólnie (może być pod koniec, może być nie pod koniec)
+    best_finished = [sys.maxsize, []] # Najlepsza odległość pod koniec
+    best_overall = [sys.maxsize, []] # Najlepsza odległość ogólnie (może być pod koniec, może być nie pod koniec)
 
     for i in range(num_runs):
         data_run = simulatedAnnealing(distance_matrix, initial_temperature, cooling_rate, num_iterations, min_temp, best_result)
@@ -94,7 +96,7 @@ def runSimulatedAnnealingMultipleTimes(distance_matrix, num_runs, initial_temper
             best_result = best_distance
 
         if (best_overall[0] < acc_value):
-            save_data(best_overall, acc_value)
+            save_data(best_overall, initial_temperature=initial_temperature, cooling_rate=cooling_rate, num_iterations=num_iterations,min_temp=min_temp)
 
     return best_finished[0], best_finished[1], best_overall
 
@@ -172,7 +174,7 @@ distance_matrix = readData.iloc[:, 1:].astype(float).to_numpy()
 
 # Uruchomienie algorytmu symulowanego wyżarzania 3000 razy
 start_time = time.time()
-best_distance, best_route, best_global = runSimulatedAnnealingMultipleTimes(distance_matrix, num_runs=4, initial_temperature=10000, cooling_rate=0.003, num_iterations=100, acc_value=2000,min_temp=0.11)
+best_distance, best_route, best_global = runSimulatedAnnealingMultipleTimes(distance_matrix, num_runs=4, initial_temperature=10000, cooling_rate=0.003, num_iterations=10000, acc_value=200000,min_temp=0.11)
 end_time = time.time()
 
 print("Trasa na koncu:", best_route)
