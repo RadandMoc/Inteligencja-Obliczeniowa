@@ -37,8 +37,6 @@ def GetCities(cityOrder :np.array,firstIdx :int,secondIdx :int):
     return neighbourOfFirstIndex, neighbourOfSecondIndex
 
 
-    
-    
 def checkIfWeGetBetterRoute(distanceMatrix: np.array,cityOrder: np.array,listOfNeighbour,firstIndexSwapping,SecondIndexSwapping):
     if ifSwapNeighbour(len(cityOrder)-1,firstIndexSwapping,SecondIndexSwapping) == False:
         previousRoute = checkRouteWithNeighbour(distanceMatrix,cityOrder,firstIndexSwapping,listOfNeighbour[0])+checkRouteWithNeighbour(distanceMatrix,cityOrder,SecondIndexSwapping,listOfNeighbour[1])
@@ -105,7 +103,7 @@ def checkRouteWithNeighbour(distanceMatrix,cityOrder,index):
 def ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIterationWithoutImprovement,cities):
 
     i = 0
-    k = 0
+
     while i < howManyIterationWithoutImprovement:
         #newCityOrder = swapCities(cityOrder)
         indexOfTable = random.sample(cityOrder, 2)
@@ -116,8 +114,6 @@ def ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIterationWithout
         i = i+1
         if changeCityOrder[1] == True: #If change city order
             i = 0
-        k=k+1
-    print(k)
     return cityOrder    
     
     
@@ -134,8 +130,7 @@ def makeIteration(repetition,distanceMatrix,howManyIterationWithoutImprovem,acce
         cities = range(len(cityOrder))
         finalCitiesOrder = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIterationWithoutImprovem,cities)
         sumOfFinalResult = getSumOfCities(distanceMatrix,finalCitiesOrder)
-        print(finalCitiesOrder) 
-        print(sumOfFinalResult)
+      
         if sumOfFinalResult < acceptanceValue:
             
             actual_datetime = datetime.datetime.now()
@@ -145,6 +140,76 @@ def makeIteration(repetition,distanceMatrix,howManyIterationWithoutImprovem,acce
                 for element in finalCitiesOrder:
                     resultFile.write(str(element) + ' ')
                 resultFile.write(str(sumOfFinalResult))
+
+
+def ClimbingAlghoritmByInsertion(distanceMatrix,cityOrder,howManyIterationWithoutImprovement):
+    i = 0
+    while i < howManyIterationWithoutImprovement:
+        indexOfCityAndIndexOfInsetrion = random.sample(cityOrder, 2)
+
+
+
+def checkIfWeGetBetterRouteForInsertion(distanceMatrix: np.array,cityOrder: np.array,indexOfCityInCityOrder,indexToInsert):
+    lenOfCityOrder = len(cityOrder)
+    if ifSwapNeighbour(lenOfCityOrder-1,indexOfCityInCityOrder,indexToInsert) == False:
+        print("kot")
+        if indexOfCityInCityOrder < indexToInsert:
+            lengthBefore = distanceMatrix[cityOrder[indexOfCityInCityOrder],cityOrder[indexOfCityInCityOrder-1]] + distanceMatrix[cityOrder[indexOfCityInCityOrder],cityOrder[(indexOfCityInCityOrder+1)%lenOfCityOrder]] + distanceMatrix[cityOrder[indexToInsert],cityOrder[(indexToInsert+1)%lenOfCityOrder]] 
+
+            lengthAfter = distanceMatrix[cityOrder[indexOfCityInCityOrder],cityOrder[indexToInsert]] + distanceMatrix[cityOrder[indexOfCityInCityOrder],cityOrder[(indexToInsert+1)%lenOfCityOrder]] + distanceMatrix[cityOrder[indexOfCityInCityOrder+1],cityOrder[(indexOfCityInCityOrder-1)]] 
+            return lengthAfter - lengthBefore
+        lengthBefore = distanceMatrix[cityOrder[indexOfCityInCityOrder],cityOrder[indexOfCityInCityOrder-1]] + distanceMatrix[cityOrder[indexOfCityInCityOrder],cityOrder[(indexOfCityInCityOrder+1)%lenOfCityOrder]] + distanceMatrix[cityOrder[indexToInsert],cityOrder[indexToInsert-1]] 
+        lengthAfter = distanceMatrix[cityOrder[indexOfCityInCityOrder],cityOrder[indexToInsert]] + distanceMatrix[cityOrder[indexOfCityInCityOrder],cityOrder[indexToInsert-1]] + distanceMatrix[cityOrder[indexOfCityInCityOrder+1],cityOrder[(indexOfCityInCityOrder-1)]] 
+        return lengthAfter - lengthBefore
+    elif abs(indexOfCityInCityOrder-indexToInsert) == 1:
+        firstIdx = indexOfCityInCityOrder
+        secIdx = indexToInsert
+        if indexToInsert < indexOfCityInCityOrder:
+            firstIdx = indexToInsert
+            secIdx = indexOfCityInCityOrder
+        return calculate_route_change_for_neighbour(distanceMatrix,cityOrder,firstIdx,secIdx)
+    return 0
+ 
+
+
+
+def checkIfWeGetBetterRouteForReverse(distanceMatrix: np.array,cityOrder: np.array,firstIdx,secondIdx):
+    lenOfCityOrder = len(cityorder)
+    if firstIdx==0 and secondIdx == lenOfCityOrder-1:
+        return 0
+    if firstIdx - secondIdx == -1:
+        return calculate_route_change_for_neighbour(distanceMatrix,cityOrder,firstIdx,secondIdx)
+    return distance_matrix[cityOrder[firstIdx],cityOrder[firstIdx-1]] + distance_matrix[cityOrder[secondIdx],cityOrder[(secondIdx+1)%lenOfCityOrder]] - (distance_matrix[cityOrder[secondIdx],cityOrder[firstIdx-1]] + distanceMatrix[cityOrder[firstIdx],cityOrder[(secondIdx+1)%lenOfCityOrder]])
+
+def reverse_subarray(arr, i, j):
+
+    if i < 0 or j >= arr.size or i > j:
+        raise ValueError("Invalid indices. Ensure that 0 <= i <= j < len(arr).")
+    reverseArray = arr.copy()
+    reverseArray[i:j+1] = reverseArray[i:j+1][::-1]
+    return reverseArray
+
+
+
+def insert_at_index(order, index, insertion_index):
+    if index < 0 or index >= order.size or insertion_index < 0 or insertion_index >= order.size:
+        raise ValueError("Invalid indices. Ensure that 0 <= index, insertion_index < len(order).")
+    element = order[index]
+   
+    new_order = np.delete(order, index)
+    new_order = np.insert(new_order, insertion_index, element)
+    return new_order
+
+# Example usage
+example_order = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
+index = 2  # Element to move (element '3')
+insertion_index = 5  # New position for the element
+
+# Move element '3' to the new position
+new_order = insert_at_index(example_order, index, insertion_index)
+new_order
+
+
 
 """
 Not optimal function to show difference between two alghoritm
@@ -169,6 +234,8 @@ def checkIfWeGetBetterRouteNotOptimal(distanceMatrix,cityOrder,getNeighbourCitie
 
 
 
+
+
 readData=pd.read_csv("Miasta29.csv",sep=";")
 #readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
 #readData = ChangeCommaToPoint(readData)
@@ -177,8 +244,108 @@ start_time = time.time()
 
 
 
-makeIteration(1000,distance_matrix,100000,2050)
+#makeIteration(1000,distance_matrix,1000000,2050)
 
+
+cityorder = np.array([20, 4, 8, 11, 5, 27, 7, 26, 23, 12, 0, 25, 28, 2, 1, 9, 3, 14, 18, 15, 22, 6, 24, 10, 21, 13, 16, 17, 19])
+
+print(checkIfWeGetBetterRouteForInsertion(distance_matrix,cityorder,0,28))
+kot = insert_at_index(cityorder,0,28)
+print(kot)
+print(getSumOfCities(distance_matrix,kot))
+print(getSumOfCities(distance_matrix,cityorder))
+
+print(checkIfWeGetBetterRouteForInsertion(distance_matrix,cityorder,2,11))
+
+kot = insert_at_index(cityorder,2,11)
+print(kot)
+print(getSumOfCities(distance_matrix,kot))
+print(getSumOfCities(distance_matrix,cityorder))
+
+
+print(checkIfWeGetBetterRouteForInsertion(distance_matrix,cityorder,11,12))
+
+kot = insert_at_index(cityorder,11,12)
+print(kot)
+print(getSumOfCities(distance_matrix,kot))
+print(getSumOfCities(distance_matrix,cityorder))
+
+
+
+
+print(checkIfWeGetBetterRouteForInsertion(distance_matrix,cityorder,0,27))
+
+kot = insert_at_index(cityorder,0,27)
+print(kot)
+print(getSumOfCities(distance_matrix,kot))
+print(getSumOfCities(distance_matrix,cityorder))
+
+
+
+
+print(checkIfWeGetBetterRouteForInsertion(distance_matrix,cityorder,5,2))
+
+kot = insert_at_index(cityorder,5,2)
+print(kot)
+print(getSumOfCities(distance_matrix,kot))
+print(getSumOfCities(distance_matrix,cityorder))
+
+
+
+
+
+print(checkIfWeGetBetterRouteForInsertion(distance_matrix,cityorder,11,4))
+
+kot = insert_at_index(cityorder,11,4)
+print(kot)
+print(getSumOfCities(distance_matrix,kot))
+print(getSumOfCities(distance_matrix,cityorder))
+
+
+"""
+
+print(checkIfWeGetBetterRouteForReverse(distance_matrix,cityorder,0,28))
+
+
+kot = reverse_subarray(cityorder,0,28)
+print(kot)
+print(getSumOfCities(distance_matrix,kot))
+print(getSumOfCities(distance_matrix,cityorder))
+
+print(checkIfWeGetBetterRouteForReverse(distance_matrix,cityorder,0,27))
+
+
+kot = reverse_subarray(cityorder,0,27)
+print(kot)
+print(getSumOfCities(distance_matrix,kot))
+print(getSumOfCities(distance_matrix,cityorder))
+
+print(checkIfWeGetBetterRouteForReverse(distance_matrix,cityorder,11,12))
+
+
+kot = reverse_subarray(cityorder,11,12)
+print(kot)
+print(getSumOfCities(distance_matrix,kot))
+print(getSumOfCities(distance_matrix,cityorder))
+
+
+print(checkIfWeGetBetterRouteForReverse(distance_matrix,cityorder,4,11))
+
+kot = reverse_subarray(cityorder,4,11)
+print(kot)
+print(getSumOfCities(distance_matrix,kot))
+print(getSumOfCities(distance_matrix,cityorder))
+
+
+print(checkIfWeGetBetterRouteForReverse(distance_matrix,cityorder,1,4))
+kot = reverse_subarray(cityorder,1,4)
+print(kot)
+
+
+print(getSumOfCities(distance_matrix,kot))
+
+print(getSumOfCities(distance_matrix,cityorder))
+"""
 
 """
 Test
