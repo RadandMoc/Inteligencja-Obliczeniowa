@@ -50,7 +50,6 @@ def simulatedAnnealing(distance_matrix, initial_temperature, cooling_rate, num_i
     best = best_res
     global_best_list = []
     new_distance = 0
-
     temperature = initial_temperature
 
     while(temperature>min_temp):
@@ -64,7 +63,8 @@ def simulatedAnnealing(distance_matrix, initial_temperature, cooling_rate, num_i
                                 checkIfWeGetBetterRoute(distance_matrix, current_route, neighbours, idx1, idx2))
                 new_route = swapCities(new_route, idx1, idx2)
             elif (method == "insertion"):
-                idx1, idx2 = random.sample(range(len(new_route)), 2)
+                if (idx1 > idx2):
+                    idx1, idx2 = idx2, idx1
                 new_distance = (current_distance +
                                 checkIfWeGetBetterRouteForInsertion(distance_matrix, current_route, idx1, idx2))
                 new_route = insert_at_index(new_route, idx1, idx2)
@@ -74,9 +74,6 @@ def simulatedAnnealing(distance_matrix, initial_temperature, cooling_rate, num_i
                 new_distance = (current_distance +
                                 checkIfWeGetBetterRouteForReverse(distance_matrix, current_route, idx1, idx2))
                 new_route = reverse_subarray(new_route, idx1, idx2)
-
-            if(getSumOfCities(new_route, distance_matrix)!=new_distance):
-                print(getSumOfCities(new_route, distance_matrix), new_distance)
 
             if acceptanceProbability(current_distance, new_distance, temperature) > random.random():
                 current_route = np.copy(new_route)
@@ -211,7 +208,7 @@ def checkIfWeGetBetterRouteForReverse(distanceMatrix: np.array, cityOrder: np.ar
         return 0
     if firstIdx - secondIdx == -1:
         return calculate_route_change_for_neighbour(distanceMatrix, cityOrder, firstIdx, secondIdx)
-    return (distanceMatrix[cityOrder[firstIdx], cityOrder[firstIdx - 1]] +
+    return -(distanceMatrix[cityOrder[firstIdx], cityOrder[firstIdx - 1]] +
             distanceMatrix[cityOrder[secondIdx], cityOrder[(secondIdx + 1) % lenOfCityOrder]] -
             (distanceMatrix[cityOrder[secondIdx], cityOrder[firstIdx - 1]] +
              distanceMatrix[cityOrder[firstIdx], cityOrder[(secondIdx + 1) % lenOfCityOrder]]))
@@ -231,12 +228,12 @@ def insert_at_index(order, index, insertion_index):
 
 readData = pd.read_csv("Dane_TSP_127.csv", sep=";")
 readData = ChangeCommaToPoint(readData)
-distance_matrix = readData.iloc[:, 1:].astype(float).to_numpy()
+matrix = readData.iloc[:, 1:].astype(float).to_numpy()
 
 start_time = time.time()
 best_distance, best_route, best_global = runSimulatedAnnealingMultipleTimes(
-    distance_matrix, num_runs=4, initial_temperature=10000, cooling_rate=0.003,
-    num_iterations=100, acc_value=200000, min_temp=0.11, method="reverse")
+    matrix, num_runs=4, initial_temperature=10000, cooling_rate=0.003,
+    num_iterations=100, acc_value=200000, min_temp=0.11, method="insertion")
 end_time = time.time()
 
 print("Najlepsza trasa na koncu:", best_route)
