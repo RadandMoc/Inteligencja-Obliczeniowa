@@ -51,120 +51,118 @@ def acceptanceProbability(old_distance, new_distance, temperature):
     return math.exp((old_distance - new_distance) / temperature)
 
 # POJEDYNCZA ITERACJA SYMULOWANEGO WYŻARZANIA
-def simulatedAnnealing(distance_matrix, temperature, cooling_rate, num_iterations, min_temp, best_res, method="swap"):
+def simulatedAnnealing(distance_matrix, temperature, cooling_rate, num_iterations, min_temp, method="swap"):
     current_route = getRandomRouteCities(len(distance_matrix)) # Początkowa trasa - randomowa
     current_distance = getSumOfCities(current_route, distance_matrix) # Dystans początkowej trasy
-    best = best_res # Deklaruję funkcję best, na początku wynosi inf, potem wynosi najlepszy możliwy wynik, jaki wystąpił w x iteracjach
-    global_best_list = [] # Lista, w której będzie najlepszy rezultat i trasa
+    best_one_iteration = current_distance # Globalne najlepsze rozwiązanie w jednej iteracji
+    best_one_route = np.copy(current_route)
     new_distance = 0
 
-    while(temperature>min_temp): # Pętla się wykonuje, aż temperatura nie będzie miała pożądanej temp.
-        for iteration in range(num_iterations):
+    while(temperature>min_temp): # Pętla się wykonuje, aż temperatura nie będzie miała pożądanej temperatury
+        for iteration in range(num_iterations): # Pętla wykonuje się określoną liczbę iteracji
             new_route = np.copy(current_route)
-            idx1, idx2 = random.sample(range(len(new_route)), 2)
+            idx1, idx2 = random.sample(range(len(new_route)), 2) # Losujemy 2 randomowe indexy od 0 do (długości trasy-1)
 
             if (method == "swap"):
-                neighbours = getCities(new_route, idx1, idx2)
+                neighbours = getCities(new_route, idx1, idx2) # Biorę sąsiadów indeksów
                 new_distance = (current_distance +
-                                checkIfWeGetBetterRouteSwapping(distance_matrix, current_route, neighbours, idx1, idx2))
-                new_route = swapCities(new_route, idx1, idx2)
+                                checkIfWeGetBetterRouteSwapping(distance_matrix, current_route, neighbours, idx1, idx2)) # Liczę dystans gdybym zamienił miasta
+                new_route = swapCities(new_route, idx1, idx2) # Nowa trasa po swappingu
             elif (method == "insertion"):
                 new_distance = (current_distance +
-                                checkIfWeGetBetterRouteForInsertion(distance_matrix, current_route, idx1, idx2))
-                new_route = insertMethod(new_route, idx1, idx2)
+                                checkIfWeGetBetterRouteForInsertion(distance_matrix, current_route, idx1, idx2)) # Liczę dystans gdybym zmienił kolejność miast
+                new_route = insertMethod(new_route, idx1, idx2) # Nowa trasa po insercji
             else:
                 if (idx1 > idx2):
-                    idx1, idx2 = idx2, idx1
+                    idx1, idx2 = idx2, idx1 # Zamieniam indeksy, aby spełnić warunek funkcji checkIfGetBetter...
                 new_distance = (current_distance +
                                 checkIfWeGetBetterRouteForReverse(distance_matrix, current_route, idx1, idx2))
                 new_route = reverseMethod(new_route, idx1, idx2)
 
 
-            if acceptanceProbability(current_distance, new_distance, temperature) > random.random():
-                current_route = np.copy(new_route)
-                current_distance = new_distance
+            if acceptanceProbability(current_distance, new_distance, temperature) > random.random(): # Jeśli prawdopodobieństwo wybrania trasy jest większe niż losowa liczba z zakresu 0 do 1, to:
+                current_route = np.copy(new_route) # Zamieniam aktualną trasą na tą nową wygenenerowaną ostatnio
+                current_distance = new_distance # Zmieniam aktualny dystans na ten wygenerowany ostatnio
+                if(current_distance < best_one_iteration):
+                    best_one_iteration = current_distance
+                    best_one_route = current_route
 
-            if current_distance < best:
-                global_best_route = np.copy(current_route)
-                global_best_list = [current_distance, global_best_route]
-                best = current_distance
+        temperature *= (1 - cooling_rate) # Schładzam temperaturę po wykonaniu określonej liczby iteracji
 
-        temperature *= (1 - cooling_rate)
-
-    return current_route, current_distance, global_best_list
+    return current_route, current_distance, [best_one_iteration, best_one_route] # Zwracam trasę końcową wraz z jej dystansem oraz najlepszą możliwą trasę którą udało się wygenerować i przypadkowo z tego optimum lokalnego wyszliśmy. Dodatkowo zwracam najlepsze globalne rozwiązanie z jednej iteracji.
 def runSimulatedAnnealingMultipleTimes(distance_matrix, num_runs,
                                        initial_temperature, cooling_rate, num_iterations, min_temp, acc_value,
-                                       filename, best_result=sys.maxsize, method="swap"):
+                                       filename, best_result=sys.maxsize, method="swap"): # Funkcja wykonującaco symulowane wyżarzanie num_runs
 
-    if(method != "swap" and method != "reverse" and method != "insertion"):
+    if(method != "swap" and method != "reverse" and method != "insertion"): # Sprawdzanie czy wprowadziliśmy istniejącą metodę zamiany
         print("Method doesn't exist.")
         return [0, 0, [0, 0]]
 
-    best_finished = [sys.maxsize, []] # Najlepsza odległość pod koniec
-    best_overall = [sys.maxsize, []] # Najlepsza odległość ogólnie (może być pod koniec, może być nie pod koniec)
+    best_finished = [sys.maxsize, []] # Najlepsza odległość pod koniec z num_runs razy wykonanego algorytmu wraz z trasą
+    best_overall = [sys.maxsize, []] # Najlepsza odległość ogólnie z num_rns razy wykonanego algorytmu wraz z trasą (może być pod koniec, może być nie pod koniec)
 
     for i in range(num_runs):
-        data_run = simulatedAnnealing(distance_matrix, initial_temperature, cooling_rate, num_iterations, min_temp, best_result, method)
-        best_route, best_distance, glbestlist = data_run[0], data_run[1], data_run[2]
-        print(best_distance)
+        data_run = simulatedAnnealing(distance_matrix, initial_temperature, cooling_rate, num_iterations, min_temp, method) # Wykonanie algorytmu symulowanego wyżarzania
+        best_route, best_distance, glbestone = data_run[0], data_run[1], data_run[2] # Kolejno najlepsza odległość końcowa, najlepszy dystans końcowy , najlepsze rozwiązanie w całym okresie wykonywanego algorytmu, najlepsze rozwiązanie w okresie jednej iteracji
+        print("Odległość na końcu:", best_distance) # Printuje nam końcowy dystans
 
-        if best_distance < best_finished[0]:
-            best_finished = [best_distance, best_route]
-            best_result = best_distance
-
-        if (len(glbestlist) > 0 and best_overall[0] > glbestlist[0]):
-            best_overall = glbestlist
-            best_result = best_distance
-
-        if (best_overall[0] < acc_value):
-            saveData(best_overall, initial_temperature=initial_temperature,
-                     cooling_rate=cooling_rate, num_iterations=num_iterations, min_temp=min_temp, metoda=method, filename=filename)
-
-    return best_finished[0], best_finished[1], best_overall
+        if best_distance < best_finished[0]: # Jeśli końcowy dystans jest lepszy od najlepszego końcowego dystansu, to:
+            best_finished = [best_distance, best_route] # Przypisujemy do zmiennej best_finished dystans i trasę
 
 
-def ifSwapNeighbour(lenght, firstIndexSwapping, SecondIndexSwapping):
+        if (best_overall[0] > glbestone[0]): # Jeśli najlepsze rozwiązanie ogólne z iteracji algorytmu symulowanego wyżarzania jest najlepsze, (np. gdy rozwiązanie z 4 iteracji wykonania całego algorytmu jest lepsze niż rozwiązanie z 2 iteracji, które było do tego czasu najlepszym):
+            best_overall = glbestone # Przypisuję do zmiennej best_overall listę posiadającą trasę wraz z odległością
+
+        if (glbestone[0] < acc_value): # Jeśli najlepsza globalna odległość jest lepsza od tej, jaką ustalimy, to zapisujemy do pliku
+            saveData(glbestone, initial_temperature=initial_temperature,
+                     cooling_rate=cooling_rate, num_iterations=num_iterations,
+                     min_temp=min_temp, metoda=method, filename=filename)
+
+    return best_finished[0], best_finished[1], best_overall # Zwracamy najlepszą trasę końcową ze wszystkich wraz z trasą oraz zwracamy najlepsze globalne rozwiązanie
+
+
+def ifSwapNeighbour(lenght, firstIndexSwapping, SecondIndexSwapping): # Sprawdzamy czy indeksy są sąsiadami
     return abs(SecondIndexSwapping - firstIndexSwapping) <= 1 or (
                 firstIndexSwapping == 0 and SecondIndexSwapping == lenght) or (
                 SecondIndexSwapping == 0 and firstIndexSwapping == lenght)
 
-def checkRouteWithNeighbour(distanceMatrix, cityOrder, index, neighbourCities):
+def checkRouteWithNeighbour(distanceMatrix, cityOrder, index, neighbourCities): # Liczy nam trasę indeksu z dwoma sąsiadami
     return distanceMatrix[cityOrder[index], neighbourCities[0]] + distanceMatrix[cityOrder[index], neighbourCities[1]]
 
 
-def getCities(cityOrder: np.array, firstIdx: int, secondIdx: int):
+def getCities(cityOrder: np.array, firstIdx: int, secondIdx: int): # Funkcja, której zadaniem jest zebranie sąsiadów dla dwóch indeksów
     def city(index):
         return cityOrder[index % len(cityOrder)]
 
     neighbourOfFirstIndex = np.array([city(firstIdx - 1), city(
         firstIdx + 1)])  # Zbieram sąsiadów dla pierwszego miasta w funkcji city jest modulo by uniknac błedu wyjscia indeksu poza zakres dla firstidx=len(cityOrder)-1
     neighbourOfSecondIndex = np.array([city(secondIdx - 1), city(secondIdx + 1)])
-    return neighbourOfFirstIndex, neighbourOfSecondIndex
+    return neighbourOfFirstIndex, neighbourOfSecondIndex # Zwracamy dwóch sąsiadów dla dwóch indeksów (nr miast)
 
 
 def checkIfWeGetBetterRouteSwapping(distanceMatrix: np.array, cityOrder: np.array, listOfNeighbour, firstIndexSwapping,
-                            SecondIndexSwapping):
-    if ifSwapNeighbour(len(cityOrder) - 1, firstIndexSwapping, SecondIndexSwapping) == False:
+                            SecondIndexSwapping): # Funkcja sprawdzająca różnice odległości gdyby dokonał się swapping
+    if ifSwapNeighbour(len(cityOrder) - 1, firstIndexSwapping, SecondIndexSwapping) == False: # Sprawdzamy czy zamieniamy sąsiadów
         previousRoute = checkRouteWithNeighbour(distanceMatrix, cityOrder, firstIndexSwapping,
                                                 listOfNeighbour[0]) + checkRouteWithNeighbour(distanceMatrix, cityOrder,
                                                                                               SecondIndexSwapping,
-                                                                                              listOfNeighbour[1])
+                                                                                              listOfNeighbour[1]) # Odległości pomiędzy sąsiadami indeksów, których nie zamieniamy jeszcze
         newRoute = checkRouteWithNeighbour(distanceMatrix, cityOrder, firstIndexSwapping,
                                            listOfNeighbour[1]) + checkRouteWithNeighbour(distanceMatrix, cityOrder,
                                                                                          SecondIndexSwapping,
-                                                                                         listOfNeighbour[0])
+                                                                                         listOfNeighbour[0]) # Odległości pomiędzy sąsiadami indeksów, których zamieniliśmy
         return (newRoute-previousRoute)
     firstIdx = firstIndexSwapping
     secIdx = SecondIndexSwapping
     if SecondIndexSwapping < firstIndexSwapping:
         firstIdx = SecondIndexSwapping
-        secIdx = firstIndexSwapping
+        secIdx = firstIndexSwapping # Zamiana kolejności indeksów aby spełnić warunek funkcji calculateRouteChange...
     distanceChange = calculateRouteChangeForNeighbour(distanceMatrix, cityOrder, firstIdx, secIdx)
-    return (distanceChange)
+    return (distanceChange) # Zwracamy różnicę dystansu
 
-def calculateRouteChangeForNeighbour(distanceMatrix, cityOrder, i, j):
+def calculateRouteChangeForNeighbour(distanceMatrix, cityOrder, i, j): # Funkcja licząca odległości sąsiadów, i < j!
     lenght = len(cityOrder)
-    if i == 0 and j == lenght-1:
+    if i == 0 and j == lenght-1: # sprawdzamy czy nie zamieniamy -1 indeksu z 0
         length_before = (distanceMatrix[cityOrder[0], cityOrder[1]] +
                          distanceMatrix[cityOrder[-1], cityOrder[-2]])
         length_after = (distanceMatrix[cityOrder[0], cityOrder[-2]] +
@@ -173,19 +171,19 @@ def calculateRouteChangeForNeighbour(distanceMatrix, cityOrder, i, j):
 
 
     # Długość przed zmianą
-    length_before = (distanceMatrix[cityOrder[i-1], cityOrder[i]] +
+    length_before = (distanceMatrix[cityOrder[i-1], cityOrder[i]] + # sprawdzamy odległość (i) oraz jego lewego sąsiada wraz z odległością j z jego prawym sąsiadem
                      distanceMatrix[cityOrder[i+1], cityOrder[(i+2) % lenght]])
 
     # Długość po zmianie
-    length_after = (distanceMatrix[cityOrder[i-1], cityOrder[i+1]] +
+    length_after = (distanceMatrix[cityOrder[i-1], cityOrder[i+1]] + # sprawdzamy odległość j z lewym sąsiadem i wraz z odległością itego miasta z prawym sąsiadem jtego miasta
                     distanceMatrix[cityOrder[i], cityOrder[(i+2) % lenght]])
 
     # Zwraca różnicę długości
     return length_after - length_before
 
-def checkIfWeGetBetterRouteForInsertion(distanceMatrix: np.array,cityOrder: np.array,indexOfCityInCityOrder,indexToInsert):
+def checkIfWeGetBetterRouteForInsertion(distanceMatrix: np.array,cityOrder: np.array,indexOfCityInCityOrder,indexToInsert): # Funkcja licząca różnicę odległości, gdybyśmy dokonali swappingu. Brak założeń z indeksami
     lenOfCityOrder = len(cityOrder)
-    if ifSwapNeighbour(lenOfCityOrder-1,indexOfCityInCityOrder,indexToInsert) == False:
+    if ifSwapNeighbour(lenOfCityOrder-1,indexOfCityInCityOrder,indexToInsert) == False: # Jeśli zamieniane miasta nie są sąsiadami, to:
         if indexOfCityInCityOrder < indexToInsert:
             lengthBefore = (distanceMatrix[cityOrder[indexOfCityInCityOrder], cityOrder[indexOfCityInCityOrder-1]]
                             + distanceMatrix[cityOrder[indexOfCityInCityOrder], cityOrder[(indexOfCityInCityOrder+1) % lenOfCityOrder]]
@@ -193,43 +191,44 @@ def checkIfWeGetBetterRouteForInsertion(distanceMatrix: np.array,cityOrder: np.a
             lengthAfter = (distanceMatrix[cityOrder[indexOfCityInCityOrder], cityOrder[indexToInsert]] +
                            distanceMatrix[cityOrder[indexOfCityInCityOrder], cityOrder[(indexToInsert+1) % lenOfCityOrder]] +
                            distanceMatrix[cityOrder[indexOfCityInCityOrder+1], cityOrder[(indexOfCityInCityOrder-1)]])
-            return lengthAfter - lengthBefore
+            return lengthAfter - lengthBefore # Zwracamy różnicę odległości
         lengthBefore = (distanceMatrix[cityOrder[indexOfCityInCityOrder], cityOrder[indexOfCityInCityOrder-1]] +
                         distanceMatrix[cityOrder[indexOfCityInCityOrder], cityOrder[(indexOfCityInCityOrder+1) % lenOfCityOrder]] +
                         distanceMatrix[cityOrder[indexToInsert], cityOrder[indexToInsert-1]])
         lengthAfter = (distanceMatrix[cityOrder[indexOfCityInCityOrder], cityOrder[indexToInsert]] +
                        distanceMatrix[cityOrder[indexOfCityInCityOrder], cityOrder[indexToInsert-1]] +
                        distanceMatrix[cityOrder[(indexOfCityInCityOrder+1) % lenOfCityOrder], cityOrder[(indexOfCityInCityOrder-1)]])
-        return lengthAfter - lengthBefore
-    elif abs(indexOfCityInCityOrder-indexToInsert) == 1:
+        return lengthAfter - lengthBefore # Zwracamy różnicę odległości
+    elif abs(indexOfCityInCityOrder-indexToInsert) == 1: # Jeśli zamieniane miasta są sąsiadami, to zamieniami kolejności indeksów, aby spełnić wymagania funkcji calculateRouteChangeForNeighbour i ją wykonujemy
         firstIdx = indexOfCityInCityOrder
         secIdx = indexToInsert
         if indexToInsert < indexOfCityInCityOrder:
             firstIdx = indexToInsert
             secIdx = indexOfCityInCityOrder
-        return calculateRouteChangeForNeighbour(distanceMatrix, cityOrder, firstIdx, secIdx)
+        return calculateRouteChangeForNeighbour(distanceMatrix, cityOrder, firstIdx, secIdx) # Zwracamy różnicę odległości
     return 0
 
-
+# FUNKCJA DO SPRAWDZANIA RÓŻNICY ODLEGŁOŚCI DLA REVERSE (funkcja zwraca różnicę pomiędzy nową trasą a starą) WARUNEK KONIECZNY: firstIdX > secondIdx
 def checkIfWeGetBetterRouteForReverse(distanceMatrix: np.array, cityOrder: np.array, firstIdx, secondIdx):
-    lenOfCityOrder = len(cityOrder)
+    lenOfCityOrder = len(cityOrder) # Liczba miast w trasie
 
-    if firstIdx == 0 and secondIdx == lenOfCityOrder - 1:
+    if firstIdx == 0 and secondIdx == lenOfCityOrder - 1: # Warunek sprawdzający czy zamieniamy pierwsze z ostatnim miastem, jeśli tak to jest to ta sama odległość
         return 0
-    if firstIdx - secondIdx == -1:
+    if firstIdx - secondIdx == -1: # Warunek sprawdzający, czy wylosowano sąsiadów, jeśli tak, to zwraca nam wynik funkcji calculateRouteChangeForNeighbour
         return calculateRouteChangeForNeighbour(distanceMatrix, cityOrder, firstIdx, secondIdx)
-    lengthBefore = (distanceMatrix[cityOrder[firstIdx], cityOrder[firstIdx - 1]] +
+    lengthBefore = (distanceMatrix[cityOrder[firstIdx], cityOrder[firstIdx - 1]] + # Jest to suma odległości pomiędzy itym miastem i sąsiadem po lewej oraz j miastem i sąsiadem po jego prawej
                     distanceMatrix[cityOrder[secondIdx], cityOrder[(secondIdx + 1) % lenOfCityOrder]])
-    lengthAfter = (distanceMatrix[cityOrder[secondIdx], cityOrder[firstIdx - 1]] +
-                   distanceMatrix[cityOrder[firstIdx], cityOrder[(secondIdx + 1) % lenOfCityOrder]])
+    lengthAfter = (distanceMatrix[cityOrder[secondIdx], cityOrder[firstIdx - 1]] + # Jest to suma odległości pomiędzy jtym miastem i lewym sąsiadem itego miasta oraz itym miastem i prawym sąsiadem jtego miasta
+                   distanceMatrix[cityOrder[firstIdx], cityOrder[(secondIdx + 1) % lenOfCityOrder]]) # Działamy tak, gdyż tylko te odległości się zmieniają przy odwracaniu.
     return lengthAfter - lengthBefore
 
-
+# FUNKCJA DO ODWRACANIA
 def reverseMethod(order, firstIdx,secondIdx):
     reverseOrder = order.copy()
     reverseOrder[firstIdx:secondIdx + 1] = reverseOrder[firstIdx:secondIdx + 1][::-1]
     return reverseOrder
 
+# FUNKCJA DO INSERCJI
 def insertMethod(order, index, insertion_index):
     element = order[index]
     new_order = np.delete(order, index)
@@ -244,13 +243,14 @@ matrix = readData.iloc[:, 1:].astype(float).to_numpy()
 start_time = time.time()
 best_distance, best_route, best_global = runSimulatedAnnealingMultipleTimes(
     matrix, num_runs=4, initial_temperature=10000, cooling_rate=0.003,
-    num_iterations=100, acc_value=200000, min_temp=0.11, method="reverse", filename=f"Wyzarzanie_records_127.txt")
+    num_iterations=10000, acc_value=130000, min_temp=0.11, method="reverse", filename=f"Wyzarzanie_records_127.txt")
 end_time = time.time()
 
 print("Najlepsza trasa na koncu:", best_route)
 print("Najlepsza odległość na koncu:", best_distance)
 
-print("Najlepsza globalna trasa:", best_global[0])
-print("Najlepsza globalna odległość:", best_global[1])
+print("Najlepsza globalna trasa:", best_global[1])
+print("Najlepsza globalna ogleglosc:", best_global[0])
+
 print("Czas wykonania:", end_time - start_time, "sekundy")
 
