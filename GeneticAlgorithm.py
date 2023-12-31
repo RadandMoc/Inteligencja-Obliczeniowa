@@ -35,25 +35,6 @@ def select_parents(population, distances):
     parents = [population[idx] for idx in parents_indices]
 
     return parents
-# def select_parents(population, distances):
-#     fitness_scores = [1 / calculate_fitness(individual, distances) for individual in population]
-#     total_fitness = sum(fitness_scores)
-#     probabilities = [score / total_fitness for score in fitness_scores]
-#
-#     # Spłaszcz listę populacji
-#     flat_population = [item for sublist in population for item in sublist]
-#
-#     # Wybierz indeksy rodziców
-#     parents_indices = np.random.choice(len(flat_population), size=2, p=probabilities, replace=False)
-#
-#     # Przekształć indeksy na pary indeksów odpowiadające dwóm rodzicom w dwuwymiarowej populacji
-#     parents_indices_2d = [(idx // len(flat_population[0]), idx % len(flat_population[0])) for idx in parents_indices]
-#
-#     # Wybierz rodziców z dwuwymiarowej populacji
-#     parents = [[flat_population[i][j] for i, j in parents_indices_2d[0]],
-#                [flat_population[i][j] for i, j in parents_indices_2d[1]]]
-#
-#     return parents
 
 def crossover(parents):
     crossover_point = random.randint(1, len(parents[0]) - 1)
@@ -67,7 +48,7 @@ def mutate(individual, mutation_rate):
         individual[idx1], individual[idx2] = individual[idx2], individual[idx1]
     return individual
 
-def genetic_algorithm(distances, population_size=100, generations=100, mutation_rate=0.01):
+def genetic_algorithm(distances, population_size=300, generations=100, mutation_rate=0.01):
     num_cities = len(distances)
     population = initialize_population(population_size, num_cities)
 
