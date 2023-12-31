@@ -1,6 +1,7 @@
 import pandas as pd
 import random
 import copy
+import time
 from tqdm import tqdm
 
 # Funkcja obliczająca odległość między dwoma miastami
@@ -45,12 +46,14 @@ def update_tabu_list(tabu_list, new_solution, tabu_tenure):
     if len(tabu_list) > tabu_tenure:
         tabu_list.pop(0)
 
-def tabu_search(cities_df, output_file, iterations, tabu_tenure=7):
-
+def tabu_search(excel_file, output_file, iterations, tabu_tenure=7):
+    cities_df = pd.read_excel(excel_file, index_col=0)
     num_cities = len(cities_df)
     tabu_list = []
     overall_best_solution = list(range(1, num_cities + 1))
     random.shuffle(overall_best_solution)
+
+    start_time = time.time()  # Początek pomiaru czasu
 
     for n in tqdm(range(iterations)):
         current_solution = list(range(1, num_cities + 1))
@@ -82,14 +85,17 @@ def tabu_search(cities_df, output_file, iterations, tabu_tenure=7):
             overall_best_solution = best_solution
 
     # Zapisz wynik do pliku txt
+    #end timer
+    end_time = time.time()  # Koniec pomiaru czasu
+    elapsed_time = end_time - start_time
     with open(output_file, "a") as file:
-        file.write(f"----------------\nIterations: {iterations}\nBest solution: {overall_best_solution}\nDistance: {calculate_distance(overall_best_solution, cities_df)}")
+        file.write(f"----------------\nFile: {excel_file}\nIterations: {iterations}\nBest solution: {overall_best_solution}\nDistance: {calculate_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
     return overall_best_solution
 
 # Przykładowe użycie
-excel_file = 'Dane_TSP_127.xlsx'
-cities_df = pd.read_excel(excel_file, index_col=0)
-best_solution = tabu_search(cities_df, "ResultsTabuSearch.txt", iterations=35, tabu_tenure=10)
+best_solution = tabu_search('Przykład_TSP_29.xlsx', "ResultsTabuSearch.txt", iterations=10, tabu_tenure=10)
 
 print("Best solution:", best_solution)
+excel_file = 'Przykład_TSP_29.xlsx'
+cities_df = pd.read_excel(excel_file, index_col=0)
 print("Best distance:", calculate_distance(best_solution, cities_df))
