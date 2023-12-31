@@ -89,7 +89,7 @@ def tabu_search(cities_df, output_file, iterations, tabu_tenure=7):
 # Przykładowe użycie
 excel_file = 'Dane_TSP_127.xlsx'
 cities_df = pd.read_excel(excel_file, index_col=0)
-best_solution = tabu_search(cities_df, "ResultsTabuSearch.txt", iterations=35, tabu_tenure=10)
+best_solution = tabu_search(cities_df, "ResultsTabuSearch.txt", iterations=3, tabu_tenure=10)
 
 print("Best solution:", best_solution)
 print("Best distance:", calculate_distance(best_solution, cities_df))
