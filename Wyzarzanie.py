@@ -6,7 +6,7 @@ import time
 import sys
 
 # FUNKCJA DO ZAPISU DO PLIKU
-def saveData(best_overall, initial_temperature, cooling_rate, num_iterations, min_temp, metoda, filename):
+def saveData(best_overall, initial_temperature, cooling_rate, num_iterations, min_temp, temp_red, metoda, filename):
         with open(filename, 'a') as resultFile:
             resultFile.write("\n" + "=" * 25 + "\n")
             for element in best_overall[1]:
@@ -16,6 +16,7 @@ def saveData(best_overall, initial_temperature, cooling_rate, num_iterations, mi
             resultFile.write("\n" + "Wsp. chlodzenia: " + str(cooling_rate))
             resultFile.write("\n" + "Liczba iteracji dla jednej temperatury: " + str(num_iterations))
             resultFile.write("\n" + "Minimalna temperatura: " + str(min_temp))
+            resultFile.write("\n" + "Metoda redukcji temperatury: " + temp_red)
             resultFile.write("\n" + "Metoda: " + metoda)
 
 # FUNKCJA LOSUJĄCA LOSOWĄ TRASE
@@ -43,12 +44,15 @@ def acceptanceProbability(old_distance, new_distance, temperature):
     return math.exp((old_distance - new_distance) / temperature)
 
 # POJEDYNCZA ITERACJA SYMULOWANEGO WYŻARZANIA
-def simulatedAnnealing(distance_matrix, temperature, cooling_rate, num_iterations, min_temp, method="swap"):
+def simulatedAnnealing(distance_matrix, temperature, cooling_rate, num_iterations, min_temp, temp_red, method="swap"):
     current_route = getRandomRouteCities(len(distance_matrix)) # Początkowa trasa - randomowa
     current_distance = getSumOfCities(current_route, distance_matrix) # Dystans początkowej trasy
     best_one_iteration = current_distance # Globalne najlepsze rozwiązanie w jednej iteracji
     best_one_route = np.copy(current_route)
     new_distance = 0
+
+    if(temp_red == 'slow'):
+        num_iterations = 1
 
     while(temperature>min_temp): # Pętla się wykonuje, aż temperatura nie będzie miała pożądanej temperatury
         for iteration in range(num_iterations): # Pętla wykonuje się określoną liczbę iteracji
@@ -78,13 +82,15 @@ def simulatedAnnealing(distance_matrix, temperature, cooling_rate, num_iteration
                 if(current_distance < best_one_iteration):
                     best_one_iteration = current_distance
                     best_one_route = current_route
-
-        temperature *= (1 - cooling_rate) # Schładzam temperaturę po wykonaniu określonej liczby iteracji
+        if(temp_red == 'slow'):
+            temperature = temperature/(1+temperature*cooling_rate)
+        else:
+            temperature *= (1 - cooling_rate) # Schładzam temperaturę po wykonaniu określonej liczby iteracji
 
     return current_route, current_distance, [best_one_iteration, best_one_route] # Zwracam trasę końcową wraz z jej dystansem oraz najlepszą możliwą trasę którą udało się wygenerować i przypadkowo z tego optimum lokalnego wyszliśmy. Dodatkowo zwracam najlepsze globalne rozwiązanie z jednej iteracji.
 def runSimulatedAnnealingMultipleTimes(distance_matrix, num_runs,
                                        initial_temperature, cooling_rate, num_iterations, min_temp, acc_value,
-                                       filename, best_result=sys.maxsize, method="swap"): # Funkcja wykonującaco symulowane wyżarzanie num_runs
+                                       filename, temp_red, method="swap"): # Funkcja wykonującaco symulowane wyżarzanie num_runs
 
     if(method != "swap" and method != "reverse" and method != "insertion"): # Sprawdzanie czy wprowadziliśmy istniejącą metodę zamiany
         print("Method doesn't exist.")
@@ -94,7 +100,7 @@ def runSimulatedAnnealingMultipleTimes(distance_matrix, num_runs,
     best_overall = [sys.maxsize, []] # Najlepsza odległość ogólnie z num_rns razy wykonanego algorytmu wraz z trasą (może być pod koniec, może być nie pod koniec)
 
     for i in range(num_runs):
-        data_run = simulatedAnnealing(distance_matrix, initial_temperature, cooling_rate, num_iterations, min_temp, method) # Wykonanie algorytmu symulowanego wyżarzania
+        data_run = simulatedAnnealing(distance_matrix, initial_temperature, cooling_rate, num_iterations, min_temp, temp_red, method) # Wykonanie algorytmu symulowanego wyżarzania
         best_route, best_distance, glbestone = data_run[0], data_run[1], data_run[2] # Kolejno najlepsza odległość końcowa, najlepszy dystans końcowy , najlepsze rozwiązanie w całym okresie wykonywanego algorytmu, najlepsze rozwiązanie w okresie jednej iteracji
         print("Odległość na końcu:", best_distance) # Printuje nam końcowy dystans
 
@@ -108,7 +114,7 @@ def runSimulatedAnnealingMultipleTimes(distance_matrix, num_runs,
         if (glbestone[0] < acc_value): # Jeśli najlepsza globalna odległość jest lepsza od tej, jaką ustalimy, to zapisujemy do pliku
             saveData(glbestone, initial_temperature=initial_temperature,
                      cooling_rate=cooling_rate, num_iterations=num_iterations,
-                     min_temp=min_temp, metoda=method, filename=filename)
+                     min_temp=min_temp, temp_red=temp_red, metoda=method, filename=filename)
 
     return best_finished[0], best_finished[1], best_overall # Zwracamy najlepszą trasę końcową ze wszystkich wraz z trasą oraz zwracamy najlepsze globalne rozwiązanie
 
@@ -234,9 +240,12 @@ matrix = readData.iloc[:, 1:].astype(float).to_numpy()
 start_time = time.time()
 
 best_distance, best_route, best_global = runSimulatedAnnealingMultipleTimes(
-    matrix, num_runs=1, initial_temperature=10000, cooling_rate=0.003,
-    num_iterations=1000, acc_value=130000, min_temp=0.11, method="reverse",
+    matrix, num_runs=4, initial_temperature=10000, cooling_rate=0.003,
+    num_iterations=1000, acc_value=130000, min_temp=0.11, temp_red='fast', method="reverse",
     filename=f"Wyzarzanie_records_127.txt")
+
+### TEMP_RED = slow jest dla wolnej redukcji temperatury, fast dla szybkiej, wg wykładu dla wolnej redukcji temperatury liczba iteracji jest równa 1.
+### METHOD : REVERSE, SWAP, ISERTION
 
 end_time = time.time()
 
