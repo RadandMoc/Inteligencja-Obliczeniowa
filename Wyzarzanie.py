@@ -5,14 +5,6 @@ import math
 import time
 import sys
 
-# ZAMIANA PRZECINKÓW NA KROPKI
-def changeCommaToPoint(text):
-    df_skopiowany = text.copy()
-    for kolumna in df_skopiowany.columns:
-        if df_skopiowany[kolumna].dtype == 'object':
-            df_skopiowany[kolumna] = df_skopiowany[kolumna].astype(str).str.replace(',', '.')
-    return df_skopiowany
-
 # FUNKCJA DO ZAPISU DO PLIKU
 def saveData(best_overall, initial_temperature, cooling_rate, num_iterations, min_temp, metoda, filename):
         with open(filename, 'a') as resultFile:
@@ -236,21 +228,22 @@ def insertMethod(order, index, insertion_index):
     return new_order
 
 
-readData = pd.read_csv("Dane_TSP_127.csv", sep=";")
-readData = changeCommaToPoint(readData)
+readData = pd.read_csv("Dane_TSP_127.csv", sep=";", decimal=',')
 matrix = readData.iloc[:, 1:].astype(float).to_numpy()
 
 start_time = time.time()
+
 best_distance, best_route, best_global = runSimulatedAnnealingMultipleTimes(
-    matrix, num_runs=4, initial_temperature=10000, cooling_rate=0.003,
-    num_iterations=10000, acc_value=130000, min_temp=0.11, method="reverse", filename=f"Wyzarzanie_records_127.txt")
+    matrix, num_runs=1, initial_temperature=10000, cooling_rate=0.003,
+    num_iterations=1000, acc_value=130000, min_temp=0.11, method="reverse",
+    filename=f"Wyzarzanie_records_127.txt")
+
 end_time = time.time()
 
 print("Najlepsza trasa na koncu:", best_route)
 print("Najlepsza odległość na koncu:", best_distance)
-
 print("Najlepsza globalna trasa:", best_global[1])
 print("Najlepsza globalna ogleglosc:", best_global[0])
-
 print("Czas wykonania:", end_time - start_time, "sekundy")
+
 
