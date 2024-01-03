@@ -58,9 +58,11 @@ def minValueInList(listOfResult):
 #distance_matrix = np.random.randint(1, 100, size=(100, 100))  # Losowe odległości między miastami
 #np.fill_diagonal(distance_matrix, 0)
 readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
+readData=pd.read_csv("Dane_TSP_48.csv",sep=";")
+
 readData = ChangeCommaToPoint(readData)
 
-distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
+distance_matrix = readData.iloc[:,1:].astype(int).to_numpy()
 
 
 print(FindMin(distance_matrix))

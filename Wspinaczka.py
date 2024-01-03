@@ -8,7 +8,7 @@ import datetime
 
 
 
-def save_data(best_route, distance ,method , num_iterations, filename=f"Wspinaczka_records.txt"):
+def save_data(best_route, distance ,method , num_iterations, filename=f"Wspinaczka_records48.txt"):
         with open(filename, 'a') as resultFile:
             resultFile.write("\n" + "=" * 25 + "\n")  # Dodanie kreski oddzielającej dane
             for element in best_route:
@@ -141,7 +141,7 @@ def ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIterationWithout
         k= k+1
         if changeCityOrder[1] == True: #If change city order
             i = 0
-    print(k)
+    #print(k)
     return cityOrder    
     
     
@@ -275,15 +275,16 @@ def checkIfWeGetBetterRouteNotOptimal(distanceMatrix,cityOrder,getNeighbourCitie
 
 
 
-#readData=pd.read_csv("Miasta29.csv",sep=";")
-readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
+readData=pd.read_csv("Miasta29.csv",sep=";")
+#readData=pd.read_csv("Dane_TSP_48.csv",sep=";")
+#readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
 readData = ChangeCommaToPoint(readData)
-distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
+distance_matrix = readData.iloc[:,1:].astype(int).to_numpy()
 start_time = time.time()
 
 
 
-makeIteration(10,distance_matrix,1000,122000,method="kot")
+makeIteration(100,distance_matrix,2200,2000,method="reverse")
 
 
 
