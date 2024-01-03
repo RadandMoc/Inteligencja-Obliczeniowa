@@ -4,6 +4,7 @@ import copy
 import time
 from tqdm import tqdm
 
+
 # Funkcja obliczająca odległość między dwoma miastami
 def calculate_distance(route, cities_df):
     distance = 0
@@ -16,7 +17,7 @@ def calculate_distance(route, cities_df):
 
 # Funkcja obliczająca odległość euklidesową między dwoma miastami
 def calculate_euclidean_distance(city1, city2, cities_df):
-    dist = cities_df.loc[city1, city2]
+    dist = cities_df[city1, city2]
     return dist
 
 # Generowanie sąsiedztwa poprzez zamianę dwóch miast w trasie
@@ -46,21 +47,23 @@ def update_tabu_list(tabu_list, new_solution, tabu_tenure):
     if len(tabu_list) > tabu_tenure:
         tabu_list.pop(0)
 
-def tabu_search(excel_file, output_file, iterations, tabu_tenure=7):
-    cities_df = pd.read_excel(excel_file, index_col=0)
+def tabu_search(csv_file, output_file, iterations, tabu_tenure=7):
+    readData = pd.read_csv(csv_file, sep=";", decimal=',')
+    cities_df = readData.iloc[:, 1:].astype(float).to_numpy()
+
     num_cities = len(cities_df)
     tabu_list = []
-    overall_best_solution = list(range(1, num_cities + 1))
+    overall_best_solution = list(range(0, num_cities))
     random.shuffle(overall_best_solution)
 
     start_time = time.time()  # Początek pomiaru czasu
 
     for n in tqdm(range(iterations)):
-        current_solution = list(range(1, num_cities + 1))
+        current_solution = list(range(0, num_cities))
         random.shuffle(current_solution)
         best_solution = current_solution
         rep_counter = 0
-        # i=0
+
         while True:
 
             neighborhood = generate_neighborhood(best_solution)
@@ -89,13 +92,14 @@ def tabu_search(excel_file, output_file, iterations, tabu_tenure=7):
     end_time = time.time()  # Koniec pomiaru czasu
     elapsed_time = end_time - start_time
     with open(output_file, "a") as file:
-        file.write(f"----------------\nFile: {excel_file}\nIterations: {iterations}\nBest solution: {overall_best_solution}\nDistance: {calculate_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
+        file.write(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nBest solution: {overall_best_solution}\nDistance: {calculate_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
+        print(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nBest solution: {overall_best_solution}\nDistance: {calculate_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
     return overall_best_solution
 
 # Przykładowe użycie
-best_solution = tabu_search('Przykład_TSP_29.xlsx', "ResultsTabuSearch.txt", iterations=10, tabu_tenure=10)
+best_solution = tabu_search('Miasta29.csv', "ResultsTabuSearch.txt", iterations=1000, tabu_tenure=10)
 
-print("Best solution:", best_solution)
-excel_file = 'Przykład_TSP_29.xlsx'
-cities_df = pd.read_excel(excel_file, index_col=0)
-print("Best distance:", calculate_distance(best_solution, cities_df))
+#print("Best solution:", best_solution)
+#csv_file = 'Przykład_TSP_29.xlsx'
+#cities_df = pd.read_csv(excel_file, index_col=0)
+#print("Best distance:", calculate_distance(best_solution, cities_df))
