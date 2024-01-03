@@ -225,3 +225,39 @@ Wsp. chlodzenia: 0.003
 Liczba iteracji dla jednej temperatury: 10000
 Minimalna temperatura: 0.11
 Metoda: insertion
+=========================
+6 12 9 5 26 29 3 2 20 10 4 15 18 17 14 22 11 19 25 7 23 27 8 24 16 13 21 1 28 
+Najlepsza odleglosc: 2020.0
+Poczatkowa temparatura: 10000
+Wsp. chlodzenia: 0.003
+Liczba iteracji dla jednej temperatury: 1000
+Minimalna temperatura: 0.11
+Metoda redukcji temperatury: fast
+Metoda: reverse
+=========================
+7 25 19 11 22 14 17 18 15 4 10 20 2 3 29 26 5 9 12 6 28 1 21 13 16 24 8 27 23 
+Najlepsza odleglosc: 2020.0
+Poczatkowa temparatura: 10000
+Wsp. chlodzenia: 0.003
+Liczba iteracji dla jednej temperatury: 1000
+Minimalna temperatura: 0.11
+Metoda redukcji temperatury: fast
+Metoda: reverse
+=========================
+18 17 14 22 11 19 25 7 23 27 8 24 16 13 21 1 28 6 12 9 5 26 29 3 2 20 10 4 15 
+Najlepsza odleglosc: 2020.0
+Poczatkowa temparatura: 10000
+Wsp. chlodzenia: 0.003
+Liczba iteracji dla jednej temperatury: 1000
+Minimalna temperatura: 0.11
+Metoda redukcji temperatury: fast
+Metoda: reverse
+=========================
+5 26 29 3 2 20 10 4 15 18 17 14 22 11 19 25 7 23 27 8 24 16 13 21 1 28 6 12 9 
+Najlepsza odleglosc: 2020.0
+Poczatkowa temparatura: 10000
+Wsp. chlodzenia: 0.003
+Liczba iteracji dla jednej temperatury: 1000
+Minimalna temperatura: 0.11
+Metoda redukcji temperatury: fast
+Metoda: reverse

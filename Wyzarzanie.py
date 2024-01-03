@@ -234,7 +234,7 @@ def insertMethod(order, index, insertion_index):
     return new_order
 
 
-readData = pd.read_csv("Dane_TSP_127.csv", sep=";", decimal=',')
+readData = pd.read_csv("Miasta29.csv", sep=";", decimal=',')
 matrix = readData.iloc[:, 1:].astype(float).to_numpy()
 
 start_time = time.time()
