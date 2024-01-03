@@ -28,7 +28,7 @@ def generate_neighborhood(route):
             neighbor = copy.deepcopy(route)
             neighbor[i], neighbor[j] = neighbor[j], neighbor[i]
             neighborhood.append(neighbor)
-    return neighborhood
+    return neighborhoodS
 
 # Wybieranie najlepszego sąsiedztwa spośród sąsiadów, które nie są na liście tabu
 def get_best_neighborhood(neighborhood, tabu_list, cities_df):
