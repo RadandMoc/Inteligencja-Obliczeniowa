@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 
 #Zwykly
-
+"""
 
 def initialize_population(num_individuals, num_cities):
     population = []
@@ -39,7 +39,7 @@ def select_parents(population,probabilities):
 
     return parents
 
-def getProbabilitesOfCrossover(population,distances):
+def get_probabilites_of_crossover(population,distances):
     fitness_scores = [1 / calculate_fitness(individual, distances) for individual in population]
     total_fitness = sum(fitness_scores)
     probabilities = [ score / total_fitness for score in fitness_scores]
@@ -86,7 +86,7 @@ def genetic_algorithm(distances, population_size=100, generations=100, mutation_
     
     for generation in tqdm(range(generations)):
         children = []
-        probabilities = getProbabilitesOfCrossover(population,distances)
+        probabilities = get_probabilites_of_crossover(population,distances)
 
         for _ in range( number_of_crossover // 2):
             parents = select_parents(population, probabilities)
@@ -110,104 +110,84 @@ def genetic_algorithm(distances, population_size=100, generations=100, mutation_
     best_individual = min(population, key=lambda ind: calculate_fitness(ind, distances))
     best_fitness = calculate_fitness(best_individual, distances)
     return best_individual, best_fitness
-
-
-
-
-
 """
-numpy ale co zabawne dziala wolniej wiec mozna poprawic
+
+
+
+
+
 
 
 def initialize_population(num_individuals, num_cities):
-    population = np.empty((num_individuals, num_cities), dtype=int)
-    for i in range(num_individuals):
-        population[i] = np.random.permutation(num_cities) + 1
-    return population
+    # No change needed here, the function is already efficient
+    return np.array([np.random.permutation(num_cities) + 1 for _ in range(num_individuals)])
 
-def calculate_fitness(individual, distances):
-    total_distance = 0
-    for i in range(len(individual) - 1):
-        total_distance += distances[individual[i] - 1,individual[i + 1] - 1]
-    total_distance += distances[individual[-1] - 1,individual[0] - 1]  # Return to the starting city
-    return total_distance
+def calculate_fitness_vectorized(population, distances):
+    # Vectorized fitness calculation
+    indices = np.array(population) - 1  # Adjust indices for 0-based indexing
+    rolled_indices = np.roll(indices, -1, axis=1)  # Roll indices to get pairs for distance calculation
+    total_distances = distances[indices, rolled_indices].sum(axis=1)
+    return total_distances
 
-# def select_parents(population, distances):
-#     fitness_scores = [1 / calculate_fitness(individual, distances) for individual in population]
-#     total_fitness = sum(fitness_scores)
-#     probabilities = [score / total_fitness for score in fitness_scores]
-#     parents = np.random.Generator.choice(population, size=2, p=probabilities, replace=False)
-#     return parents
-def select_parents(population,probabilities):
-    parents_indices = np.random.choice(len(population), size=2, p=probabilities, replace=False)
-    return population[parents_indices]
-
-def getProbabilitesOfCrossover(population, distances):
-    fitness_scores = 1 / np.array([calculate_fitness(individual, distances) for individual in population])
-    return fitness_scores / fitness_scores.sum()
-    
-
-
-# def select_parents(population, distances):
-#     fitness_scores = [1 / calculate_fitness(individual, distances) for individual in population]
-#     total_fitness = sum(fitness_scores)
-#     probabilities = [score / total_fitness for score in fitness_scores]
-#
-#     # Spłaszcz listę populacji
-#     flat_population = [item for sublist in population for item in sublist]
-#
-#     # Wybierz indeksy rodziców
-#     parents_indices = np.random.choice(len(flat_population), size=2, p=probabilities, replace=False)
-#
-#     # Przekształć indeksy na pary indeksów odpowiadające dwóm rodzicom w dwuwymiarowej populacji
-#     parents_indices_2d = [(idx // len(flat_population[0]), idx % len(flat_population[0])) for idx in parents_indices]
-#
-#     # Wybierz rodziców z dwuwymiarowej populacji
-#     parents = [[flat_population[i][j] for i, j in parents_indices_2d[0]],
-#                [flat_population[i][j] for i, j in parents_indices_2d[1]]]
-#
-#     return parents
+def tournament_selection(population, fitness_scores, tournament_size=3):
+    # Select parents using tournament selection
+    selected_indices = []
+    for _ in range(2):
+        participants = np.random.choice(len(population), tournament_size, replace=False)
+        winner_idx = participants[np.argmin(fitness_scores[participants])]
+        selected_indices.append(winner_idx)
+    return population[selected_indices]
 
 def crossover(parents):
+    # No change needed here, the function is efficient
     crossover_point = random.randint(1, len(parents[0]) - 1)
     child1 = np.concatenate([parents[0][:crossover_point], 
                              [city for city in parents[1] if city not in parents[0][:crossover_point]]])
     child2 = np.concatenate([parents[1][:crossover_point], 
                              [city for city in parents[0] if city not in parents[1][:crossover_point]]])
-    return child1,child2
+    return child1, child2
 
 def mutate(individual, mutation_rate):
+    # No change needed here, the function is efficient
     if random.random() < mutation_rate:
         idx1, idx2 = np.random.choice(len(individual), 2, replace=False)
         individual[idx1], individual[idx2] = individual[idx2], individual[idx1]
     return individual
 
+# Optimized Genetic Algorithm
+
 def genetic_algorithm(distances, population_size=100, generations=100, mutation_rate=0.01, number_of_crossover=900, elite_percent=0.1):
     num_cities = distances.shape[0]
     population = initialize_population(population_size, num_cities)
+    fitness_scores = calculate_fitness_vectorized(population, distances)
 
     for generation in tqdm(range(generations)):
-        probabilities = getProbabilitesOfCrossover(population, distances)
+        # Tournament selection for parents
         children = np.empty((number_of_crossover, num_cities), dtype=int)
-
         for i in range(0, number_of_crossover, 2):
-            parents = select_parents(population, probabilities)
+            parents = tournament_selection(population, fitness_scores)
             offspring = crossover(parents)
             children[i] = mutate(offspring[0], mutation_rate)
             children[i+1] = mutate(offspring[1], mutation_rate)
 
-        fitness_scores = np.array([calculate_fitness(individual, distances) for individual in population])
-        top_indices = np.argsort(fitness_scores)[:int(elite_percent * population_size)]
+        # Recalculate fitness for the new children
+        children_fitness = calculate_fitness_vectorized(children, distances)
 
-        children_fitness = np.array([calculate_fitness(individual, distances) for individual in children])
-        top_children_indices = np.argsort(children_fitness)[:population_size - len(top_indices)]
+        # Elitism: Keep the best individuals from the current population
+        elite_indices = np.argsort(fitness_scores)[:int(elite_percent * population_size)]
+        elite_population = population[elite_indices]
 
-        population = np.vstack([population[top_indices], children[top_children_indices]])
+        # Combine elite individuals and best children to form new population
+        top_children_indices = np.argsort(children_fitness)[:population_size - len(elite_population)]
+        population = np.vstack([elite_population, children[top_children_indices]])
 
-    best_index = np.argmin([calculate_fitness(individual, distances) for individual in population])
-    return population[best_index], calculate_fitness(population[best_index], distances)
+        # Update fitness scores
+        fitness_scores = calculate_fitness_vectorized(population, distances)
 
-"""
+    # Find the best solution in the final population
+    best_index = np.argmin(fitness_scores)
+    return population[best_index], fitness_scores[best_index]
+
 
 
 
@@ -222,6 +202,8 @@ def genetic_algorithm(distances, population_size=100, generations=100, mutation_
 
 # Read distances from the provided Excel file
 readData=pd.read_csv("Dane_TSP_127.csv",sep=";", decimal=',')
+#readData=pd.read_csv("Dane_TSP_76.csv",sep=";", decimal=',')
+
 #readData=pd.read_csv("Miasta29.csv",sep=";", decimal=',')
 
 distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
@@ -229,7 +211,7 @@ distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
 
 #print(crossover([[12, 18, 17, 14, 15, 26, 3, 6, 8, 28, 27, 23, 25, 7, 11, 22, 10, 24, 19, 4, 16, 9, 21, 2, 20, 5, 1, 13, 29],[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,21,23,24,25,26,27,28,29]]))
 # Run the genetic algorithm
-best_route, best_distance = genetic_algorithm(distance_matrix,1000,generations=10000,mutation_rate=0.05, number_of_crossover = 10000, elite_percent=0.1)
+best_route, best_distance = genetic_algorithm(distance_matrix,50,generations=10000,mutation_rate=0.05, number_of_crossover = 250, elite_percent=0.1)
 
 print("Best Route:", best_route)
 print("Best Distance:", best_distance)
