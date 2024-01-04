@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import math
 
 # Wczytanie danych treningowych i testowych
-train_data = pd.read_csv("train.csv")
-test_data = pd.read_csv("test.csv")
+train_data = pd.read_csv("mnist1.csv")
+test_data = pd.read_csv("mnist2.csv")
 
 # Podział danych na etykiety i piksele
 train_labels = np.array(train_data.loc[:, 'label'])
@@ -98,11 +98,13 @@ def initialize_parameters_deep(layer_dims):
     
     return parameters
 
-# Przekazywanie przez warstwy w przód
-# Parametry:
-# A - aktywacja poprzedniej warstwy
-# W - wagi
-# b - bias
+"""
+ Przekazywanie przez warstwy w przód
+ Parametry:
+ A - aktywacja poprzedniej warstwy
+ W - wagi
+ b - bias
+"""
 def linear_forward(A, W, b):
     Z = np.dot(W, A) + b
     cache = (A, W, b)
