@@ -2,61 +2,17 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
+import random
 
-# Wczytanie danych treningowych i testowych
-train_data = pd.read_csv("mnist1.csv")
-test_data = pd.read_csv("mnist2.csv")
 
-# Podział danych na etykiety i piksele
-train_labels = np.array(train_data.loc[:, 'label'])
-test_labels = np.array(train_data.loc[:, 'label'])
-train_data = np.array(train_data.loc[:, train_data.columns != 'label'])
-test_data = np.array(test_data.loc[:, test_data.columns != 'label'])
 
-# Wyświetlenie 30 przykładowych obrazów
-for i in range(2):
-    plt.title(f"Numer {i}")
-    plt.imshow(test_data[i].reshape(28, 28), cmap=plt.cm.binary)
-    plt.show()
+def get_train_data_and_test_data(data,labels,test_sample_percent):
+    data_length = data.shape[0]
+    indices_for_test =  random.sample(range(0, data_length), int(test_sample_percent*data_length))
+    indices_for_train = [x for x in range(data_length) if x not in indices_for_test]
+    return data[indices_for_train,:], labels[indices_for_train], data[indices_for_test,:], labels[indices_for_test]
 
-# Wczytanie danych do złożenia
-data = pd.read_csv('submission1.csv', encoding='unicode_escape')
-print(data.head(10))
 
-# Wyświetlenie histogramu danych treningowych
-plt.hist(train_labels, edgecolor='black', linewidth=1.2)
-plt.title("Histogram danych")
-plt.axis([0, 9, 0, 5000])
-plt.xlabel("Cyfra")
-plt.ylabel("Wystąpienia w zestawie danych")
-plt.show()
-
-# Analiza danych treningowych
-print("Dane treningowe")
-for i in range(10):
-    count = np.count_nonzero(train_labels == i)
-    print(f"Wystąpienia cyfry {i} = {count}")
-
-# Przygotowanie danych treningowych i testowych do sieci neuronowej
-train_data = np.reshape(train_data, [784, 42000])
-train_label = np.zeros((10, 42000))
-for col in range(42000):
-    val = train_labels[col]
-    train_label[val, col] = 1
-
-print(f"Kształt danych treningowych: {np.shape(train_data)}")
-print(f"Kształt etykiet treningowych: {np.shape(train_label)}")
-print(f"Kształt danych testowych: {np.shape(test_data)}")
-print(f"Kształt etykiet testowych: {np.shape(test_data)}")
-
-test_data = np.reshape(test_data, [784, 28000])
-test_label = np.zeros((10, 28000))
-for col in range(28000):
-    val = train_labels[col]
-    test_label[val, col] = 1
-
-print(f"Kształt danych testowych: {np.shape(test_data)}")
-print(f"Kształt etykiet testowych: {np.shape(test_label)}")
 
 # Definicja funkcji aktywacji i ich pochodnych
 def relu(Z):
@@ -100,6 +56,7 @@ def initialize_parameters_deep(layer_dims):
 
 def linear_forward(A, W, b):
     """
+
      Przekazywanie przez warstwy w przód
 
      Parametry:
@@ -109,7 +66,8 @@ def linear_forward(A, W, b):
      W - wagi
      
      b - bias
-    """
+
+"""
     Z = np.dot(W, A) + b
     cache = (A, W, b)
     assert Z.shape == (W.shape[0], A.shape[1])
@@ -207,17 +165,49 @@ def L_layer_model(X, Y, layers_dims, learning_rate, num_iterations, print_cost=F
         plot_graph(cost_plot)
     return parameters
 
-# Trenowanie modelu
-layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
-parameters1 = L_layer_model(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22, print_cost=True)
-print("Trenowanie zakończone")
-
 # Testowanie wytrenowanego modelu na danych testowych
 def check_test(X, params):
     AL, caches = L_model_forward(X, params)
     return AL, caches
 
+
+# Wczytanie danych treningowych i testowych
+mnist_data_csv_1 = pd.read_csv("mnist1.csv", sep = ",")
+mnist_data_csv_2 = pd.read_csv("mnist2.csv", sep = ",")
+
+# Podział danych na etykiety i piksele
+mnist_labels_1 = np.array(mnist_data_csv_1.loc[:, 'label'])
+mnist_labels_2 = np.array(mnist_data_csv_2.loc[:, 'label'])
+mnist_data_1 = np.array(mnist_data_csv_1.loc[:, mnist_data_csv_1.columns != 'label'])
+mnist_data_2 = np.array(mnist_data_csv_2.loc[:, mnist_data_csv_2.columns != 'label'])
+
+
+all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
+all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
+
+train_data = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[0]
+train_label = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[1]
+
+
+test_data = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[2]
+test_label = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[3]
+
+
+
+# Trenowanie modelu
+layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
+parameters1 = L_layer_model(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22, print_cost=True)
+print("Trenowanie zakończone")
+
+
+
 predictions, _ = check_test(test_data, parameters1)
+
+print(predictions)
+
+"""
+
+
 
 results = []
 
@@ -240,3 +230,4 @@ plt.show()
 # Zapisanie wyników do pliku submission.csv
 np.savetxt('submission.csv', np.c_[range(1, 28001), results], delimiter=',', header='ImageId,Label', comments='', fmt='%d')
 print("Testowanie zakończone")
+"""
