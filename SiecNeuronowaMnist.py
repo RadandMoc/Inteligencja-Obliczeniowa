@@ -98,14 +98,18 @@ def initialize_parameters_deep(layer_dims):
     
     return parameters
 
-"""
- Przekazywanie przez warstwy w przód
- Parametry:
- A - aktywacja poprzedniej warstwy
- W - wagi
- b - bias
-"""
 def linear_forward(A, W, b):
+    """
+     Przekazywanie przez warstwy w przód
+
+     Parametry:
+
+     A - aktywacja poprzedniej warstwy
+
+     W - wagi
+     
+     b - bias
+    """
     Z = np.dot(W, A) + b
     cache = (A, W, b)
     assert Z.shape == (W.shape[0], A.shape[1])
