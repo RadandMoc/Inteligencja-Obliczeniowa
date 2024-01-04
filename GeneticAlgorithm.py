@@ -138,13 +138,30 @@ def tournament_selection(population, fitness_scores, tournament_size=3):
         selected_indices.append(winner_idx)
     return population[selected_indices]
 
-def crossover(parents):
+def crossover1(parents):
     # No change needed here, the function is efficient
     crossover_point = random.randint(1, len(parents[0]) - 1)
     child1 = np.concatenate([parents[0][:crossover_point], 
                              [city for city in parents[1] if city not in parents[0][:crossover_point]]])
     child2 = np.concatenate([parents[1][:crossover_point], 
                              [city for city in parents[0] if city not in parents[1][:crossover_point]]])
+    return child1, child2
+
+def crossover2(parents): 
+    number_of_cities = len(parents[1])
+    crossover_point_1 = round(number_of_cities/3)
+    crossover_point_2 = round(number_of_cities*(2/3))
+    c1 = np.zeros(number_of_cities, dtype=int)
+    c2 = np.zeros(number_of_cities, dtype=int)
+    for i in range(number_of_cities):
+        if i >= crossover_point_1 and i <= crossover_point_2:
+            c1[i] = parents[1][i]
+            c2[i] = parents[0][i]
+        else:
+            c1[i] = parents[0][i]
+            c2[i] = parents[1][i]
+    child1 = c1.tolist()
+    child2 = c2.tolist()
     return child1, child2
 
 def mutate(individual, mutation_rate):
@@ -166,7 +183,7 @@ def genetic_algorithm(distances, population_size=100, generations=100, mutation_
         children = np.empty((number_of_crossover, num_cities), dtype=int)
         for i in range(0, number_of_crossover, 2):
             parents = tournament_selection(population, fitness_scores)
-            offspring = crossover(parents)
+            offspring = crossover1(parents)
             children[i] = mutate(offspring[0], mutation_rate)
             children[i+1] = mutate(offspring[1], mutation_rate)
 
