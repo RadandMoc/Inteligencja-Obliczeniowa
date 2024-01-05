@@ -5,14 +5,16 @@ import math
 import random
 
 
-
-def get_train_data_and_test_data(data,labels,test_sample_percent):
+# Dzielenie danych na zbior uczacy i testowy
+def get_train_data_and_test_data(data,labels,test_sample_percent,want_random_order):
     data_length = data.shape[0]
-    indices_for_test =  random.sample(range(0, data_length), int(test_sample_percent*data_length))
-    indices_for_train = [x for x in range(data_length) if x not in indices_for_test]
-    return data[indices_for_train,:], labels[indices_for_train], data[indices_for_test,:], labels[indices_for_test]
-
-
+    if want_random_order:
+        indices_for_test =  random.sample(range(0, data_length), int(test_sample_percent*data_length))
+        indices_for_train = [x for x in range(data_length) if x not in indices_for_test]
+        return data[indices_for_train,:], labels[indices_for_train], data[indices_for_test,:], labels[indices_for_test]
+    else:
+        split_index = int(test_sample_percent * data_length)
+        return data[:split_index, :], labels[:split_index], data[split_index:, :], labels[split_index:]
 
 # Definicja funkcji aktywacji i ich pochodnych
 def relu(Z):
@@ -57,17 +59,17 @@ def initialize_parameters_deep(layer_dims):
 def linear_forward(A, W, b):
     """
 
-     Przekazywanie przez warstwy w przód
-
-     Parametry:
-
-     A - aktywacja poprzedniej warstwy
-
-     W - wagi
-     
-     b - bias
-
-"""
+    Przekazywanie przez warstwy w przód
+    
+    Parametry:
+    
+    A - aktywacja poprzedniej warstwy
+    
+    W - wagi
+    
+    b - bias
+    
+    """
     Z = np.dot(W, A) + b
     cache = (A, W, b)
     assert Z.shape == (W.shape[0], A.shape[1])
@@ -185,12 +187,13 @@ mnist_data_2 = np.array(mnist_data_csv_2.loc[:, mnist_data_csv_2.columns != 'lab
 all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
 all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
-train_data = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[0]
-train_label = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[1]
+list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,0.1,False)
+train_data = list_of_datas[0]
+train_label = list_of_datas[1]
 
 
-test_data = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[2]
-test_label = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[3]
+test_data = list_of_datas[2]
+test_label = list_of_datas[3]
 
 
 
