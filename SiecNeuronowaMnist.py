@@ -196,15 +196,15 @@ mnist_labels_2 = np.array(mnist_data_csv_2.loc[:, 'label'])
 mnist_data_1 = np.array(mnist_data_csv_1.loc[:, mnist_data_csv_1.columns != 'label'])
 mnist_data_2 = np.array(mnist_data_csv_2.loc[:, mnist_data_csv_2.columns != 'label'])
 
-
+# Łączenie danych do jednego arrayu
 all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
 all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
-list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,0.1,False)
+# Dzielenie danych na zbiór uczący i testowy
+percent_of_test_data = 0.1
+list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,False)
 train_data = list_of_datas[0]
 train_label = list_of_datas[1]
-
-
 test_data = list_of_datas[2]
 test_label = list_of_datas[3]
 
