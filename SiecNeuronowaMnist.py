@@ -208,12 +208,13 @@ train_label = list_of_datas[1]
 test_data = list_of_datas[2]
 test_label = list_of_datas[3]
 
-save_array_as_csv(train_data,'DaneUczace.csv')
-save_array_as_csv(train_label,'ZnakiUczace.csv')
-save_array_as_csv(test_data,'DaneTestowe.csv')
-save_array_as_csv(test_label,'ZnakiTestowe.csv')
-save_array_as_csv(all_mnist_labels,'Znaki.csv')
-save_array_as_csv(all_data,'Dane.csv')
+# Sprawdzenie danych zbiorów testowych i uczących w formie zapisu do plikow csv celem latwiejszej inspekcji
+#save_array_as_csv(train_data,'DaneUczace.csv')
+#save_array_as_csv(train_label,'ZnakiUczace.csv')
+#save_array_as_csv(test_data,'DaneTestowe.csv')
+#save_array_as_csv(test_label,'ZnakiTestowe.csv')
+#save_array_as_csv(all_mnist_labels,'Znaki.csv')
+#save_array_as_csv(all_data,'Dane.csv')
 
 
 # Trenowanie modelu
