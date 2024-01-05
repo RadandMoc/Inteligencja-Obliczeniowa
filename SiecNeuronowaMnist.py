@@ -227,7 +227,7 @@ def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
 
 
 
-"""
+
 # Wczytanie danych treningowych i testowych
 mnist_data_csv_1 = pd.read_csv("mnist1.csv", sep = ",")
 mnist_data_csv_2 = pd.read_csv("mnist2.csv", sep = ",")
@@ -257,16 +257,6 @@ test_label = list_of_datas[3]
 #save_array_as_csv(test_label,'ZnakiTestowe.csv')
 #save_array_as_csv(all_mnist_labels,'Znaki.csv')
 #save_array_as_csv(all_data,'Dane.csv')
-train_data = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[0]
-
-
-train_label = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[1]
-
-test_data = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[2]
-
-test_label = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[3]
-
-"""
 
 
 layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
