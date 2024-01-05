@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
+from enum import Enum
 import random
 import csv
 
@@ -186,6 +187,47 @@ def check_test(X, params):
     return AL, caches
 
 
+class InitializationMethod(Enum):
+    RANDOM = "random"
+    HE = "he"
+    XAVIER_GLOROT = "xavier_glorot"
+
+
+
+def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
+    """
+    Inicjalizuje wagi i biasy dla każdej warstwy w sieci neuronowej zgodnie z wybraną metodą.
+
+    Argumenty:
+    layers_dims -- lista zawierająca liczbę neuronów w każdej warstwie.
+    method -- metoda inicjalizacji (InitializationMethod).
+
+    Zwraca:
+    parameters -- słownik zawierający parametry "W1", "b1", ..., "WL", "bL".
+    """
+
+    np.random.seed(3)  # Ustawienie ziarna dla spójności wyników
+    parameters = {}
+    L = len(layers_dims)  # liczba warstw w sieci
+
+    for l in range(1, L):
+        if method == InitializationMethod.HE:
+            parameters['W' + str(l)] = np.random.randn(layers_dims[l], layers_dims[l-1]) * np.sqrt(2 / layers_dims[l-1])
+        elif method == InitializationMethod.XAVIER_GLOROT:
+            limit = np.sqrt(6 / (layers_dims[l-1] + layers_dims[l]))
+            parameters['W' + str(l)] = np.random.uniform(-limit, limit, (layers_dims[l], layers_dims[l-1]))
+        else:  # DEFAULT: Random initialization
+            parameters['W' + str(l)] = np.random.randn(layers_dims[l], layers_dims[l-1]) * 0.01
+
+        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
+
+    return parameters
+
+
+
+
+
+"""
 # Wczytanie danych treningowych i testowych
 mnist_data_csv_1 = pd.read_csv("mnist1.csv", sep = ",")
 mnist_data_csv_2 = pd.read_csv("mnist2.csv", sep = ",")
@@ -200,6 +242,7 @@ mnist_data_2 = np.array(mnist_data_csv_2.loc[:, mnist_data_csv_2.columns != 'lab
 all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
 all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
+<<<<<<< Updated upstream
 # Dzielenie danych na zbiór uczący i testowy
 percent_of_test_data = 0.1
 list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,False)
@@ -215,7 +258,27 @@ test_label = list_of_datas[3]
 #save_array_as_csv(test_label,'ZnakiTestowe.csv')
 #save_array_as_csv(all_mnist_labels,'Znaki.csv')
 #save_array_as_csv(all_data,'Dane.csv')
+=======
+train_data = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[0]
 
+
+train_label = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[1]
+
+test_data = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[2]
+
+test_label = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[3]
+
+"""
+>>>>>>> Stashed changes
+
+
+layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
+print(initialize_parameters(layers_dims,InitializationMethod.HE))
+
+print(initialize_parameters(layers_dims,InitializationMethod.RANDOM))
+
+
+"""
 
 # Trenowanie modelu
 layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
@@ -228,7 +291,6 @@ predictions, _ = check_test(test_data, parameters1)
 
 print(predictions)
 
-"""
 
 
 
