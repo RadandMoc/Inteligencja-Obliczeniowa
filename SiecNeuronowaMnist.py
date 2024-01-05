@@ -46,8 +46,7 @@ def relu_backward(dA, cache):
 def softmax(Z):
     e_x = np.exp(Z - np.max(Z))
     A = e_x / np.sum(e_x, axis=0, keepdims=True)
-    cache = Z
-    return A, cache
+    return A
 
 def softmax_backward(dA, cache):
     Z = cache
@@ -58,6 +57,11 @@ def softmax_backward(dA, cache):
         dZ[:, i] = np.dot(np.diag(s[:, i]), dA[:, i]) - np.outer(s[:, i], s[:, i]) @ dA[:, i]
     
     return dZ
+
+def sigmoid(Z):
+    return 1/(1+np.exp(-Z))
+
+
 
 # Inicjalizacja parametrów sieci neuronowej
 def initialize_parameters_deep(layer_dims):
@@ -224,7 +228,85 @@ def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
     return parameters
 
 
+def forward_propagation(X, parameters):
+    """
+    Implement forward propagation for the [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID computation.
+    
+    Arguments:
+    X -- data, numpy array of shape (input size, number of examples)
+    parameters -- output of initialize_parameters_deep()
+    
+    Returns:
+    AL -- last post-activation value
+    caches -- list of caches containing every cache of linear_relu_forward() (there are L-1 of them, indexed from 0 to L-2)
+    """
 
+    activations_history = []
+    A = X
+    L = len(parameters) // 2                  # number of layers in the neural network
+
+    # Implement [LINEAR -> RELU]*(L-1). Add "cache" to the "caches" list.
+    for l in range(1, L):
+        A_prev = A 
+        W = parameters['W' + str(l)]
+        b = parameters['b' + str(l)]
+        Z = np.dot(W, A_prev) + b
+        A = relu(Z)
+        activations_history.append((A_prev, W, b, Z))
+
+    # Implement LINEAR -> SIGMOID. Add "cache" to the "caches" list.
+    W = parameters['W' + str(L)]
+    b = parameters['b' + str(L)]
+    Z = np.dot(W, A) + b
+    AL = softmax(Z)
+    activations_history.append((A, W, b, Z))
+    
+    return AL, activations_history
+
+
+
+def neural_network(X, Y, layers_dims, learning_rate, num_iterations):
+    """
+    Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SOFTMAX.
+    
+    Arguments:
+    X -- data, numpy array of shape (number of examples, num_px * num_px * 3)
+    Y -- true "label" vector (containing 0 if non-cat, 1 if cat), of shape (1, number of examples)
+    layers_dims -- dimensions of the layers (n_x, n_h, n_y)
+    learning_rate -- learning rate of the gradient descent update rule
+    num_iterations -- number of iterations of the optimization loop
+    
+    Returns:
+    parameters -- parameters learnt by the model. They can then be used to predict.
+    """
+
+    np.random.seed(1)
+    costs = []                         # keep track of cost
+    
+    # Parameters initialization
+    parameters = initialize_parameters(layers_dims)
+
+    # Loop (gradient descent)
+    for i in range(0, num_iterations):
+
+        # Forward propagation
+        AL, caches = forward_propagation(X, parameters)
+
+        # Compute cost
+        cost = compute_cost(AL, Y)
+
+        # Backward propagation
+        grads = L_model_backward(AL, Y, caches)
+
+        # Update parameters
+        parameters = update_parameters(parameters, grads, learning_rate)
+        
+        # Print the cost every 100 training example
+        if i % 100 == 0:
+            print ("Cost after iteration %i: %f" %(i, cost))
+            costs.append(cost)
+            
+    return parameters
 
 
 
@@ -235,8 +317,8 @@ mnist_data_csv_2 = pd.read_csv("mnist2.csv", sep = ",")
 # Podział danych na etykiety i piksele
 mnist_labels_1 = np.array(mnist_data_csv_1.loc[:, 'label'])
 mnist_labels_2 = np.array(mnist_data_csv_2.loc[:, 'label'])
-mnist_data_1 = np.array(mnist_data_csv_1.loc[:, mnist_data_csv_1.columns != 'label'])
-mnist_data_2 = np.array(mnist_data_csv_2.loc[:, mnist_data_csv_2.columns != 'label'])
+mnist_data_1 = np.array(mnist_data_csv_1.loc[:, mnist_data_csv_1.columns != 'label'], dtype = 'int16')
+mnist_data_2 = np.array(mnist_data_csv_2.loc[:, mnist_data_csv_2.columns != 'label'], dtype = 'int16')
 
 # Łączenie danych do jednego arrayu
 all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
@@ -259,10 +341,14 @@ test_label = list_of_datas[3]
 #save_array_as_csv(all_data,'Dane.csv')
 
 
-layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
-print(initialize_parameters(layers_dims,InitializationMethod.HE))
 
-print(initialize_parameters(layers_dims,InitializationMethod.RANDOM))
+
+
+layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
+
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22)
+predictions, _ = check_test(test_data, parameters)
+print(predictions)
 
 
 """
