@@ -242,7 +242,6 @@ mnist_data_2 = np.array(mnist_data_csv_2.loc[:, mnist_data_csv_2.columns != 'lab
 all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
 all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
-<<<<<<< Updated upstream
 # Dzielenie danych na zbiór uczący i testowy
 percent_of_test_data = 0.1
 list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,False)
@@ -258,7 +257,6 @@ test_label = list_of_datas[3]
 #save_array_as_csv(test_label,'ZnakiTestowe.csv')
 #save_array_as_csv(all_mnist_labels,'Znaki.csv')
 #save_array_as_csv(all_data,'Dane.csv')
-=======
 train_data = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[0]
 
 
@@ -269,7 +267,6 @@ test_data = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[2]
 test_label = get_train_data_and_test_data(all_data,all_mnist_labels,0.1)[3]
 
 """
->>>>>>> Stashed changes
 
 
 layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
