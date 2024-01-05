@@ -46,7 +46,7 @@ def relu_backward(dA, cache):
 def softmax(Z):
     e_x = np.exp(Z - np.max(Z))
     A = e_x / np.sum(e_x, axis=0, keepdims=True)
-    return A
+    return A, Z
 
 def softmax_backward(dA, cache):
     Z = cache
@@ -198,7 +198,7 @@ class InitializationMethod(Enum):
 
 
 
-def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
+def initialize_parameters(layers_dims, number_of_training_data, method=InitializationMethod.RANDOM):
     """
     Inicjalizuje wagi i biasy dla każdej warstwy w sieci neuronowej zgodnie z wybraną metodą.
 
@@ -223,7 +223,7 @@ def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
         else:  # DEFAULT: Random initialization
             parameters['W' + str(l)] = np.random.randn(layers_dims[l], layers_dims[l-1]) * 0.01
 
-        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
+        parameters['b' + str(l)] = np.zeros((layers_dims[l], number_of_training_data))
 
     return parameters
 
@@ -250,22 +250,28 @@ def forward_propagation(X, parameters):
         A_prev = A 
         W = parameters['W' + str(l)]
         b = parameters['b' + str(l)]
-        Z = np.dot(W, A_prev) + b
-        A = relu(Z)
-        activations_history.append((A_prev, W, b, Z))
+        #save_array_as_csv(W,'zmiennaW.csv')
+        #save_array_as_csv(A_prev,'zmiennaA.csv')
+        #save_array_as_csv(b,'zmiennaB.csv')
+        print('W' + str(l) +" shape="+str(np.shape(W)))
+        print("A_prev shape="+str(np.shape(A_prev)))
+        print("b shape ="+str(np.shape(b)))
+        A, activation_history = linear_activation_forward(A, W, b, "relu")
+        #Z = np.dot(W, A_prev) + b
+        #A = relu(Z)
+        activations_history.append(activation_history)
 
     # Implement LINEAR -> SIGMOID. Add "cache" to the "caches" list.
     W = parameters['W' + str(L)]
     b = parameters['b' + str(L)]
-    Z = np.dot(W, A) + b
-    AL = softmax(Z)
-    activations_history.append((A, W, b, Z))
+    AL, activation_history = linear_activation_forward(A,W,b,"softmax")
+    activations_history.append(activation_history)
     
     return AL, activations_history
 
 
 
-def neural_network(X, Y, layers_dims, learning_rate, num_iterations):
+def neural_network(X, Y, layers_dims, learning_rate, num_iterations, number_of_training_data):
     """
     Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SOFTMAX.
     
@@ -284,7 +290,7 @@ def neural_network(X, Y, layers_dims, learning_rate, num_iterations):
     costs = []                         # keep track of cost
     
     # Parameters initialization
-    parameters = initialize_parameters(layers_dims)
+    parameters = initialize_parameters(layers_dims, number_of_training_data)
 
     # Loop (gradient descent)
     for i in range(0, num_iterations):
@@ -325,12 +331,17 @@ all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
 all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
 # Dzielenie danych na zbiór uczący i testowy
-percent_of_test_data = 0.1
+percent_of_test_data = 0.4
 list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,False)
-train_data = list_of_datas[0]
-train_label = list_of_datas[1]
-test_data = list_of_datas[2]
-test_label = list_of_datas[3]
+train_data = np.transpose(list_of_datas[0])
+train_label = np.transpose(list_of_datas[1])
+test_data = np.transpose(list_of_datas[2])
+test_label = np.transpose(list_of_datas[3])
+
+print("train_data shape="+str(np.shape(train_data)))
+print("train_label shape="+str(np.shape(train_label)))
+print("test shape ="+str(np.shape(test_data)))
+print("test_label shape="+str(np.shape(test_label)))
 
 # Sprawdzenie danych zbiorów testowych i uczących w formie zapisu do plikow csv celem latwiejszej inspekcji
 #save_array_as_csv(train_data,'DaneUczace.csv')
@@ -345,8 +356,7 @@ test_label = list_of_datas[3]
 
 
 layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
-
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22, number_of_training_data = int((1-percent_of_test_data) * all_data.shape[0]))
 predictions, _ = check_test(test_data, parameters)
 print(predictions)
 
