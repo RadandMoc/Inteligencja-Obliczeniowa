@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math
 import random
-
+import csv
 
 # Dzielenie danych na zbior uczacy i testowy
 def get_train_data_and_test_data(data,labels,test_sample_percent,want_random_order):
@@ -13,8 +13,21 @@ def get_train_data_and_test_data(data,labels,test_sample_percent,want_random_ord
         indices_for_train = [x for x in range(data_length) if x not in indices_for_test]
         return data[indices_for_train,:], labels[indices_for_train], data[indices_for_test,:], labels[indices_for_test]
     else:
-        split_index = int(test_sample_percent * data_length)
+        split_index = int((1-test_sample_percent) * data_length)
         return data[:split_index, :], labels[:split_index], data[split_index:, :], labels[split_index:]
+
+def save_array_as_csv(array, file_path):
+    # Jeśli tablica jest jednowymiarowa, przekształć ją w tablicę 2D (jeden wiersz)
+    if array.ndim == 1:
+        array = array.reshape(1, -1)
+
+    try:
+        with open(file_path, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(array)
+        print(f"Plik CSV został pomyślnie zapisany jako {file_path}")
+    except Exception as e:
+        print(f"Błąd podczas zapisywania pliku CSV: {e}")
 
 # Definicja funkcji aktywacji i ich pochodnych
 def relu(Z):
@@ -195,6 +208,12 @@ train_label = list_of_datas[1]
 test_data = list_of_datas[2]
 test_label = list_of_datas[3]
 
+save_array_as_csv(train_data,'DaneUczace.csv')
+save_array_as_csv(train_label,'ZnakiUczace.csv')
+save_array_as_csv(test_data,'DaneTestowe.csv')
+save_array_as_csv(test_label,'ZnakiTestowe.csv')
+save_array_as_csv(all_mnist_labels,'Znaki.csv')
+save_array_as_csv(all_data,'Dane.csv')
 
 
 # Trenowanie modelu
