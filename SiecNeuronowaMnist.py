@@ -6,16 +6,36 @@ from enum import Enum
 import random
 import csv
 
+# Funkcja przekształca array tworząc macierz odpowiedzi
+def extend_array(array):
+    # Sprawdzenie czy w kolumnie znajdują się wartości od 0 do 9
+    unikalne_wartosci = np.unique(array)
+    if not np.array_equal(unikalne_wartosci, np.arange(10)):
+        raise ValueError("Kolumna powinna zawierać wartości od 0 do 9")
+
+    # Tworzenie nowego arraya z zerami o wymiarach: liczba wierszy x 10 kolumn
+    result = np.zeros((array.shape[0], 10), dtype=int)
+
+    # Indeksowanie wartości 1 na podstawie wartości w kolumnie oryginalnego arraya
+    for i, val in enumerate(array.flatten()):
+        result[i, val] = 1
+
+    return result
+
 # Dzielenie danych na zbior uczacy i testowy
 def get_train_data_and_test_data(data,labels,test_sample_percent,want_random_order):
     data_length = data.shape[0]
     if want_random_order:
         indices_for_test =  random.sample(range(0, data_length), int(test_sample_percent*data_length))
         indices_for_train = [x for x in range(data_length) if x not in indices_for_test]
-        return data[indices_for_train,:], labels[indices_for_train], data[indices_for_test,:], labels[indices_for_test]
+        returner1 = extend_array(labels[indices_for_train])
+        returner2 = extend_array(labels[indices_for_test])
+        return data[indices_for_train,:], returner1, data[indices_for_test,:], returner2
     else:
         split_index = int((1-test_sample_percent) * data_length)
-        return data[:split_index, :], labels[:split_index], data[split_index:, :], labels[split_index:]
+        returner1 = extend_array(labels[:split_index])
+        returner2 = extend_array(labels[split_index:])
+        return data[:split_index, :], returner1, data[split_index:, :], returner2
 
 def save_array_as_csv(array, file_path):
     # Jeśli tablica jest jednowymiarowa, przekształć ją w tablicę 2D (jeden wiersz)
@@ -88,6 +108,9 @@ def linear_forward(A, W, b):
     b - bias
     
     """
+    #print("W shape="+str(np.shape(W)))
+    #print("A_prev shape="+str(np.shape(A)))
+    #print("b shape ="+str(np.shape(b)))
     Z = np.dot(W, A) + b
     cache = (A, W, b)
     assert Z.shape == (W.shape[0], A.shape[1])
@@ -198,7 +221,7 @@ class InitializationMethod(Enum):
 
 
 
-def initialize_parameters(layers_dims, number_of_training_data, method=InitializationMethod.RANDOM):
+def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
     """
     Inicjalizuje wagi i biasy dla każdej warstwy w sieci neuronowej zgodnie z wybraną metodą.
 
@@ -223,7 +246,7 @@ def initialize_parameters(layers_dims, number_of_training_data, method=Initializ
         else:  # DEFAULT: Random initialization
             parameters['W' + str(l)] = np.random.randn(layers_dims[l], layers_dims[l-1]) * 0.01
 
-        parameters['b' + str(l)] = np.zeros((layers_dims[l], number_of_training_data))
+        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
 
     return parameters
 
@@ -253,9 +276,9 @@ def forward_propagation(X, parameters):
         #save_array_as_csv(W,'zmiennaW.csv')
         #save_array_as_csv(A_prev,'zmiennaA.csv')
         #save_array_as_csv(b,'zmiennaB.csv')
-        print('W' + str(l) +" shape="+str(np.shape(W)))
-        print("A_prev shape="+str(np.shape(A_prev)))
-        print("b shape ="+str(np.shape(b)))
+        #print('W' + str(l) +" shape="+str(np.shape(W)))
+        #print("A_prev shape="+str(np.shape(A_prev)))
+        #print("b shape ="+str(np.shape(b)))
         A, activation_history = linear_activation_forward(A, W, b, "relu")
         #Z = np.dot(W, A_prev) + b
         #A = relu(Z)
@@ -271,7 +294,7 @@ def forward_propagation(X, parameters):
 
 
 
-def neural_network(X, Y, layers_dims, learning_rate, num_iterations, number_of_training_data):
+def neural_network(X, Y, layers_dims, learning_rate, num_iterations):
     """
     Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SOFTMAX.
     
@@ -290,13 +313,14 @@ def neural_network(X, Y, layers_dims, learning_rate, num_iterations, number_of_t
     costs = []                         # keep track of cost
     
     # Parameters initialization
-    parameters = initialize_parameters(layers_dims, number_of_training_data)
+    parameters = initialize_parameters(layers_dims)
 
     # Loop (gradient descent)
     for i in range(0, num_iterations):
 
         # Forward propagation
         AL, caches = forward_propagation(X, parameters)
+        #print(np.shape(Y))
 
         # Compute cost
         cost = compute_cost(AL, Y)
@@ -331,8 +355,8 @@ all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
 all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
 # Dzielenie danych na zbiór uczący i testowy
-percent_of_test_data = 0.4
-list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,False)
+percent_of_test_data = 0.1
+list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,True)
 train_data = np.transpose(list_of_datas[0])
 train_label = np.transpose(list_of_datas[1])
 test_data = np.transpose(list_of_datas[2])
@@ -356,10 +380,12 @@ print("test_label shape="+str(np.shape(test_label)))
 
 
 layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22, number_of_training_data = int((1-percent_of_test_data) * all_data.shape[0]))
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22)
 predictions, _ = check_test(test_data, parameters)
 print(predictions)
-
+print(str(np.shape(predictions)))
+print(str(np.max(predictions)))
+save_array_as_csv(np.transpose(predictions),'Answers.csv')
 
 """
 
