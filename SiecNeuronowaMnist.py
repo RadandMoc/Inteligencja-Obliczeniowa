@@ -126,18 +126,6 @@ def linear_activation_forward(A_prev, W, b, activation):
     cache = (linear_cache, activation_cache)
     return A, cache
 
-def L_model_forward(X, parameters):
-    caches = []
-    A = X
-    L = len(parameters) // 2
-    for l in range(1, L):
-        A_prev = A
-        A, cache = linear_activation_forward(A_prev, parameters['W' + str(l)], parameters['b' + str(l)], activation="relu")
-        caches.append(cache)
-    AL, cache = linear_activation_forward(A, parameters['W' + str(L)], parameters['b' + str(L)], activation="softmax")
-    caches.append(cache)
-    return AL, caches
-
 # Obliczanie kosztu
 def compute_cost(AL, Y):
     m = Y.shape[1]
@@ -167,19 +155,23 @@ def L_model_backward(AL, Y, caches):
     grads = {}
     L = len(caches)
     dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
-    current_cache = caches[L - 1]
-    grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = linear_activation_backward(dAL, current_cache, activation="softmax")
-    for l in reversed(range(L - 1)):
+    M=len(layers_dims)
+    current_cache = caches[M-2]
+    grads["dA"+str(M-1)], grads["dW"+str(M-1)], grads["db"+str(M-1)] = linear_activation_backward(dAL, current_cache, activation = "softmax")
+    for l in reversed(range(L-1)):
         current_cache = caches[l]
-        dA_prev_temp, dW_temp, db_temp = linear_activation_backward(grads["dA" + str(l + 2)], current_cache, activation="relu")
+        dA_prev_temp, dW_temp, db_temp = linear_activation_backward(grads["dA" + str(l + 2)], current_cache, activation = "relu")
         grads["dA" + str(l + 1)] = dA_prev_temp
         grads["dW" + str(l + 1)] = dW_temp
         grads["db" + str(l + 1)] = db_temp
     return grads
 
 def update_parameters(parameters, grads, learning_rate):
-    L = len(parameters) // 2
+    L = len(layers_dims) - 1
     for l in range(L):
+        #print("Oto sprawdzane LLLLLLLLLLLLLLLLL"+str(l))
+        #print("W "+str(learning_rate * grads["dW" + str(l + 1)]))
+        #print("b "+str(learning_rate * grads["db" + str(l + 1)]))
         parameters["W" + str(l + 1)] -= learning_rate * grads["dW" + str(l + 1)]
         parameters["b" + str(l + 1)] -= learning_rate * grads["db" + str(l + 1)]
     return parameters
@@ -198,7 +190,7 @@ def L_layer_model(X, Y, layers_dims, learning_rate, num_iterations, print_cost=F
     cost_plot = np.zeros(num_iterations)
     parameters = initialize_parameters_deep(layers_dims)
     for i in range(num_iterations):
-        AL, caches = L_model_forward(X, parameters)
+        AL, caches = forward_propagation(X, parameters)
         cost = compute_cost(AL, Y)
         grads = L_model_backward(AL, Y, caches)
         parameters = update_parameters(parameters, grads, learning_rate)
@@ -210,7 +202,7 @@ def L_layer_model(X, Y, layers_dims, learning_rate, num_iterations, print_cost=F
 
 # Testowanie wytrenowanego modelu na danych testowych
 def check_test(X, params):
-    AL, caches = L_model_forward(X, params)
+    AL, caches = forward_propagation(X, params)
     return AL, caches
 
 
@@ -230,7 +222,7 @@ def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
     method -- metoda inicjalizacji (InitializationMethod).
 
     Zwraca:
-    parameters -- słownik zawierający parametry "W1", "b1", ..., "WL", "bL".
+    parameters -- słownik zawierający parametry "W0", "b0", ..., "WL", "bL".
     """
 
     np.random.seed(3)  # Ustawienie ziarna dla spójności wyników
@@ -279,7 +271,7 @@ def forward_propagation(X, parameters):
         #print('W' + str(l) +" shape="+str(np.shape(W)))
         #print("A_prev shape="+str(np.shape(A_prev)))
         #print("b shape ="+str(np.shape(b)))
-        A, activation_history = linear_activation_forward(A, W, b, "relu")
+        A, activation_history = linear_activation_forward(A_prev, W, b, "relu")
         #Z = np.dot(W, A_prev) + b
         #A = relu(Z)
         activations_history.append(activation_history)
@@ -313,7 +305,7 @@ def neural_network(X, Y, layers_dims, learning_rate, num_iterations):
     costs = []                         # keep track of cost
     
     # Parameters initialization
-    parameters = initialize_parameters(layers_dims)
+    parameters = initialize_parameters_deep(layers_dims)
 
     # Loop (gradient descent)
     for i in range(0, num_iterations):
@@ -355,7 +347,7 @@ all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
 all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
 # Dzielenie danych na zbiór uczący i testowy
-percent_of_test_data = 0.1
+percent_of_test_data = 0.4
 list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,True)
 train_data = np.transpose(list_of_datas[0])
 train_label = np.transpose(list_of_datas[1])
@@ -382,16 +374,16 @@ print("test_label shape="+str(np.shape(test_label)))
 layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
 parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22)
 predictions, _ = check_test(test_data, parameters)
-print(predictions)
-print(str(np.shape(predictions)))
+#print(predictions)
+#print(str(np.shape(predictions)))
 print(str(np.max(predictions)))
 save_array_as_csv(np.transpose(predictions),'Answers.csv')
 
-"""
+
 
 # Trenowanie modelu
-layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
-parameters1 = L_layer_model(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22, print_cost=True)
+#layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
+"""parameters1 = L_layer_model(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22, print_cost=True)
 print("Trenowanie zakończone")
 
 
@@ -400,6 +392,8 @@ predictions, _ = check_test(test_data, parameters1)
 
 print(predictions)
 
+print(str(np.max(predictions)))
+save_array_as_csv(np.transpose(predictions),'Answers.csv')
 
 
 
