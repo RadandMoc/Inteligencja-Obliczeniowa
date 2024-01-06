@@ -27,7 +27,7 @@ def getRandomRouteCities(numberOfCities):
 def getSumOfCities(cityOrders, distanceMatrix):
     sum = 0
     for i in range(-1,len(cityOrders)-1):
-        sum = sum + distanceMatrix[cityOrders[i],cityOrders[i+1]]
+        sum = sum + distanceMatrix[cityOrders[i], cityOrders[i+1]]
     return sum
 
 # FUNKCJA DO SWAPINGU
@@ -36,6 +36,28 @@ def swapCities(cityOrder,firstIdx,Secondidx):
     cityOrder[firstIdx] = cityOrder[Secondidx]
     cityOrder[Secondidx] = firstCity
     return cityOrder
+
+def getDifference(meth, new_r, current_r, distance_m, current_dist, idx1, idx2):
+    if (meth == "swap"):
+        neighbours = getCities(new_r, idx1, idx2)  # Biorę sąsiadów indeksów
+        new_distance = (current_dist +
+                        checkIfWeGetBetterRouteSwapping(distance_m, current_r, neighbours, idx1,
+                                                        idx2))  # Liczę dystans gdybym zamienił miasta
+        new_route = swapCities(new_r, idx1, idx2)  # Nowa trasa po swappingu
+        return new_distance, new_route
+    elif (meth == "insertion"):
+        new_distance = (current_dist +
+                        checkIfWeGetBetterRouteForInsertion(distance_m, current_r, idx1,
+                                                            idx2))  # Liczę dystans gdybym zmienił kolejność miast
+        new_route = insertMethod(new_r, idx1, idx2)  # Nowa trasa po insercji
+        return new_distance, new_route
+    else:
+        if (idx1 > idx2):
+            idx1, idx2 = idx2, idx1  # Zamieniam indeksy, aby spełnić warunek funkcji checkIfGetBetter...
+        new_distance = (current_dist +
+                        checkIfWeGetBetterRouteForReverse(distance_m, current_r, idx1, idx2))
+        new_route = reverseMethod(new_r, idx1, idx2)
+        return new_distance, new_route
 
 # FUNKCJA LICZĄCA PRAWDOPODOBIEŃSTWO ZAMIANY
 def acceptanceProbability(old_distance, new_distance, temperature):
@@ -59,22 +81,7 @@ def simulatedAnnealing(distance_matrix, temperature, cooling_rate, num_iteration
             new_route = np.copy(current_route)
             idx1, idx2 = random.sample(range(len(new_route)), 2) # Losujemy 2 randomowe indexy od 0 do (długości trasy-1)
 
-            if (method == "swap"):
-                neighbours = getCities(new_route, idx1, idx2) # Biorę sąsiadów indeksów
-                new_distance = (current_distance +
-                                checkIfWeGetBetterRouteSwapping(distance_matrix, current_route, neighbours, idx1, idx2)) # Liczę dystans gdybym zamienił miasta
-                new_route = swapCities(new_route, idx1, idx2) # Nowa trasa po swappingu
-            elif (method == "insertion"):
-                new_distance = (current_distance +
-                                checkIfWeGetBetterRouteForInsertion(distance_matrix, current_route, idx1, idx2)) # Liczę dystans gdybym zmienił kolejność miast
-                new_route = insertMethod(new_route, idx1, idx2) # Nowa trasa po insercji
-            else:
-                if (idx1 > idx2):
-                    idx1, idx2 = idx2, idx1 # Zamieniam indeksy, aby spełnić warunek funkcji checkIfGetBetter...
-                new_distance = (current_distance +
-                                checkIfWeGetBetterRouteForReverse(distance_matrix, current_route, idx1, idx2))
-                new_route = reverseMethod(new_route, idx1, idx2)
-
+            new_distance, new_route = getDifference(method, new_route, current_route, distance_matrix, current_distance, idx1, idx2)
 
             if acceptanceProbability(current_distance, new_distance, temperature) > random.random(): # Jeśli prawdopodobieństwo wybrania trasy jest większe niż losowa liczba z zakresu 0 do 1, to:
                 current_route = np.copy(new_route) # Zamieniam aktualną trasą na tą nową wygenenerowaną ostatnio
@@ -241,7 +248,7 @@ start_time = time.time()
 
 best_distance, best_route, best_global = runSimulatedAnnealingMultipleTimes(
     matrix, num_runs=4, initial_temperature=10000, cooling_rate=0.003,
-    num_iterations=1000, acc_value=130000, min_temp=0.11, temp_red='fast', method="reverse",
+    num_iterations=100, acc_value=130000, min_temp=0.11, temp_red='fast', method="reverse",
     filename=f"Wyzarzanie_records_127.txt")
 
 ### TEMP_RED = slow jest dla wolnej redukcji temperatury, fast dla szybkiej, wg wykładu dla wolnej redukcji temperatury liczba iteracji jest równa 1.
