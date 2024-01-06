@@ -156,7 +156,7 @@ def backward_propagation(actual_layers, Y,  activations_history):
     number_of_layers=len(layers_dims)
     current_cache =  activations_history[number_of_layers-2]
     gradient["dA"+str(number_of_layers-1)], gradient["dW"+str(number_of_layers-1)], gradient["db"+str(number_of_layers-1)] = linear_activation_backward(dAL, current_cache, activation = "softmax")
-    for l in range(L-1,0,-1):
+    for l in reversed(range(L-1)):
         current_cache =  activations_history[l]
         dA_prev_temp, dW_temp, db_temp = linear_activation_backward(gradient["dA" + str(l + 2)], current_cache, activation = "relu")
         gradient["dA" + str(l + 1)] = dA_prev_temp
