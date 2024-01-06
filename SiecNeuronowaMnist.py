@@ -284,7 +284,43 @@ def forward_propagation(X, parameters):
     
     return AL, activations_history
 
+# Tłumaczy macierz prawdopodobieństw na odpowiedzi
+def translate_matrix_of_probabilities_to_matrix_of_answers(arr):
+    # Kopiowanie oryginalnej tablicy numpy
+    result = arr.copy()
+    
+    # Iteracja po każdym wierszu tablicy numpy
+    for row in range(arr.shape[0]):
+        # Znajdowanie indeksu maksymalnej wartości w danym wierszu
+        max_index = np.argmax(arr[row])
+        
+        # Ustawienie 1 w komórce o maksymalnej wartości w danym wierszu
+        result[row] = 0
+        result[row, max_index] = 1
+    
+    return result
 
+# Porównuje dwie macierze i zwraca średnią zgodność wierszy
+def matrix_comparison(arr1, arr2):
+    if arr1.shape != arr2.shape:
+        raise ValueError("Tablice mają różne kształty. Porównanie niemożliwe.")
+
+    rows = arr1.shape[0]
+    columns = arr1.shape[1]
+
+    returner = 0  # Zmienna lokalna do zliczania identycznych wierszy
+
+    for i in range(rows):
+        row_match = True
+        for j in range(columns):
+            if arr1[i][j] != arr2[i][j]:
+                row_match = False
+                break
+
+        if row_match:
+            returner += 1
+
+    return returner / rows if rows > 0 else 0
 
 def neural_network(X, Y, layers_dims, learning_rate, num_iterations):
     """
@@ -347,7 +383,7 @@ all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
 all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
 # Dzielenie danych na zbiór uczący i testowy
-percent_of_test_data = 0.4
+percent_of_test_data = 0.1
 list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,True)
 train_data = np.transpose(list_of_datas[0])
 train_label = np.transpose(list_of_datas[1])
@@ -375,9 +411,11 @@ layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
 parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22)
 predictions, _ = check_test(test_data, parameters)
 #print(predictions)
-#print(str(np.shape(predictions)))
+print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
 print(str(np.max(predictions)))
-save_array_as_csv(np.transpose(predictions),'Answers.csv')
+predictions = translate_matrix_of_probabilities_to_matrix_of_answers(np.transpose(predictions))
+print(str(matrix_comparison(predictions,np.transpose(test_label))))
+save_array_as_csv(predictions,'Answers.csv')
 
 
 
