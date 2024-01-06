@@ -14,16 +14,16 @@ class Method(Enum):
 
 def get_difference(meth, new_r, current_r, distance_m, current_dist, idx1, idx2):
     if (meth == Method.Swap):
-        neighbours = getCities(new_r, idx1, idx2)  # Biorę sąsiadów indeksów
+        neighbours = get_cities(new_r, idx1, idx2)  # Biorę sąsiadów indeksów
         new_distance = (current_dist +
                         check_if_we_get_better_route_swapping(distance_m, current_r, neighbours, idx1, idx2))  # Liczę dystans gdybym zamienił miasta
-        new_route = swapCities(new_r, idx1, idx2)  # Nowa trasa po swappingu
+        new_route = swap_cities(new_r, idx1, idx2)  # Nowa trasa po swappingu
         return new_distance, new_route
     elif (meth == "insertion"):
         new_distance = (current_dist +
                         check_if_we_get_better_route_insertion(distance_m, current_r, idx1,
                                                             idx2))  # Liczę dystans gdybym zmienił kolejność miast
-        new_route = insertMethod(new_r, idx1, idx2)  # Nowa trasa po insercji
+        new_route = insert_method(new_r, idx1, idx2)  # Nowa trasa po insercji
         return new_distance, new_route
     else:
         if (idx1 > idx2):
@@ -33,7 +33,7 @@ def get_difference(meth, new_r, current_r, distance_m, current_dist, idx1, idx2)
         new_route = reverseMethod(new_r, idx1, idx2)
         return new_distance, new_route
 
-def getCities(cityOrder: np.array, firstIdx: int, secondIdx: int): # Funkcja, której zadaniem jest zebranie sąsiadów dla dwóch indeksów
+def get_cities(cityOrder: np.array, firstIdx: int, secondIdx: int): # Funkcja, której zadaniem jest zebranie sąsiadów dla dwóch indeksów
     def city(index):
         return cityOrder[index % len(cityOrder)]
 
@@ -46,7 +46,7 @@ def calculate_route_distance(route, cities_df):
     for i in range(-1,len(route)-1):
         sum = sum + cities_df[route[i],route[i+1]]
     return sum
-def swapCities(cityOrder,firstIdx,Secondidx):
+def swap_cities(cityOrder,firstIdx,Secondidx):
     firstCity = cityOrder[firstIdx]
     cityOrder[firstIdx] = cityOrder[Secondidx]
     cityOrder[Secondidx] = firstCity
@@ -99,7 +99,7 @@ def check_if_we_get_better_route_insertion(distanceMatrix: np.array,cityOrder: n
         return calculateRouteChangeForNeighbour(distanceMatrix, cityOrder, firstIdx, secIdx) # Zwracamy różnicę odległości
     return 0
 
-def insertMethod(order, index, insertion_index):
+def insert_method(order, index, insertion_index):
     element = order[index]
     new_order = np.delete(order, index)
     new_order = np.insert(new_order, insertion_index, element)
@@ -236,18 +236,18 @@ def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_
                     best_solution = current_solution
                     best_distance = current_distance
                     rep_counter = 0
-
             else:
                 rep_counter += 1
 
             if rep_counter == critic_counter:
+
                 break
 
         if(best_distance < overall_best_distance):
             overall_best_distance = best_distance
             overall_best_solution = best_solution
 
-    # Zapisz wynik do pliku txt
+    # Zapisz wynik do pliku tx
     #end timer
     end_time = time.time()  # Koniec pomiaru czasu
     elapsed_time = end_time - start_time
@@ -257,4 +257,4 @@ def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_
     return overall_best_solution
 
 # Przykładowe użycie
-best_solution = tabu_search('Dane_TSP_127.csv', "ResultsTabuSearch.txt",iterations=100, critic_counter=5, method= Method.Reverse, tabu_tenure=10)
+best_solution = tabu_search('Dane_TSP_127.csv', "ResultsTabuSearch.txt",iterations=100, critic_counter=2, method= Method.Reverse, tabu_tenure=10)
