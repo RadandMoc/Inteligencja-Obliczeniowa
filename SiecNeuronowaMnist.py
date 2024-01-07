@@ -1,10 +1,14 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import math
 from enum import Enum
 import random
 import csv
+
+class InitializationMethod(Enum):
+    RANDOM = "random"
+    HE = "he"
+    XAVIER_GLOROT = "xavier_glorot"
 
 # Funkcja przekształca array tworząc macierz odpowiedzi
 def extend_array(array):
@@ -51,26 +55,23 @@ def save_array_as_csv(array, file_path):
         print(f"Błąd podczas zapisywania pliku CSV: {e}")
 
 # Definicja funkcji aktywacji i ich pochodnych
-def relu(Z):
-    A = np.maximum(0, Z)
-    cache = Z
-    return A, cache
+def relu(neurons):
+    A = np.maximum(0, neurons)
+    activation_history = neurons
+    return A, activation_history
 
-def relu_backward(dA, cache):
-    Z = cache
-    dZ = np.array(dA, copy=True)
-    dZ[Z <= 0] = 0
-    assert (dZ.shape == Z.shape)
+def relu_backward(dA, activation_history):
+    dZ = np.copy(dA)
+    dZ[activation_history <= 0] = 0
     return dZ
 
-def softmax(Z):
-    e_x = np.exp(Z - np.max(Z))
+def softmax(neurons):
+    e_x = np.exp(neurons - np.max(neurons))
     A = e_x / np.sum(e_x, axis=0, keepdims=True)
-    return A, Z
+    return A, neurons
 
-def softmax_backward(dA, cache):
-    Z = cache
-    s, _ = softmax(Z)
+def softmax_backward(dA, activation_history):
+    s, _ = softmax(activation_history)
     dZ = np.zeros_like(s)
     
     for i in range(dA.shape[1]):
@@ -78,17 +79,13 @@ def softmax_backward(dA, cache):
     
     return dZ
 
-def sigmoid(Z):
-    return 1/(1+np.exp(-Z))
-
-
 
 # Inicjalizacja parametrów sieci neuronowej
 def initialize_parameters_deep(layer_dims):
     parameters = {}
-    L = len(layer_dims)
+    length_of_layers = len(layer_dims)
     
-    for l in range(1, L):
+    for l in range(1, length_of_layers):
         parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l-1]) / np.sqrt(layer_dims[l-1])
         parameters['b' + str(l)] = np.zeros((layer_dims[l], 1))
     
@@ -111,43 +108,44 @@ def linear_forward(A, W, b):
     #print("W shape="+str(np.shape(W)))
     #print("A_prev shape="+str(np.shape(A)))
     #print("b shape ="+str(np.shape(b)))
-    Z = np.dot(W, A) + b
-    cache = (A, W, b)
-    assert Z.shape == (W.shape[0], A.shape[1])
-    return Z, cache
+    neurons = np.dot(W, A) + b
+    activation_history = (A, W, b)
+    return neurons, activation_history
 
-def linear_activation_forward(A_prev, W, b, activation):
+def linear_activation_forward(A_prev, W, b, activation): 
+    """activation na enum i zmienić mu nazwę. można dodać więcej funkcji aktywacji"""
     if activation == "relu":
-        Z, linear_cache = linear_forward(A_prev, W, b)
-        A, activation_cache = relu(Z)
+        neurons, linear_forward_history = linear_forward(A_prev, W, b)
+        A, activation_history = relu(neurons)
     elif activation == "softmax":
-        Z, linear_cache = linear_forward(A_prev, W, b)
-        A, activation_cache = softmax(Z)
-    cache = (linear_cache, activation_cache)
-    return A, cache
+        neurons, linear_forward_history = linear_forward(A_prev, W, b)
+        A, activation_history = softmax(neurons)
+    activations_history = (linear_forward_history, activation_history)
+    return A, activations_history
 
-# Obliczanie kosztu
-def compute_cost(AL, Y):
-    m = Y.shape[1]
-    cost = (-1 / m) * np.sum(np.multiply(Y, np.log(AL)) + np.multiply(1 - Y, np.log(1 - AL)))
+# Obliczanie entropii krzyżowej
+def compute_cost(model_results, Y):
+    number_of_data = Y.shape[1]
+    cost = (-1 / number_of_data) * np.sum(Y * np.log(model_results) + (1 - Y) * np.log(1 - model_results))
     return cost
 
 # Wsteczna propagacja przez warstwy
-def linear_backward(dZ, cache):
-    A_prev, W, b = cache
-    m = A_prev.shape[1]
-    dW = (1 / m) * np.dot(dZ, A_prev.T)
-    db = (1 / m) * np.sum(dZ, axis=1, keepdims=True)
+def linear_backward(dZ, activation_history):
+    A_prev, W, b = activation_history
+    number_of_data = A_prev.shape[1]
+    dW = (1 / number_of_data) * np.dot(dZ, A_prev.T)
+    db = (1 / number_of_data) * np.sum(dZ, axis=1, keepdims=True)
     dA_prev = np.dot(W.T, dZ)
     return dA_prev, dW, db
 
-def linear_activation_backward(dA, cache, activation):
-    linear_cache, activation_cache = cache
+def linear_activation_backward(dA, activations_history, activation):
+    """activation na enum i zmienić mu nazwę. można dodać więcej funkcji aktywacji"""
+    linear_cache, activation_history = activations_history
     if activation == "relu":
-        dZ = relu_backward(dA, activation_cache)
+        dZ = relu_backward(dA, activation_history)
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
     elif activation == "softmax":
-        dZ = softmax_backward(dA, activation_cache)
+        dZ = softmax_backward(dA, activation_history)
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
     return dA_prev, dW, db
 
