@@ -148,7 +148,7 @@ def linear_activation_forward(A_prev, W, b, activation):
 # Obliczanie entropii krzyżowej
 def compute_cost(model_results, Y):
     number_of_data = Y.shape[1]
-    cost = (-1 / number_of_data) * np.sum(Y * np.log(model_results) + (1 - Y) * np.log(1 - model_results))
+    cost = (-1 / number_of_data) * np.sum(Y * np.log(model_results + 1e-8) + (1 - Y) * np.log(1 - model_results + 1e-8))
     return cost
 
 # Wsteczna propagacja przez warstwy
@@ -174,7 +174,7 @@ def linear_activation_backward(dA, activations_history, activation):
 def backward_propagation(actual_layers, Y,  activations_history):
     gradient = {}
     L = len(activations_history)
-    dAL = - ((Y / actual_layers) - ((1 - Y) / (1 - actual_layers)))
+    dAL = - ((Y / actual_layers + 1e-8) - ((1 - Y) / (1 - actual_layers + 1e-8)))
     number_of_layers=len(layers_dims)
     current_cache =  activations_history[number_of_layers-2]
     gradient["dA"+str(number_of_layers-1)], gradient["dW"+str(number_of_layers-1)], gradient["db"+str(number_of_layers-1)] = linear_activation_backward(dAL, current_cache, activation = "softmax")
