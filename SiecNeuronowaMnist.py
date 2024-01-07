@@ -97,7 +97,7 @@ def softmax_backward(dA, activation_history):
     dZ = np.zeros_like(s)
     
     for i in range(dA.shape[1]):
-        dZ[:, i] = np.dot(np.diag(s[:, i]), dA[:, i]) - np.outer(s[:, i], s[:, i]) @ dA[:, i]
+        dZ[:, i] = (np.diag(s[:, i]) @ dA[:, i]) - np.outer(s[:, i], s[:, i]) @ dA[:, i]
     
     return dZ
 
@@ -130,7 +130,7 @@ def linear_forward(A, W, b):
     #print("W shape="+str(np.shape(W)))
     #print("A_prev shape="+str(np.shape(A)))
     #print("b shape ="+str(np.shape(b)))
-    neurons = np.dot(W, A) + b
+    neurons = W @ A + b
     activation_history = (A, W, b)
     return neurons, activation_history
 
@@ -155,9 +155,9 @@ def compute_cost(model_results, Y):
 def linear_backward(dZ, activation_history):
     A_prev, W, b = activation_history
     number_of_data = A_prev.shape[1]
-    dW = (1 / number_of_data) * np.dot(dZ, A_prev.T)
+    dW = (1 / number_of_data) * (dZ @ A_prev.T)
     db = (1 / number_of_data) * np.sum(dZ, axis=1, keepdims=True)
-    dA_prev = np.dot(W.T, dZ)
+    dA_prev = W.T @ dZ
     return dA_prev, dW, db
 
 def linear_activation_backward(dA, activations_history, activation):
@@ -261,7 +261,7 @@ def forward_propagation(X, parameters):
         #print("A_prev shape="+str(np.shape(A_prev)))
         #print("b shape ="+str(np.shape(b)))
         A, activation_history = linear_activation_forward(A_prev, W, b, "relu")
-        #Z = np.dot(W, A_prev) + b
+        #Z = (W @ A_prev) + b
         #A = relu(Z)
         activations_history.append(activation_history)
 
