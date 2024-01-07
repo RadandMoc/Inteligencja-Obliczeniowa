@@ -130,21 +130,22 @@ def compute_cost(model_results, Y):
     return cost
 
 # Wsteczna propagacja przez warstwy
-def linear_backward(dZ, cache):
-    A_prev, W, b = cache
-    m = A_prev.shape[1]
-    dW = (1 / m) * np.dot(dZ, A_prev.T)
-    db = (1 / m) * np.sum(dZ, axis=1, keepdims=True)
+def linear_backward(dZ, activation_history):
+    A_prev, W, b = activation_history
+    number_of_data = A_prev.shape[1]
+    dW = (1 / number_of_data) * np.dot(dZ, A_prev.T)
+    db = (1 / number_of_data) * np.sum(dZ, axis=1, keepdims=True)
     dA_prev = np.dot(W.T, dZ)
     return dA_prev, dW, db
 
-def linear_activation_backward(dA, cache, activation):
-    linear_cache, activation_cache = cache
+def linear_activation_backward(dA, activations_history, activation):
+    """activation na enum i zmienić mu nazwę. można dodać więcej funkcji aktywacji"""
+    linear_cache, activation_history = activations_history
     if activation == "relu":
-        dZ = relu_backward(dA, activation_cache)
+        dZ = relu_backward(dA, activation_history)
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
     elif activation == "softmax":
-        dZ = softmax_backward(dA, activation_cache)
+        dZ = softmax_backward(dA, activation_history)
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
     return dA_prev, dW, db
 
