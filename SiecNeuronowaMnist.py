@@ -349,7 +349,7 @@ def neural_network(X, Y, layers_dims, learning_rate, epoka):
         parameters = update_parameters(parameters, grads, learning_rate)
         
         # Print the cost every 100 training example
-        if i % 100 == 0:
+        if i % 10 == 0:
             print ("Cost after iteration %i: %f" %(i, cost))
             costs.append(cost)
             
@@ -381,10 +381,10 @@ test_label = np.transpose(list_of_datas[3])
 
 
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
+layers_dims = [784, 392, 196, 98, 49, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, epoka=22)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.004, epoka=120)
 predictions, _ = check_test(test_data, parameters)
 #print(predictions)
 print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
