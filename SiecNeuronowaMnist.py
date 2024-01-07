@@ -149,20 +149,20 @@ def linear_activation_backward(dA, activations_history, activation):
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
     return dA_prev, dW, db
 
-def L_model_backward(AL, Y, caches):
-    grads = {}
-    L = len(caches)
-    dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
-    M=len(layers_dims)
-    current_cache = caches[M-2]
-    grads["dA"+str(M-1)], grads["dW"+str(M-1)], grads["db"+str(M-1)] = linear_activation_backward(dAL, current_cache, activation = "softmax")
+def backward_propagation(actual_layers, Y,  activations_history):
+    gradient = {}
+    L = len(activations_history)
+    dAL = - ((Y / actual_layers) - ((1 - Y) / (1 - actual_layers)))
+    number_of_layers=len(layers_dims)
+    current_cache =  activations_history[number_of_layers-2]
+    gradient["dA"+str(number_of_layers-1)], gradient["dW"+str(number_of_layers-1)], gradient["db"+str(number_of_layers-1)] = linear_activation_backward(dAL, current_cache, activation = "softmax")
     for l in reversed(range(L-1)):
-        current_cache = caches[l]
-        dA_prev_temp, dW_temp, db_temp = linear_activation_backward(grads["dA" + str(l + 2)], current_cache, activation = "relu")
-        grads["dA" + str(l + 1)] = dA_prev_temp
-        grads["dW" + str(l + 1)] = dW_temp
-        grads["db" + str(l + 1)] = db_temp
-    return grads
+        current_cache =  activations_history[l]
+        dA_prev_temp, dW_temp, db_temp = linear_activation_backward(gradient["dA" + str(l + 2)], current_cache, activation = "relu")
+        gradient["dA" + str(l + 1)] = dA_prev_temp
+        gradient["dW" + str(l + 1)] = dW_temp
+        gradient["db" + str(l + 1)] = db_temp
+    return gradient
 
 def update_parameters(parameters, grads, learning_rate):
     L = len(layers_dims) - 1
@@ -174,41 +174,10 @@ def update_parameters(parameters, grads, learning_rate):
         parameters["b" + str(l + 1)] -= learning_rate * grads["db" + str(l + 1)]
     return parameters
 
-# Funkcja rysująca wykres funkcji kosztu
-def plot_graph(cost_plot):
-    x_values = list(range(1, len(cost_plot) + 1))
-    plt.xlabel('Iteracja')
-    plt.ylabel('Koszt')
-    plt.plot(x_values, cost_plot, color='green')
-    plt.show()
-
-# Model sieci neuronowej L-warstwowej
-def L_layer_model(X, Y, layers_dims, learning_rate, num_iterations, print_cost=False):
-    costs = []
-    cost_plot = np.zeros(num_iterations)
-    parameters = initialize_parameters_deep(layers_dims)
-    for i in range(num_iterations):
-        AL, caches = forward_propagation(X, parameters)
-        cost = compute_cost(AL, Y)
-        grads = L_model_backward(AL, Y, caches)
-        parameters = update_parameters(parameters, grads, learning_rate)
-        cost_plot[i] = cost
-
-    if print_cost:
-        plot_graph(cost_plot)
-    return parameters
-
 # Testowanie wytrenowanego modelu na danych testowych
 def check_test(X, params):
-    AL, caches = forward_propagation(X, params)
-    return AL, caches
-
-
-class InitializationMethod(Enum):
-    RANDOM = "random"
-    HE = "he"
-    XAVIER_GLOROT = "xavier_glorot"
-
+    actual_layers,  activations_history = forward_propagation(X, params)
+    return actual_layers,  activations_history
 
 
 def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
@@ -250,16 +219,16 @@ def forward_propagation(X, parameters):
     parameters -- output of initialize_parameters_deep()
     
     Returns:
-    AL -- last post-activation value
-    caches -- list of caches containing every cache of linear_relu_forward() (there are L-1 of them, indexed from 0 to L-2)
+    actual_layers -- last post-activation value
+    activations_history -- list of  activations_history containing every activation_history of linear_relu_forward() (there are L-1 of them, indexed from 0 to L-2)
     """
 
     activations_history = []
     A = X
-    L = len(parameters) // 2                  # number of layers in the neural network
+    number_of_layers = len(parameters) // 2                  # number of layers in the neural network
 
-    # Implement [LINEAR -> RELU]*(L-1). Add "cache" to the "caches" list.
-    for l in range(1, L):
+    # Implement [LINEAR -> RELU]*(L-1). Add "activation_history" to the " activations_history" list.
+    for l in range(1, number_of_layers):
         A_prev = A 
         W = parameters['W' + str(l)]
         b = parameters['b' + str(l)]
@@ -274,23 +243,23 @@ def forward_propagation(X, parameters):
         #A = relu(Z)
         activations_history.append(activation_history)
 
-    # Implement LINEAR -> SIGMOID. Add "cache" to the "caches" list.
-    W = parameters['W' + str(L)]
-    b = parameters['b' + str(L)]
-    AL, activation_history = linear_activation_forward(A,W,b,"softmax")
+    # Implement LINEAR -> SOFTMAX. Add "activation_history" to the "activations_history" list.
+    W = parameters['W' + str(number_of_layers)]
+    b = parameters['b' + str(number_of_layers)]
+    actual_layers, activation_history = linear_activation_forward(A,W,b,"softmax")
     activations_history.append(activation_history)
     
-    return AL, activations_history
+    return actual_layers, activations_history
 
 # Tłumaczy macierz prawdopodobieństw na odpowiedzi
-def translate_matrix_of_probabilities_to_matrix_of_answers(arr):
+def translate_matrix_of_probabilities_to_matrix_of_answers(array):
     # Kopiowanie oryginalnej tablicy numpy
-    result = arr.copy()
+    result = array.copy()
     
     # Iteracja po każdym wierszu tablicy numpy
-    for row in range(arr.shape[0]):
+    for row in range(array.shape[0]):
         # Znajdowanie indeksu maksymalnej wartości w danym wierszu
-        max_index = np.argmax(arr[row])
+        max_index = np.argmax(array[row])
         
         # Ustawienie 1 w komórce o maksymalnej wartości w danym wierszu
         result[row] = 0
@@ -320,7 +289,7 @@ def matrix_comparison(arr1, arr2):
 
     return returner / rows if rows > 0 else 0
 
-def neural_network(X, Y, layers_dims, learning_rate, num_iterations):
+def neural_network(X, Y, layers_dims, learning_rate, epoka):
     """
     Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SOFTMAX.
     
@@ -329,7 +298,7 @@ def neural_network(X, Y, layers_dims, learning_rate, num_iterations):
     Y -- true "label" vector (containing 0 if non-cat, 1 if cat), of shape (1, number of examples)
     layers_dims -- dimensions of the layers (n_x, n_h, n_y)
     learning_rate -- learning rate of the gradient descent update rule
-    num_iterations -- number of iterations of the optimization loop
+    epoka -- number of iterations of the optimization loop
     
     Returns:
     parameters -- parameters learnt by the model. They can then be used to predict.
@@ -342,17 +311,17 @@ def neural_network(X, Y, layers_dims, learning_rate, num_iterations):
     parameters = initialize_parameters_deep(layers_dims)
 
     # Loop (gradient descent)
-    for i in range(0, num_iterations):
+    for i in range(0, epoka):
 
         # Forward propagation
-        AL, caches = forward_propagation(X, parameters)
+        actual_layers,  activations_history = forward_propagation(X, parameters)
         #print(np.shape(Y))
 
         # Compute cost
-        cost = compute_cost(AL, Y)
+        cost = compute_cost(actual_layers, Y)
 
         # Backward propagation
-        grads = L_model_backward(AL, Y, caches)
+        grads = backward_propagation(actual_layers, Y,  activations_history)
 
         # Update parameters
         parameters = update_parameters(parameters, grads, learning_rate)
@@ -371,10 +340,10 @@ mnist_data_csv_1 = pd.read_csv("mnist1.csv", sep = ",")
 mnist_data_csv_2 = pd.read_csv("mnist2.csv", sep = ",")
 
 # Podział danych na etykiety i piksele
-mnist_labels_1 = np.array(mnist_data_csv_1.loc[:, 'label'])
-mnist_labels_2 = np.array(mnist_data_csv_2.loc[:, 'label'])
-mnist_data_1 = np.array(mnist_data_csv_1.loc[:, mnist_data_csv_1.columns != 'label'], dtype = 'int16')
-mnist_data_2 = np.array(mnist_data_csv_2.loc[:, mnist_data_csv_2.columns != 'label'], dtype = 'int16')
+mnist_labels_1 = np.array(mnist_data_csv_1.iloc[:, 0])
+mnist_labels_2 = np.array(mnist_data_csv_2.iloc[:, 0])
+mnist_data_1 = np.array(mnist_data_csv_1.iloc[:, 1:], dtype='int16')
+mnist_data_2 = np.array(mnist_data_csv_2.iloc[:, 1:], dtype='int16')
 
 # Łączenie danych do jednego arrayu
 all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
@@ -388,25 +357,12 @@ train_label = np.transpose(list_of_datas[1])
 test_data = np.transpose(list_of_datas[2])
 test_label = np.transpose(list_of_datas[3])
 
-print("train_data shape="+str(np.shape(train_data)))
-print("train_label shape="+str(np.shape(train_label)))
-print("test shape ="+str(np.shape(test_data)))
-print("test_label shape="+str(np.shape(test_label)))
 
-# Sprawdzenie danych zbiorów testowych i uczących w formie zapisu do plikow csv celem latwiejszej inspekcji
-#save_array_as_csv(train_data,'DaneUczace.csv')
-#save_array_as_csv(train_label,'ZnakiUczace.csv')
-#save_array_as_csv(test_data,'DaneTestowe.csv')
-#save_array_as_csv(test_label,'ZnakiTestowe.csv')
-#save_array_as_csv(all_mnist_labels,'Znaki.csv')
-#save_array_as_csv(all_data,'Dane.csv')
+# Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
+layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
+# Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 
-
-
-
-
-layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, epoka=22)
 predictions, _ = check_test(test_data, parameters)
 #print(predictions)
 print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
