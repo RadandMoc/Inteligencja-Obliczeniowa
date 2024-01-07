@@ -10,6 +10,12 @@ class InitializationMethod(Enum):
     HE = "he"
     XAVIER_GLOROT = "xavier_glorot"
 
+class TrainingSetSelection(Enum):
+    RANDOM = "random" # dobór w pełni losowy
+    STRATIFIEDSAMPLING = "stratified_sampling" #dobór losowy, ale z zachowaniem proporcji danych (odpowiedzi)
+    BOOTSTRAPPING = "bootstrapping" #dobór losowy, ale z możliwością wielokrotnego wyboru tych samych danych
+    RANDOMWITHIMPORTANCE = "random_with_importance" #dobór w pełni losowy, po którym następnie powtórzenie najmniej licznych danych (odpowiedzi) tyle razy, żeby wyrównać wszystkie zbiory 
+
 # Funkcja przekształca array tworząc macierz odpowiedzi
 def extend_array(array):
     # Sprawdzenie czy w kolumnie znajdują się wartości od 0 do 9
@@ -27,14 +33,20 @@ def extend_array(array):
     return result
 
 # Dzielenie danych na zbior uczacy i testowy
-def get_train_data_and_test_data(data,labels,test_sample_percent,want_random_order):
+def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
     data_length = data.shape[0]
-    if want_random_order:
+    if TrainingSetSelection.RANDOM == type_of_split:
         indices_for_test =  random.sample(range(0, data_length), int(test_sample_percent*data_length))
         indices_for_train = [x for x in range(data_length) if x not in indices_for_test]
         returner1 = extend_array(labels[indices_for_train])
         returner2 = extend_array(labels[indices_for_test])
         return data[indices_for_train,:], returner1, data[indices_for_test,:], returner2
+    elif TrainingSetSelection.STRATIFIEDSAMPLING == type_of_split:
+        return 0
+    elif TrainingSetSelection.BOOTSTRAPPING == type_of_split:
+        return 0
+    elif TrainingSetSelection.RANDOMWITHIMPORTANCE == type_of_split:
+        return 0
     else:
         split_index = int((1-test_sample_percent) * data_length)
         returner1 = extend_array(labels[:split_index])
@@ -351,7 +363,7 @@ all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
 # Dzielenie danych na zbiór uczący i testowy
 percent_of_test_data = 0.1
-list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,True)
+list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,TrainingSetSelection.RANDOM)
 train_data = np.transpose(list_of_datas[0])
 train_label = np.transpose(list_of_datas[1])
 test_data = np.transpose(list_of_datas[2])
