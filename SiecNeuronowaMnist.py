@@ -44,7 +44,17 @@ def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
     elif TrainingSetSelection.STRATIFIEDSAMPLING == type_of_split:
         return 0
     elif TrainingSetSelection.BOOTSTRAPPING == type_of_split:
-        return 0
+        test_sample_size = int(test_sample_percent * data_length)
+        unique_numbers = set()
+        random_numbers = []
+        while len(unique_numbers) < test_sample_size:
+            new_number = random.randint(0, data_length - 1)
+            if new_number not in unique_numbers:
+                unique_numbers.add(new_number)
+            random_numbers.append(new_number)
+        returner1 = extend_array(labels[random_numbers])
+        returner2 = extend_array(labels[random_numbers])
+        return data[random_numbers,:], returner1, data[random_numbers,:], returner2
     elif TrainingSetSelection.RANDOMWITHIMPORTANCE == type_of_split:
         return 0
     else:
