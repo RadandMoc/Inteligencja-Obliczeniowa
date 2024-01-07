@@ -235,6 +235,7 @@ def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_
                 if current_distance < best_distance:
                     best_solution = current_solution
                     best_distance = current_distance
+                    #print(best_distance)
                     rep_counter = 0
             else:
                 rep_counter += 1
@@ -257,4 +258,4 @@ def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_
     return overall_best_solution
 
 # Przykładowe użycie
-best_solution = tabu_search('Dane_TSP_127.csv', "ResultsTabuSearch.txt",iterations=100, critic_counter=2, method= Method.Reverse, tabu_tenure=10)
+best_solution = tabu_search('Dane_TSP_76.csv', "ResultsTabuSearch.txt",iterations=40000, critic_counter=10, method= Method.Reverse, tabu_tenure=10)
