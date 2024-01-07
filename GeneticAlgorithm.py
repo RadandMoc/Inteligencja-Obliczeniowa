@@ -138,6 +138,13 @@ def tournament_selection(population, fitness_scores, tournament_size=3):
         selected_indices.append(winner_idx)
     return population[selected_indices]
 
+def roulette_wheel_selection(population, fitness_scores):
+    # Select parents using roulette wheel selection
+    total_fitness = sum(fitness_scores)
+    probabilities = fitness_scores/total_fitness
+    participants = np.random.choice(len(population), size=2, p=probabilities, replace=False)
+    return population[participants]
+
 def crossover1(parents):
     # No change needed here, the function is efficient
     crossover_point = random.randint(1, len(parents[0]) - 1)
