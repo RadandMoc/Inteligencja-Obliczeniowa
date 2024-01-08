@@ -32,21 +32,32 @@ def extend_array(array):
 
     return result
 
-def add_random_data(how_much_data_add, index_of_col, data, labels):
-    indeksy = np.where(labels[:, index_of_col] == 1)[0]
+def add_random_data(how_much_data_add, index_of_col, data, labels, return_only_new_data):
+    try:
+        indeksy = np.where(labels[:, index_of_col] == 1)[0]
+    except IndexError:
+        labels = extend_array(labels)
+        indeksy = np.where(labels[:, index_of_col] == 1)[0]
     wanted_data = data[indeksy]
     wanted_labels = labels[indeksy]
     num_of_labels = np.shape(wanted_labels)[0]
     
     new_data = data.copy()  # Tworzenie kopii danych
     new_labels = labels.copy()  # Tworzenie kopii etykiet
-
-    for _ in range(how_much_data_add):
-        index_of_adding_row = random.randint(0, (num_of_labels-1))
-        new_data = np.vstack([new_data, wanted_data[index_of_adding_row]])
-        new_labels = np.vstack([new_labels, wanted_labels[index_of_adding_row]])
-
-    return new_data, new_labels
+    if return_only_new_data:
+        indices_for_train =  random.sample(range(0, new_data.shape[0]), int(how_much_data_add))
+        indices_for_test = [x for x in range(new_data.shape[0]) if x not in indices_for_train]
+        new_test_data = new_data[indices_for_test,:]
+        new_data = new_data[indices_for_train,:]
+        new_test_labels = new_labels[indices_for_test]
+        new_labels = new_labels[indices_for_train]
+        return new_data, new_labels, new_test_data, new_test_labels
+    else:
+        for _ in range(how_much_data_add):
+            index_of_adding_row = random.randint(0, (num_of_labels-1))
+            new_data = np.vstack([new_data, wanted_data[index_of_adding_row]])
+            new_labels = np.vstack([new_labels, wanted_labels[index_of_adding_row]])
+            return new_data, new_labels
 
 # Dzielenie danych na zbior uczacy i testowy
 def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
@@ -58,28 +69,39 @@ def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
         returner2 = extend_array(labels[indices_for_test])
         return data[indices_for_train,:], returner1, data[indices_for_test,:], returner2
     elif TrainingSetSelection.STRATIFIEDSAMPLING == type_of_split:
-        return 0
+        numbers_of_datas = list(range(10))
+        for i in range(0,10):
+            numbers_of_datas[i] = np.count_nonzero(labels == i)
+        train_data, train_label, test_data, test_label = add_random_data((numbers_of_datas[0] * (1-test_sample_percent)), 0, data, labels, True)
+        for i in range(1,9):
+            train_data2, train_label2, test_data2, test_label2 = add_random_data((numbers_of_datas[i] * (1-test_sample_percent)), i, data, labels, True)
+            train_data = np.vstack([train_data,train_data2])
+            train_label = np.vstack([train_label,train_label2])
+            test_data = np.vstack([test_data, test_data2])
+            test_label = np.vstack([test_label, test_label2])
+        return train_data, train_label, test_data, test_label
     elif TrainingSetSelection.BOOTSTRAPPING == type_of_split:
-        test_sample_size = int(test_sample_percent * data_length)
+        train_sample_size = int((1-test_sample_percent) * data_length)
         unique_numbers = set()
         random_numbers = []
-        while len(unique_numbers) < test_sample_size:
+        while len(unique_numbers) < train_sample_size:
             new_number = random.randint(0, data_length - 1)
             if new_number not in unique_numbers:
                 unique_numbers.add(new_number)
             random_numbers.append(new_number)
+        numbers_for_test = [x for x in range(data_length) if x not in unique_numbers]
         returner1 = extend_array(labels[random_numbers])
-        returner2 = extend_array(labels[random_numbers])
+        returner2 = extend_array(labels[numbers_for_test])
         print(str(np.shape(data[random_numbers,:])))
         print(str(np.shape(data[random_numbers,:])))
-        return data[random_numbers,:], returner1, data[random_numbers,:], returner2
+        return data[random_numbers,:], returner1, data[numbers_for_test,:], returner2
     elif TrainingSetSelection.RANDOMWITHIMPORTANCE == type_of_split:
         train_data, train_label, test_data, test_label = get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split = TrainingSetSelection.RANDOM)
         numbers_of_datas = list(range(10))
         for i in range(0,10):
             numbers_of_datas[i] = np.count_nonzero(train_label[:, i] == 1)
         for i in range(0,10):
-            train_data, train_label = add_random_data(max(numbers_of_datas) - numbers_of_datas[i], i, train_data, train_label)
+            train_data, train_label = add_random_data(max(numbers_of_datas) - numbers_of_datas[i], i, train_data, train_label, False)
         return train_data, train_label, test_data, test_label
     else:
         split_index = int((1-test_sample_percent) * data_length)
@@ -396,8 +418,8 @@ all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
 all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
 # Dzielenie danych na zbiór uczący i testowy
-percent_of_test_data = 0.1
-list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,TrainingSetSelection.RANDOM)
+percent_of_test_data = 0.4
+list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,TrainingSetSelection.STRATIFIEDSAMPLING)
 train_data = np.transpose(list_of_datas[0])
 train_label = np.transpose(list_of_datas[1])
 test_data = np.transpose(list_of_datas[2])
@@ -408,7 +430,7 @@ test_label = np.transpose(list_of_datas[3])
 layers_dims = [784, 392, 196, 98, 49, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.002, epoka=250)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.002, epoka=290)
 predictions, _ = check_test(test_data, parameters)
 #print(predictions)
 print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
