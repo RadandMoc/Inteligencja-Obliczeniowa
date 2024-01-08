@@ -32,6 +32,22 @@ def extend_array(array):
 
     return result
 
+def add_random_data(how_much_data_add, index_of_col, data, labels):
+    indeksy = np.where(labels[:, index_of_col] == 1)[0]
+    wanted_data = data[indeksy]
+    wanted_labels = labels[indeksy]
+    num_of_labels = np.shape(wanted_labels)[0]
+    
+    new_data = data.copy()  # Tworzenie kopii danych
+    new_labels = labels.copy()  # Tworzenie kopii etykiet
+
+    for _ in range(how_much_data_add):
+        index_of_adding_row = random.randint(0, (num_of_labels-1))
+        new_data = np.vstack([new_data, wanted_data[index_of_adding_row]])
+        new_labels = np.vstack([new_labels, wanted_labels[index_of_adding_row]])
+
+    return new_data, new_labels
+
 # Dzielenie danych na zbior uczacy i testowy
 def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
     data_length = data.shape[0]
@@ -54,9 +70,17 @@ def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
             random_numbers.append(new_number)
         returner1 = extend_array(labels[random_numbers])
         returner2 = extend_array(labels[random_numbers])
+        print(str(np.shape(data[random_numbers,:])))
+        print(str(np.shape(data[random_numbers,:])))
         return data[random_numbers,:], returner1, data[random_numbers,:], returner2
     elif TrainingSetSelection.RANDOMWITHIMPORTANCE == type_of_split:
-        return 0
+        train_data, train_label, test_data, test_label = get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split = TrainingSetSelection.RANDOM)
+        numbers_of_datas = list(range(10))
+        for i in range(0,10):
+            numbers_of_datas[i] = np.count_nonzero(train_label[:, i] == 1)
+        for i in range(0,10):
+            train_data, train_label = add_random_data(max(numbers_of_datas) - numbers_of_datas[i], i, train_data, train_label)
+        return train_data, train_label, test_data, test_label
     else:
         split_index = int((1-test_sample_percent) * data_length)
         returner1 = extend_array(labels[:split_index])
@@ -148,7 +172,7 @@ def linear_activation_forward(A_prev, W, b, activation):
 # Obliczanie entropii krzyżowej
 def compute_cost(model_results, Y):
     number_of_data = Y.shape[1]
-    cost = (-1 / number_of_data) * np.sum(Y * np.log(model_results + 1e-8) + (1 - Y) * np.log(1 - model_results + 1e-8))
+    cost = (-1 / number_of_data) * np.sum(Y * np.log(model_results + 1e-4) + (1 - Y) * np.log(1 - model_results + 1e-4))
     return cost
 
 # Wsteczna propagacja przez warstwy
@@ -174,7 +198,7 @@ def linear_activation_backward(dA, activations_history, activation):
 def backward_propagation(actual_layers, Y,  activations_history):
     gradient = {}
     L = len(activations_history)
-    dAL = - ((Y / actual_layers + 1e-8) - ((1 - Y) / (1 - actual_layers + 1e-8)))
+    dAL = - ((Y / (actual_layers + 1e-4)) - ((1 - Y) / (1 - actual_layers + 1e-4)))
     number_of_layers=len(layers_dims)
     current_cache =  activations_history[number_of_layers-2]
     gradient["dA"+str(number_of_layers-1)], gradient["dW"+str(number_of_layers-1)], gradient["db"+str(number_of_layers-1)] = linear_activation_backward(dAL, current_cache, activation = "softmax")
@@ -384,7 +408,7 @@ test_label = np.transpose(list_of_datas[3])
 layers_dims = [784, 392, 196, 98, 49, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.004, epoka=120)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.002, epoka=250)
 predictions, _ = check_test(test_data, parameters)
 #print(predictions)
 print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
