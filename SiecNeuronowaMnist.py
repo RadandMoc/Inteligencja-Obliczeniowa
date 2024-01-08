@@ -10,6 +10,12 @@ class InitializationMethod(Enum):
     HE = "he"
     XAVIER_GLOROT = "xavier_glorot"
 
+class TrainingSetSelection(Enum):
+    RANDOM = "random" # dobór w pełni losowy
+    STRATIFIEDSAMPLING = "stratified_sampling" #dobór losowy, ale z zachowaniem proporcji danych (odpowiedzi)
+    BOOTSTRAPPING = "bootstrapping" #dobór losowy, ale z możliwością wielokrotnego wyboru tych samych danych
+    RANDOMWITHIMPORTANCE = "random_with_importance" #dobór w pełni losowy, po którym następnie powtórzenie najmniej licznych danych (odpowiedzi) tyle razy, żeby wyrównać wszystkie zbiory 
+
 # Funkcja przekształca array tworząc macierz odpowiedzi
 def extend_array(array):
     # Sprawdzenie czy w kolumnie znajdują się wartości od 0 do 9
@@ -26,15 +32,55 @@ def extend_array(array):
 
     return result
 
+def add_random_data(how_much_data_add, index_of_col, data, labels):
+    indeksy = np.where(labels[:, index_of_col] == 1)[0]
+    wanted_data = data[indeksy]
+    wanted_labels = labels[indeksy]
+    num_of_labels = np.shape(wanted_labels)[0]
+    
+    new_data = data.copy()  # Tworzenie kopii danych
+    new_labels = labels.copy()  # Tworzenie kopii etykiet
+
+    for _ in range(how_much_data_add):
+        index_of_adding_row = random.randint(0, (num_of_labels-1))
+        new_data = np.vstack([new_data, wanted_data[index_of_adding_row]])
+        new_labels = np.vstack([new_labels, wanted_labels[index_of_adding_row]])
+
+    return new_data, new_labels
+
 # Dzielenie danych na zbior uczacy i testowy
-def get_train_data_and_test_data(data,labels,test_sample_percent,want_random_order):
+def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
     data_length = data.shape[0]
-    if want_random_order:
+    if TrainingSetSelection.RANDOM == type_of_split:
         indices_for_test =  random.sample(range(0, data_length), int(test_sample_percent*data_length))
         indices_for_train = [x for x in range(data_length) if x not in indices_for_test]
         returner1 = extend_array(labels[indices_for_train])
         returner2 = extend_array(labels[indices_for_test])
         return data[indices_for_train,:], returner1, data[indices_for_test,:], returner2
+    elif TrainingSetSelection.STRATIFIEDSAMPLING == type_of_split:
+        return 0
+    elif TrainingSetSelection.BOOTSTRAPPING == type_of_split:
+        test_sample_size = int(test_sample_percent * data_length)
+        unique_numbers = set()
+        random_numbers = []
+        while len(unique_numbers) < test_sample_size:
+            new_number = random.randint(0, data_length - 1)
+            if new_number not in unique_numbers:
+                unique_numbers.add(new_number)
+            random_numbers.append(new_number)
+        returner1 = extend_array(labels[random_numbers])
+        returner2 = extend_array(labels[random_numbers])
+        print(str(np.shape(data[random_numbers,:])))
+        print(str(np.shape(data[random_numbers,:])))
+        return data[random_numbers,:], returner1, data[random_numbers,:], returner2
+    elif TrainingSetSelection.RANDOMWITHIMPORTANCE == type_of_split:
+        train_data, train_label, test_data, test_label = get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split = TrainingSetSelection.RANDOM)
+        numbers_of_datas = list(range(10))
+        for i in range(0,10):
+            numbers_of_datas[i] = np.count_nonzero(train_label[:, i] == 1)
+        for i in range(0,10):
+            train_data, train_label = add_random_data(max(numbers_of_datas) - numbers_of_datas[i], i, train_data, train_label)
+        return train_data, train_label, test_data, test_label
     else:
         split_index = int((1-test_sample_percent) * data_length)
         returner1 = extend_array(labels[:split_index])
@@ -75,7 +121,7 @@ def softmax_backward(dA, activation_history):
     dZ = np.zeros_like(s)
     
     for i in range(dA.shape[1]):
-        dZ[:, i] = np.dot(np.diag(s[:, i]), dA[:, i]) - np.outer(s[:, i], s[:, i]) @ dA[:, i]
+        dZ[:, i] = (np.diag(s[:, i]) @ dA[:, i]) - np.outer(s[:, i], s[:, i]) @ dA[:, i]
     
     return dZ
 
@@ -108,7 +154,7 @@ def linear_forward(A, W, b):
     #print("W shape="+str(np.shape(W)))
     #print("A_prev shape="+str(np.shape(A)))
     #print("b shape ="+str(np.shape(b)))
-    neurons = np.dot(W, A) + b
+    neurons = W @ A + b
     activation_history = (A, W, b)
     return neurons, activation_history
 
@@ -126,16 +172,16 @@ def linear_activation_forward(A_prev, W, b, activation):
 # Obliczanie entropii krzyżowej
 def compute_cost(model_results, Y):
     number_of_data = Y.shape[1]
-    cost = (-1 / number_of_data) * np.sum(Y * np.log(model_results) + (1 - Y) * np.log(1 - model_results))
+    cost = (-1 / number_of_data) * np.sum(Y * np.log(model_results + 1e-4) + (1 - Y) * np.log(1 - model_results + 1e-4))
     return cost
 
 # Wsteczna propagacja przez warstwy
 def linear_backward(dZ, activation_history):
     A_prev, W, b = activation_history
     number_of_data = A_prev.shape[1]
-    dW = (1 / number_of_data) * np.dot(dZ, A_prev.T)
+    dW = (1 / number_of_data) * (dZ @ A_prev.T)
     db = (1 / number_of_data) * np.sum(dZ, axis=1, keepdims=True)
-    dA_prev = np.dot(W.T, dZ)
+    dA_prev = W.T @ dZ
     return dA_prev, dW, db
 
 def linear_activation_backward(dA, activations_history, activation):
@@ -152,7 +198,7 @@ def linear_activation_backward(dA, activations_history, activation):
 def backward_propagation(actual_layers, Y,  activations_history):
     gradient = {}
     L = len(activations_history)
-    dAL = - ((Y / actual_layers) - ((1 - Y) / (1 - actual_layers)))
+    dAL = - ((Y / (actual_layers + 1e-4)) - ((1 - Y) / (1 - actual_layers + 1e-4)))
     number_of_layers=len(layers_dims)
     current_cache =  activations_history[number_of_layers-2]
     gradient["dA"+str(number_of_layers-1)], gradient["dW"+str(number_of_layers-1)], gradient["db"+str(number_of_layers-1)] = linear_activation_backward(dAL, current_cache, activation = "softmax")
@@ -239,7 +285,7 @@ def forward_propagation(X, parameters):
         #print("A_prev shape="+str(np.shape(A_prev)))
         #print("b shape ="+str(np.shape(b)))
         A, activation_history = linear_activation_forward(A_prev, W, b, "relu")
-        #Z = np.dot(W, A_prev) + b
+        #Z = (W @ A_prev) + b
         #A = relu(Z)
         activations_history.append(activation_history)
 
@@ -327,7 +373,7 @@ def neural_network(X, Y, layers_dims, learning_rate, epoka):
         parameters = update_parameters(parameters, grads, learning_rate)
         
         # Print the cost every 100 training example
-        if i % 100 == 0:
+        if i % 10 == 0:
             print ("Cost after iteration %i: %f" %(i, cost))
             costs.append(cost)
             
@@ -351,7 +397,7 @@ all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
 # Dzielenie danych na zbiór uczący i testowy
 percent_of_test_data = 0.1
-list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,True)
+list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,TrainingSetSelection.RANDOM)
 train_data = np.transpose(list_of_datas[0])
 train_label = np.transpose(list_of_datas[1])
 test_data = np.transpose(list_of_datas[2])
@@ -359,10 +405,10 @@ test_label = np.transpose(list_of_datas[3])
 
 
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
+layers_dims = [784, 392, 196, 98, 49, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, epoka=22)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.002, epoka=250)
 predictions, _ = check_test(test_data, parameters)
 #print(predictions)
 print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
