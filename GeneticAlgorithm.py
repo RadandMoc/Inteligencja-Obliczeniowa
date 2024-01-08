@@ -191,10 +191,15 @@ def mutate(individual, mutation_rate):
 
 # Optimized Genetic Algorithm
 
-def genetic_algorithm(distances, population_size=100, generations=100, mutation_rate=0.01, number_of_crossover=900, elite_percent=0.1):
+def genetic_algorithm(distances, population_size=100, generations=100, mutation_rate=0.01, number_of_crossover=900, elite_percent=0.1, iteration_without_improvement=20):
     num_cities = distances.shape[0]
     population = initialize_population(population_size, num_cities)
     fitness_scores = calculate_fitness_vectorized(population, distances)
+
+    # Variables needed for stopping criterion
+    best_index_of_first_population = np.argmin(fitness_scores)
+    first_best_score = fitness_scores[best_index_of_first_population]
+    number_without_improvement = 0
 
     for generation in tqdm(range(generations)):
         # Tournament selection for parents
@@ -216,8 +221,29 @@ def genetic_algorithm(distances, population_size=100, generations=100, mutation_
         top_children_indices = np.argsort(children_fitness)[:population_size - len(elite_population)]
         population = np.vstack([elite_population, children[top_children_indices]])
 
-        # Update fitness scores
+        # Fitness scores for generation
         fitness_scores = calculate_fitness_vectorized(population, distances)
+        # Best index of generation
+        best_index_of_generation = np.argmin(fitness_scores)
+         
+        # Stopping criterion implementation - checking number of iteration without improvement
+        # If it's first generation
+        if(generation==0):
+            best_score_of_pregeneration = fitness_scores[best_index_of_generation]
+            if(fitness_scores[best_index_of_generation]<first_best_score): 
+                number_without_improvement = 0
+            else:
+                number_without_improvement += 1 
+        # In other options
+        else:
+            if(fitness_scores[best_index_of_generation]<best_score_of_pregeneration): 
+                number_without_improvement = 0
+            else:
+                number_without_improvement += 1 
+            if(number_without_improvement == iteration_without_improvement):
+                break
+        # Save best score of generation for the next checking 
+        best_score_of_pregeneration = fitness_scores[best_index_of_generation]
 
     # Find the best solution in the final population
     best_index = np.argmin(fitness_scores)
@@ -246,7 +272,7 @@ distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
 
 #print(crossover([[12, 18, 17, 14, 15, 26, 3, 6, 8, 28, 27, 23, 25, 7, 11, 22, 10, 24, 19, 4, 16, 9, 21, 2, 20, 5, 1, 13, 29],[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,21,23,24,25,26,27,28,29]]))
 # Run the genetic algorithm
-best_route, best_distance = genetic_algorithm(distance_matrix,50,generations=10000,mutation_rate=0.05, number_of_crossover = 250, elite_percent=0.1)
+best_route, best_distance = genetic_algorithm(distance_matrix,50,generations=10000,mutation_rate=0.05, number_of_crossover = 250, elite_percent=0.1, iteration_without_improvement=100)
 
 print("Best Route:", best_route)
 print("Best Distance:", best_distance)
