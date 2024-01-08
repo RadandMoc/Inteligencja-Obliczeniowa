@@ -154,21 +154,32 @@ def crossover1(parents):
                              [city for city in parents[0] if city not in parents[1][:crossover_point]]])
     return child1, child2
 
-def crossover2(parents): 
+def crossover2(parents):
     number_of_cities = len(parents[1])
     crossover_point_1 = round(number_of_cities/3)
     crossover_point_2 = round(number_of_cities*(2/3))
-    c1 = np.zeros(number_of_cities, dtype=int)
-    c2 = np.zeros(number_of_cities, dtype=int)
-    for i in range(number_of_cities):
-        if i >= crossover_point_1 and i <= crossover_point_2:
-            c1[i] = parents[1][i]
-            c2[i] = parents[0][i]
-        else:
-            c1[i] = parents[0][i]
-            c2[i] = parents[1][i]
-    child1 = c1.tolist()
-    child2 = c2.tolist()
+    child1 = []
+    child2 = []
+    
+    count = 0
+    for i in parents[0]:
+        if(count == crossover_point_1):
+            break
+        if(i not in parents[1][crossover_point_1:crossover_point_2]):
+            child1.append(i)
+            count = count+1       
+    child1.extend(parents[1][crossover_point_1:crossover_point_2])
+    child1.extend([city for city in parents[0] if city not in child1])
+
+    count = 0
+    for i in parents[1]:
+        if(count == crossover_point_1):
+            break
+        if(i not in parents[0][crossover_point_1:crossover_point_2]):
+            child2.append(i)
+            count = count+1      
+    child2.extend(parents[0][crossover_point_1:crossover_point_2])
+    child2.extend([city for city in parents[1] if city not in child2])
     return child1, child2
 
 def mutate(individual, mutation_rate):
