@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from enum import Enum
 import random
 import csv
+import copy
 
 class InitializationMethod(Enum):
     RANDOM = "random"
@@ -42,9 +43,9 @@ def add_random_data(how_much_data_add, index_of_col, data, labels, return_only_n
     wanted_labels = labels[indeksy]
     num_of_labels = np.shape(wanted_labels)[0]
     
-    new_data = data.copy()  # Tworzenie kopii danych
-    new_labels = labels.copy()  # Tworzenie kopii etykiet
     if return_only_new_data:
+        new_data = wanted_data.copy()  # Tworzenie kopii danych
+        new_labels = wanted_labels.copy()  # Tworzenie kopii etykiet
         indices_for_train =  random.sample(range(0, new_data.shape[0]), int(how_much_data_add))
         indices_for_test = [x for x in range(new_data.shape[0]) if x not in indices_for_train]
         new_test_data = new_data[indices_for_test,:]
@@ -53,11 +54,27 @@ def add_random_data(how_much_data_add, index_of_col, data, labels, return_only_n
         new_labels = new_labels[indices_for_train]
         return new_data, new_labels, new_test_data, new_test_labels
     else:
+        new_data = data.copy()  # Tworzenie kopii danych
+        new_labels = labels.copy()  # Tworzenie kopii etykiet
         for _ in range(how_much_data_add):
             index_of_adding_row = random.randint(0, (num_of_labels-1))
             new_data = np.vstack([new_data, wanted_data[index_of_adding_row]])
             new_labels = np.vstack([new_labels, wanted_labels[index_of_adding_row]])
             return new_data, new_labels
+
+# Dzielenie danych na zbior uczacy i walidacyjny
+def split_data_for_validation(data,labels,test_sample_percent):
+    numbers_of_datas = list(range(10))
+    for i in range(0,10):
+        numbers_of_datas[i] = np.count_nonzero(labels[:, i] == 1)
+    train_data, train_label, test_data, test_label = add_random_data((numbers_of_datas[0] * (1-test_sample_percent)), 0, data, labels, True)
+    for i in range(1,10):
+        train_data2, train_label2, test_data2, test_label2 = add_random_data((numbers_of_datas[i] * (1-test_sample_percent)), i, data, labels, True)
+        train_data = np.vstack([train_data,train_data2])
+        train_label = np.vstack([train_label,train_label2])
+        test_data = np.vstack([test_data, test_data2])
+        test_label = np.vstack([test_label, test_label2])
+    return train_data, train_label, test_data, test_label
 
 # Dzielenie danych na zbior uczacy i testowy
 def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
@@ -73,7 +90,7 @@ def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
         for i in range(0,10):
             numbers_of_datas[i] = np.count_nonzero(labels == i)
         train_data, train_label, test_data, test_label = add_random_data((numbers_of_datas[0] * (1-test_sample_percent)), 0, data, labels, True)
-        for i in range(1,9):
+        for i in range(1,10):
             train_data2, train_label2, test_data2, test_label2 = add_random_data((numbers_of_datas[i] * (1-test_sample_percent)), i, data, labels, True)
             train_data = np.vstack([train_data,train_data2])
             train_label = np.vstack([train_label,train_label2])
@@ -357,7 +374,7 @@ def matrix_comparison(arr1, arr2):
 
     return returner / rows if rows > 0 else 0
 
-def neural_network(X, Y, layers_dims, learning_rate, epoka):
+def neural_network(X, Y, layers_dims, learning_rate, epoka, percent_of_validation_data = 0, which_worse_prediction_stop_learning = 5):
     """
     Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SOFTMAX.
     
@@ -366,20 +383,32 @@ def neural_network(X, Y, layers_dims, learning_rate, epoka):
     Y -- true "label" vector (containing 0 if non-cat, 1 if cat), of shape (1, number of examples)
     layers_dims -- dimensions of the layers (n_x, n_h, n_y)
     learning_rate -- learning rate of the gradient descent update rule
-    epoka -- number of iterations of the optimization loop
+    epoka -- number of iterations of the optimization loop.
+    percent_of_validation_data -- how much data want for validation data
     
     Returns:
     parameters -- parameters learnt by the model. They can then be used to predict.
     """
-
+    
     np.random.seed(1)
     costs = []                         # keep track of cost
     
     # Parameters initialization
     parameters = initialize_parameters_deep(layers_dims)
+    old_parameters = initialize_parameters_deep(layers_dims)
 
+    if percent_of_validation_data > 0:
+        #Tutaj mają zostać stworzone dane walidacyjne na wprowadzonych podstawie danych. wystarczy zwykły podział danych na 2 części, z czego zbór walidacyjny posiada percent_of_validation_data wszystkich wprowadzonych danych.
+        X, Y, validation_data, validation_labels = split_data_for_validation(np.transpose(X),np.transpose(Y),percent_of_validation_data)
+        X = np.transpose(X)
+        Y = np.transpose(Y)
+        validation_data = np.transpose(validation_data)
+    i = 0
+    was_prediction_progres = True
+    how_many_worse_predictions = 0
     # Loop (gradient descent)
-    for i in range(0, epoka):
+    while (((i<epoka) and (percent_of_validation_data == 0)) or (((percent_of_validation_data > 0) and (i<epoka)) or ((percent_of_validation_data > 0) and was_prediction_progres))):
+    #for i in range(0, epoka):
 
         # Forward propagation
         actual_layers,  activations_history = forward_propagation(X, parameters)
@@ -391,6 +420,9 @@ def neural_network(X, Y, layers_dims, learning_rate, epoka):
         # Backward propagation
         grads = backward_propagation(actual_layers, Y,  activations_history)
 
+        if ((i>(epoka-1) and (how_many_worse_predictions == 0)) or ((epoka < 1) and (i > 0) and (how_many_worse_predictions == 0))):
+            old_parameters = copy.deepcopy(parameters)
+        
         # Update parameters
         parameters = update_parameters(parameters, grads, learning_rate)
         
@@ -398,8 +430,30 @@ def neural_network(X, Y, layers_dims, learning_rate, epoka):
         if i % 10 == 0:
             print ("Cost after iteration %i: %f" %(i, cost))
             costs.append(cost)
-            
-    return parameters
+        
+        if (i>epoka-1) and (percent_of_validation_data > 0):
+            #Tutaj powinien być kod, sprawdzający, czy nowy rezultat jest lepszy od starego. sprawdzone ma być na danych walidacyjnych.
+            #Jeżeli tak, to was_prediction_progres = True, w przeciwnym przypadku False i zwrócone mają być stare (poprzednie) parametry.
+            predictions_new, _ = check_test(validation_data, parameters)
+            predictions_old, _ = check_test(validation_data, old_parameters)
+            predictions_new = translate_matrix_of_probabilities_to_matrix_of_answers(np.transpose(predictions_new))
+            predictions_old = translate_matrix_of_probabilities_to_matrix_of_answers(np.transpose(predictions_old))
+            old_precision = matrix_comparison(predictions_old,validation_labels)
+            new_precision = matrix_comparison(predictions_new,validation_labels)
+            print("Starsza precyzja: " + str(old_precision) + " Nowsza precyzja: " + str(new_precision))
+            if old_precision <= new_precision:
+                how_many_worse_predictions = 0
+            else:
+                how_many_worse_predictions += 1
+                print("Predykcja jest gorsza po raz " + str(how_many_worse_predictions) + "/" + str(which_worse_prediction_stop_learning))
+                if how_many_worse_predictions >= which_worse_prediction_stop_learning:
+                    print("z tego powodu kończymy uczenie.")
+                    was_prediction_progres = False
+        i += 1
+    if percent_of_validation_data > 0:
+        return old_parameters
+    else:
+        return parameters
 
 
 
@@ -425,16 +479,18 @@ train_label = np.transpose(list_of_datas[1])
 test_data = np.transpose(list_of_datas[2])
 test_label = np.transpose(list_of_datas[3])
 
+#print(str(np.shape(train_data)))
+#print(str(np.shape(test_data)))
 
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 layers_dims = [784, 392, 196, 98, 49, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.002, epoka=290)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.002, epoka=29, percent_of_validation_data=0.2, which_worse_prediction_stop_learning = 6)
 predictions, _ = check_test(test_data, parameters)
 #print(predictions)
-print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
-print(str(np.max(predictions)))
+#print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
+#print(str(np.max(predictions)))
 predictions = translate_matrix_of_probabilities_to_matrix_of_answers(np.transpose(predictions))
 print(str(matrix_comparison(predictions,np.transpose(test_label))))
 save_array_as_csv(predictions,'Answers.csv')
