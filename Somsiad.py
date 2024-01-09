@@ -2,17 +2,6 @@ import numpy as np
 import pandas as pd
 
 
-
-def ChangeCommaToPoint(text):
-    df_skopiowany = text.copy()  # Tworzymy kopię dataframe, aby nie zmieniać oryginalnego obiektu
-    
-    # Iterujemy po każdej komórce DataFrame i zamieniamy przecinki na kropki
-    for kolumna in df_skopiowany.columns:
-        if df_skopiowany[kolumna].dtype == 'object':  # Sprawdzamy tylko kolumny zawierające tekst
-            df_skopiowany[kolumna] = df_skopiowany[kolumna].astype(str).str.replace(',', '.')
-    
-    return df_skopiowany
-
 def nearest_neighbor_tsp(distance_matrix, start_index):
     n = distance_matrix.shape[0]  # Liczba miast
     visited = [start_index]  # Lista odwiedzonych miast, zaczynamy od miasta startowego
@@ -57,11 +46,8 @@ def minValueInList(listOfResult):
 
 #distance_matrix = np.random.randint(1, 100, size=(100, 100))  # Losowe odległości między miastami
 #np.fill_diagonal(distance_matrix, 0)
-readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
-readData=pd.read_csv("Dane_TSP_48.csv",sep=";")
-
-readData = ChangeCommaToPoint(readData)
-
+#readData=pd.read_csv("Dane_TSP_127.csv",sep=";")
+readData=pd.read_csv("Dane_TSP_48.csv",sep=";", decimal=",")
 distance_matrix = readData.iloc[:,1:].astype(int).to_numpy()
 
 
