@@ -1,0 +1,98 @@
+Dane_TSP_48
+
+crossover1 -metoda krzyżowania
+tournament_selection - metoda doboru rodziców
+[population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=100]-parametry
+Wykonało 202/5000 iteracji z kryterium stopu
+Best Route: [43 17 27 19 37  6 30 28 36  7 18 44 31 38 46 33 20 47 13 21 32 24 45 35
+ 10 42 48  5 29 34 23 11 12 15 40 22 16 41  2  4 26 39 25 14  3  1  8  9]
+Best Distance: 13290.0
+
+crossover1 
+tournament_selection 
+population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=100
+Iteracje 151/5000 
+Best Route: [25 13 39 32 21 38 31 44 18  7 36 28 37 19 27 17 43  6 30 20 47 11 40  9
+  8  1 16 22  3 15 46 33 12 23 14 34 41  5 48 42 24 10 45 35  4 26  2 29]
+Best Distance: 12944.0
+
+crossover1 
+tournament_selection 
+population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=300
+Iteracje 371/5000 
+Best Route: [12 11 23 13 25 14 29  2 26  4 35 45 10 24 42 48  5 34 41 16 22  3 39 32
+ 21 47 20 43 17 27 30 28 18 46 33 15 40  9  1  8 38 31 44  7 37 19  6 36]
+Best Distance: 12635.0
+
+crossover2
+tournament_selection
+population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150
+Iteracje 290/5000
+Best Route: [26  4 35 45 24 48 20 30 43 17 27 19 37  6 28  7 18 36 33 12 11  3 34  5
+ 29  2 41 16  1  8 38 31 44 46 15 47 21 32 39 25 14 13 23 40  9 22 42 10]
+Best Distance: 14545.0
+
+crossover2
+tournament_selection
+population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150
+Iteracje 450/5000 
+Best Route: [11 23 13 14 25  5 48 39 32 24 45 35 10 34  3 40  9  1  8 38  7 28  6 37
+ 19 27 17 43 30 36 18 33 12 20 47 21 42 26  4  2 29 41 16 22 31 44 46 15]
+Best Distance: 13918.0
+
+crossover2
+tournament_selection
+population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150
+Iteracje 337/5000 
+Best Route: [37 19  6 15 40 16 41 29  2  4 26 24 32 21 47 33 46 31 38  9 34 42 10 35
+ 45 23 11 12 36 28 27 17 43 30 20 13 39 48  5 25 14  3 22  1  8 44 18  7]
+Best Distance: 16626.0
+
+crossover1
+roulette_wheel_selection
+population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150
+258/5000 
+Best Route: [11 12 33 20 47 13 25 14 23  3 22 16  1  8  9 38 31 44 18  7 28 30 43 17
+ 27 19 37  6 36 46 15 40 41 34  5 48 42 29  2 26  4 35 45 10 24 32 39 21]
+Best Distance: 11621.0
+
+crossover1
+roulette_wheel_selection
+population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150
+242/5000 
+Best Route: [32 39 48  5 42 24 10 45 35  4 26  2 29 25 13 14 34 41 16 22 40  9 38 46
+ 15 12 11 23  3  1  8 31 44 18  7 28  6 37 19 27 17 43 30 36 33 20 47 21]
+Best Distance: 11580.0
+
+crossover1
+roulette_wheel_selection
+population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150
+253/5000 
+Best Route: [39 48  5 42 26  4 35 45 10 24 32 21 47 13 14 34 29  2 41 16 22  3 23 40
+ 15 33 46  9  1  8 38 31 44 18  7 37 19 27 17 43 30  6 28 36 20 12 11 25]
+Best Distance: 12125.0
+
+crossover2
+roulette_wheel_selection
+population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150
+697/5000 
+Best Route: [47 43 17 27 19 37  7 18 44 46 15 12 20 33 36 28  6 30 21 32 39 48  5 25
+ 13 11 23  3 22 16  1  9 40 31 38  8 41 42 24 10 45 35  4 26  2 29 34 14]
+Best Distance: 14302.0
+
+crossover2
+roulette_wheel_selection
+population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150
+678/5000
+Best Route: [29  5 42  2 26  4 35 45 10 24 48 12 33 46 44 18  7 36 15 40  3 41 16 22
+  1  8  9 38 31 28  6 37 19 27 17 43 30 20 47 21 32 39 25 14 13 11 23 34]
+Best Distance: 12926.0
+
+crossover2
+roulette_wheel_selection
+population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150
+783/5000 
+Best Route: [36 30 43 20 39 32 24 10 45 35  4 26 42 48 12 33 15  3 22 16  8 27 17 19
+ 37  6 28  7 18 46 23  5 29  2 41 34 14 25 13 21 47 11 40  1  9 38 31 44]
+Best Distance: 15093.0
+
