@@ -98,10 +98,7 @@ def add_random_data(how_much_data_add, index_of_col, data, labels):
 # Funkcja przekształca array tworząc macierz odpowiedzi
 def extend_array(array):
     # Sprawdzenie czy w kolumnie znajdują się wartości od 0 do 9
-    unikalne_wartosci = np.unique(array)
-    if not np.array_equal(unikalne_wartosci, np.arange(10)):
-        raise ValueError("Kolumna powinna zawierać wartości od 0 do 9")
-
+    
     # Tworzenie nowego arraya z zerami o wymiarach: liczba wierszy x 10 kolumn
     result = np.zeros((array.shape[0], 10), dtype=int)
 
@@ -149,7 +146,10 @@ def relu_backward(dA, Z):
 
 def softmax_backward(dA, Z):
     s = softmax(Z)
-    dZ = s - dA  # Prosta różnica pomiędzy aktywacją softmax a prawdziwymi etykietami
+    dZ = np.zeros_like(s)
+    
+    for i in range(dA.shape[1]):
+        dZ[:, i] = (np.diag(s[:, i]) @ dA[:, i]) - np.outer(s[:, i], s[:, i]) @ dA[:, i]
     return dZ
 
 
@@ -173,6 +173,7 @@ def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
         weight = 0
         if method == InitializationMethod.HE:
             weight = np.random.randn(layers_dims[l], layers_dims[l - 1]) * np.sqrt(2 / layers_dims[l - 1])
+            #save_array_as_csv(weight,"wagi_grubasa.csv")
         elif method == InitializationMethod.XAVIER_GLOROT:
             limit = np.sqrt(6 / (layers_dims[l - 1] + layers_dims[l]))
             weight = np.random.uniform(-limit, limit, (layers_dims[l], layers_dims[l - 1]))
@@ -221,10 +222,12 @@ def activation_function_forward(A_prev, weights, bias, activation):
 def forward_propagation(X, parameters, function_activation_order):
     activations_history = []
     A = X
-
+    #save_array_as_csv(X,"tweeter_Tomka.csv")
     # Iteracja przez warstwy sieci
     for layer in range(len(parameters[0])):
+        #print(str(layer) + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         A_prev = A 
+        #save_array_as_csv(A_prev,"ArrajTomka.csv")
         weights = parameters[0][layer]
         bias = parameters[1][layer]
         activation = function_activation_order[layer]
@@ -238,6 +241,9 @@ def linear_backward(dZ, A_prev, weights):
     dW = (1 / m) * (dZ @ A_prev.T)
     db = (1 / m) * np.sum(dZ, axis=1, keepdims=True)
     dA_prev = weights.T @ dZ
+    #save_array_as_csv(dA_prev,"AAAAAAAAAAAAA.csv")
+    #save_array_as_csv(dW,"WWWWWWWWWWWWWWWWWWWWWW.csv")
+    #save_array_as_csv(db,"BBBBBBBBBBBBBBBBBBBBBBBB.csv")
     return dA_prev, dW, db
 
 
@@ -262,7 +268,7 @@ def backward_propagation(Y, actual_layers, activations_history, parameters, func
     gradients = {}
     L = len(activations_history)  # Liczba warstw
     dA = - ((Y / (actual_layers + 1e-4)) - ((1 - Y) / (1 - actual_layers + 1e-4)))
-
+    zmienna = True
     for l in reversed(range(L)):
         weights = parameters[0][l]
         current_Z = activations_history[l]
@@ -275,6 +281,9 @@ def backward_propagation(Y, actual_layers, activations_history, parameters, func
         gradients[f"dA{l}"] = dA_prev
         gradients[f"dW{l}"] = dW
         gradients[f"db{l}"] = db
+        if zmienna:
+            #save_array_as_csv(dA_prev,"czySoftmaxDzialaTTTTTTT.csv")
+            zmienna = False
         dA = dA_prev  # Aktualizacja dA dla poprzedniej warstwy
 
     return gradients
@@ -284,8 +293,7 @@ def backward_propagation(Y, actual_layers, activations_history, parameters, func
 
 
 def compute_cost(model_results, Y):
-    number_of_data = Y.shape[1]
-    cost = (-1 / number_of_data) * np.sum(Y * np.log(model_results + 1e-4))
+    cost = -np.sum(Y * np.log(model_results + 1e-4))/Y.shape[1]
     return cost
 
 
@@ -344,37 +352,40 @@ def neural_network(X, Y, layers_dims, function_activation_order , learning_rate,
     costs = []                         # keep track of cost
     
     # Parameters initialization
-    parameters = initialize_parameters(layers_dims,InitializationMethod.RANDOM)
-    print(str(type(parameters)))
-    print(parameters[0][0].shape)
-    print(parameters[1][0].shape)
+    parameters = initialize_parameters(layers_dims,InitializationMethod.HE)
+    #print(str(type(parameters)))
+    #print(parameters[0][0].shape)
+    #print(parameters[1][0].shape)
     # Loop (gradient descent)
     for i in range(0, epoka):
 
         # Forward propagation
         actual_layers,  activations_history = forward_propagation(X, parameters, function_activation_order )
-
-    
+        #print(type(actual_layers))
+        #print(type(activations_history))
+        #name = "aktual_lajer" + str(i)
+        #save_array_as_csv(actual_layers, name)
         #print(np.shape(Y))
 
 
         #print(actual_layers)
         # Compute cost
         cost = compute_cost(actual_layers, Y)
-        
+        #print(type(cost))
 
 
         # Backward propagation
 
 
         grads = backward_propagation(Y,actual_layers,  activations_history, parameters, function_activation_order)
-        
+        #print(type(grads))
+        #print(grads)
        
         
 
         # Update parameters
         parameters = update_parameters(parameters, grads, learning_rate)
-        
+        #print(type(parameters))
         # Print the cost every 100 training example
         if i % 10 == 0:
             print ("Cost after iteration %i: %f" %(i, cost))
@@ -442,7 +453,7 @@ def matrix_comparison(arr1, arr2):
 
 np.set_printoptions(threshold=sys.maxsize)
 
-layers_dims = [784, 392, 196, 98, 49, 10] 
+layers_dims = [784, 100, 50, 10] 
 
 #print(translate_function_order(layers_dims, [(ActivationFunction.Relu,2),(ActivationFunction.Tanh,2)]))
 order = get_function_activation_order(layers_dims)
@@ -467,23 +478,23 @@ all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
 
 # Dzielenie danych na zbiór uczący i testowy
-percent_of_test_data = 0.1
-list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,TrainingSetSelection.RANDOM)
+percent_of_test_data = 69990/70000 #69990/70000
+list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,"xd")
 train_data = np.transpose(list_of_datas[0])
 train_label = np.transpose(list_of_datas[1])
 test_label = list_of_datas[3]
-save_array_as_csv(test_label, "Test.csv")
+#save_array_as_csv(test_label, "Test.csv")
 test_data = np.transpose(list_of_datas[2])
 test_label = np.transpose(list_of_datas[3])
 
-parameters = neural_network(train_data, train_label, layers_dims,order, learning_rate=0.0002, epoka=10)
+parameters = neural_network(train_data, train_label, layers_dims,order, learning_rate=0.0002, epoka=50)
 
 
 
 predictions, _ = check_test(test_data, parameters,order)
 
-print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
-print(str(np.max(predictions)))
+#print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
+#print(str(np.max(predictions)))
 predictions = translate_matrix_of_probabilities_to_matrix_of_answers(np.transpose(predictions))
 print(str(matrix_comparison(predictions,np.transpose(test_label))))
 
