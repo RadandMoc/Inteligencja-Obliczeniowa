@@ -1,0 +1,48 @@
+Dane_TSP_127
+
+crossover2 -metoda krzyżowania
+roulette_wheel_selection - metoda doboru rodziców
+population_size=50,generations=10000,mutation_rate=0.05, number_of_crossover = 250, elite_percent=0.1, iteration_without_improvement=100)
+Wykonało 1999/10000 iteracji z kryterium stopu
+Best Route: [122  25  33  20 108  24  60  62  69  63 102 101  83  12  16  51  56 124
+  55  66  52  36  79  76  75  68  73  19  23  13 115 100  58  91  61 116
+   8   9   3  90  59 110  85  86  87  88  96  11 120   1  37   2 113  89
+  92  99 112 107 127  93  10 104 119 126  82  84  77  41 103 118  54  35
+  21  18  72  74  67  71 109  70  80  26  43 121   5  50   7 105 114 106
+  15  31  27  34  30  14  57  47  49  53  42  39  38  29  32  40  44  45
+  48  46 111  94  78  81 117  17  22   4   6  64 125  65  95 123  98  97
+  28]
+Best Distance: 243926.6059683
+
+crossover2
+roulette_wheel_selection
+population_size=50,generations=10000,mutation_rate=0.05, number_of_crossover = 250, elite_percent=0.1, iteration_without_improvement=100)
+1543/10000 
+Best Route: [120  10 100  64  58  91  62  90  70 109 110  88 119  63  84  26  39 123
+  95  46 118  37  72  74  76 117  78  77  18  21  22  23   4 108  20  24
+   3   9  11 115   5  52  48  94 111  98  97  30  12  19  17  13  16  35
+  36  41  43  54  47  53  49  57  27  31  79  75 104  99  89 125 113  59
+  60  45 103  44  56 116  61  71  85  86  87  96  82 102 101  83 126  81
+  32  29  25  33  38  65  92  67   8  15   1   7   2  40  42  28 122  80
+  69  68  73   6 105 114 106  14  34  93 127 107 112  51 121  55  66 124
+  50]
+Best Distance: 234586.99329520002
+
+crossover2
+roulette_wheel_selection
+population_size=150,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150)
+3730/5000 
+Best Route: [ 51   2  50  13   8  73  74  21  17  20  12  14  30  41  36  40  38  25
+  33 122  28  29  32  85  86  87  88 109  71  77  31  27  26 117  84  78
+  80  79  18  72   9  11   3  90 116  60  62  61  91 100  10   7   1  16
+  37  35  57 121  56   5  70  69  63 119  96 110 104  99  92  89 125  59
+  67  68  76  75  81 126  82  83 102 101  98  97 127 107  93  45  54  44
+ 103  95 123  42  39  34  43 105 114   6 106  15 108  24  23  19  22   4
+ 120 115 124  47  53  48  94 111 112  46 118  49  55  58  64 113  65  66
+  52]
+Best Distance: 168811.4658866
+
+
+
+
+

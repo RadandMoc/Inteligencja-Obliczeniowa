@@ -1,7 +1,7 @@
 Dane_TSP_76
 
 crossover1 -metoda krzyżowania
-tournament_selection - metoda doboru rodziców
+tournament_selection -metoda doboru rodziców
 [population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]-parametry
 Wykonało 391/5000 iteracji z kryterium stopu
 Best Route: [58 62 61 59 60 41 40 39 38 16 15 14 13 11 17 18 37 36 35 34 32 33 28 43
@@ -90,10 +90,45 @@ Best Route: [27 26 30 31 11 13 14 74  8  7  6  5 29 28 43 52 55 58 57 51 50 49 4
  20 19 21 25]
 Best Distance: 149138.44453500002
 
+crossover1
+roulette_wheel_selection
+[population_size=300,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+365/5000 
+Best Route: [43 28 33 32 19 20  5  4  3  7  8 74 14 13 15 16 37 18 17 11 12  9  6  2
+ 75 76  1 23 22 21 25 24 26 29 35 38 39 34 42 54 53 49 50 51 66 65 47 48
+ 27 30 31 10 36 40 41 60 59 58 52 44 45 46 55 57 63 64 71 72 73 62 61 56
+ 67 70 68 69]
+Best Distance: 154915.85375429998
 
+crossover2
+roulette_wheel_selection
+[population_size=120,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+661/5000 
+Best Route: [15 13 12 11 31 30 29 26 44 48 47 49 71 72 73 64 63 57 58 34 10  9  2  1
+ 23 76 75 74 14 17 37 36 35 28 43 27 46 45 42 54 53 52 40 38 39 41 60 61
+ 62 59 33 32 19 20  5  4 25 21 22  3  7  8  6 24 69 68 70 67 50 66 65 51
+ 56 55 18 16]
+Best Distance: 175946.29295650002
 
+crossover2
+roulette_wheel_selection
+[population_size=400,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+922/5000 
+Best Route: [15 11  9 10  5 20 42 54 55 58 59 60 61 62 73 72 71 64 63 57 33 19 31 30
+ 29 28 43 49 50 48 47 69 68 70 67 65 66 51 26 25 21 22 23  4  3  2  1 76
+ 75 74 14 13 12  8  7  6 24 46 45 44 27 32 35 36 38 39 40 41 56 52 53 34
+ 37 18 17 16]
+Best Distance: 156000.6827711
 
-
+crossover2
+roulette_wheel_selection
+[population_size=300,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+615/5000 
+Best Route: [62 61 41 40 12 13 14 74 15 16 18 37 36 38 39 34 33 29 30  5  8  7  3  4
+  6  9 10 28 42 43 26 25 21 22 23 24 27 54 53 48 47 45 44 52 55 57 63 64
+ 73 72 71 65 50 49 67 70 68 69 46  1 76 75  2 51 66 56 58 35 17 11 20 19
+ 31 32 60 59]
+Best Distance: 170636.21839350002
 
 
 
