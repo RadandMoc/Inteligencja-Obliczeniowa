@@ -210,8 +210,7 @@ def linear_activation_forward(A_prev, W, b, activation):
 
 # Obliczanie entropii krzyżowej
 def compute_cost(model_results, Y):
-    number_of_data = Y.shape[1]
-    cost = (-1 / number_of_data) * np.sum(Y * np.log(model_results + 1e-4) + (1 - Y) * np.log(1 - model_results + 1e-4))
+    cost = -np.sum(Y * np.log(model_results + 1e-4))/Y.shape[1]
     return cost
 
 # Wsteczna propagacja przez warstwy
@@ -486,7 +485,7 @@ test_label = np.transpose(list_of_datas[3])
 layers_dims = [784, 392, 196, 98, 49, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.002, epoka=29, percent_of_validation_data=0.2, which_worse_prediction_stop_learning = 6)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.002, epoka=150, percent_of_validation_data=0, which_worse_prediction_stop_learning = 6)
 predictions, _ = check_test(test_data, parameters)
 #print(predictions)
 #print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
