@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import random
 from tqdm import tqdm
-
+import datetime
 
 #Zwykly
 """
@@ -115,6 +115,21 @@ def genetic_algorithm(distances, population_size=100, generations=100, mutation_
 
 
 
+def saveData(best_route, distance, population_size, generation_size ,number_of_crossover, mutation, iteration_without_improvement,filename = "genetic_algorithm_results.txt" ):
+        with open(filename, 'a') as resultFile:
+            resultFile.write("\n" + "=" * 25 + "\n")
+            for element in best_route:
+                resultFile.write(str(element+1) + ' ')
+            resultFile.write("\n" + "Najlepsza odleglosc: " + str(distance))
+            resultFile.write("\n" + "Generacji " + str(generation_size))
+            resultFile.write("\n + Rozmiar populacji" + str(population_size))
+            resultFile.write("\n + mutacja" + str(mutation))
+            resultFile.write("\n" + "Liczba iteracji bez poprawy " + str(iteration_without_improvement))
+            resultFile.write("\n" + "Liczba Krzyżówek: " + str(number_of_crossover))
+            resultFile.write("\n" + "Populacja Początkowa: " + str(population_size))
+
+
+
 
 
 
@@ -154,36 +169,88 @@ def crossover1(parents):
                              [city for city in parents[0] if city not in parents[1][:crossover_point]]])
     return child1, child2
 
-def crossover2(parents): 
+def crossover2(parents):
     number_of_cities = len(parents[1])
     crossover_point_1 = round(number_of_cities/3)
     crossover_point_2 = round(number_of_cities*(2/3))
-    c1 = np.zeros(number_of_cities, dtype=int)
-    c2 = np.zeros(number_of_cities, dtype=int)
-    for i in range(number_of_cities):
-        if i >= crossover_point_1 and i <= crossover_point_2:
-            c1[i] = parents[1][i]
-            c2[i] = parents[0][i]
-        else:
-            c1[i] = parents[0][i]
-            c2[i] = parents[1][i]
-    child1 = c1.tolist()
-    child2 = c2.tolist()
+    child1 = []
+    child2 = []
+    
+    count = 0
+    for i in parents[0]:
+        if(count == crossover_point_1):
+            break
+        if(i not in parents[1][crossover_point_1:crossover_point_2]):
+            child1.append(i)
+            count = count+1       
+    child1.extend(parents[1][crossover_point_1:crossover_point_2])
+    child1.extend([city for city in parents[0] if city not in child1])
+
+    count = 0
+    for i in parents[1]:
+        if(count == crossover_point_1):
+            break
+        if(i not in parents[0][crossover_point_1:crossover_point_2]):
+            child2.append(i)
+            count = count+1      
+    child2.extend(parents[0][crossover_point_1:crossover_point_2])
+    child2.extend([city for city in parents[1] if city not in child2])
     return child1, child2
 
 def mutate(individual, mutation_rate):
-    # No change needed here, the function is efficient
     if random.random() < mutation_rate:
         idx1, idx2 = np.random.choice(len(individual), 2, replace=False)
-        individual[idx1], individual[idx2] = individual[idx2], individual[idx1]
+        #individual[idx1], individual[idx2] = individual[idx2], individual[idx1]
+    
+        if idx1 > idx2:
+            idx1, idx2 = idx2 , idx1
+        individual = reverse_subarray(individual,idx1,idx2)
+        
     return individual
+
+
+def reverse_subarray(arr, i, j):
+    reverseArray = arr.copy()
+    reverseArray[i:j + 1] = reverseArray[i:j + 1][::-1]
+    return reverseArray
+
+
+def save_the_best_individual(individual, total_route_length, generation ,filename):
+    with open(filename, 'a') as file:
+        for element in individual:
+            file.write(str(element+1) + ' ')
+        file.write(f"\n Całkowita Długość trasy dla najlepszego osobnika generacji {generation} to {total_route_length}\n")
+        
+        
+
 
 # Optimized Genetic Algorithm
 
-def genetic_algorithm(distances, population_size=100, generations=100, mutation_rate=0.01, number_of_crossover=900, elite_percent=0.1):
+def genetic_algorithm(distances, population_size=100, generations=500, mutation_rate=0.01, number_of_crossover=900, elite_percent=0.1, iteration_without_improvement=200, history_of_best_results_for_generation = False):
     num_cities = distances.shape[0]
     population = initialize_population(population_size, num_cities)
     fitness_scores = calculate_fitness_vectorized(population, distances)
+
+    # Variables needed for stopping criterion
+    best_index_of_first_population = np.argmin(fitness_scores)
+    first_best_score = fitness_scores[best_index_of_first_population]
+    number_without_improvement = 0
+
+    current_time = datetime.datetime.now()
+
+        # Formatowanie daty i czasu jako łańcucha znaków (np. '2024-01-10_15-30-45')
+    formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+
+    # Nazwa pliku z datą i czasem
+    file_name = f"plik_{formatted_time}_for_{num_cities}.txt"
+
+    formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+    if history_of_best_results_for_generation == True:
+        with open(file_name, 'a') as file:
+            file.write("Historia najlepszych osobników dla podanych parametrów: \n")
+            file.write(f"population_size = {population_size}, liczba generacji = {generations}, mutacja = {mutation_rate}, liczba krzyżówek = {number_of_crossover}, elite_percent={elite_percent}, iteracje bez poprawy = {iteration_without_improvement}  \n")
+
+
 
     for generation in tqdm(range(generations)):
         # Tournament selection for parents
@@ -205,11 +272,37 @@ def genetic_algorithm(distances, population_size=100, generations=100, mutation_
         top_children_indices = np.argsort(children_fitness)[:population_size - len(elite_population)]
         population = np.vstack([elite_population, children[top_children_indices]])
 
-        # Update fitness scores
+        # Fitness scores for generation
         fitness_scores = calculate_fitness_vectorized(population, distances)
+        # Best index of generation
+        best_index_of_generation = np.argmin(fitness_scores)
+         
+        # Stopping criterion implementation - checking number of iteration without improvement
+        # If it's first generation
+        if(generation==0):
+            best_score_of_pregeneration = fitness_scores[best_index_of_generation]
+            if(fitness_scores[best_index_of_generation]<first_best_score): 
+                number_without_improvement = 0
+            else:
+                number_without_improvement += 1 
+        # In other options
+        else:
+            if(fitness_scores[best_index_of_generation]<best_score_of_pregeneration): 
+                number_without_improvement = 0
+            else:
+                number_without_improvement += 1 
+            if(number_without_improvement == iteration_without_improvement):
+                break
+        # Save best score of generation for the next checking 
+        best_score_of_pregeneration = fitness_scores[best_index_of_generation]
+        if history_of_best_results_for_generation == True and number_without_improvement == 0:
+            save_the_best_individual(population[best_index_of_generation], best_score_of_pregeneration, generation ,file_name )
+
 
     # Find the best solution in the final population
+
     best_index = np.argmin(fitness_scores)
+    saveData(population[best_index],fitness_scores[best_index],population_size,generations,number_of_crossover,mutation_rate,iteration_without_improvement)
     return population[best_index], fitness_scores[best_index]
 
 
@@ -235,7 +328,7 @@ distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
 
 #print(crossover([[12, 18, 17, 14, 15, 26, 3, 6, 8, 28, 27, 23, 25, 7, 11, 22, 10, 24, 19, 4, 16, 9, 21, 2, 20, 5, 1, 13, 29],[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,21,23,24,25,26,27,28,29]]))
 # Run the genetic algorithm
-best_route, best_distance = genetic_algorithm(distance_matrix,50,generations=10000,mutation_rate=0.05, number_of_crossover = 250, elite_percent=0.1)
+best_route, best_distance = genetic_algorithm(distance_matrix,50,generations=100,mutation_rate=0.1, number_of_crossover = 250, elite_percent=0.1, iteration_without_improvement=40, history_of_best_results_for_generation=True)
 
 print("Best Route:", best_route)
 print("Best Distance:", best_distance)

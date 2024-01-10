@@ -1,0 +1,280 @@
+
+=========================
+32 20 34 35 44 27 5 4 21 30 54 56 58 59 62 13 16 14 15 75 77 76 8 9 10 6 7 22 23 26 53 57 72 65 64 66 69 68 67 60 74 73 63 61 42 41 39 37 40 29 55 52 51 50 45 28 43 31 11 3 2 24 33 36 19 38 18 17 12 46 48 70 71 49 47 25 
+Najlepsza odleglosc: 224185.94105830003
+Generacji 10000
+ + Rozmiar populacji200
+ + mutacja0.01
+Liczba iteracji bez poprawy 100
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 200
+=========================
+40 35 41 66 67 52 53 28 27 5 4 8 9 7 10 6 3 2 24 23 22 26 19 38 37 36 34 55 54 51 68 69 71 72 65 57 56 43 44 49 45 46 47 11 13 16 17 18 33 30 31 21 20 32 29 58 64 73 74 63 62 59 60 61 42 50 70 48 25 77 76 75 15 14 12 39 
+Najlepsza odleglosc: 183740.23758729998
+Generacji 10000
+ + Rozmiar populacji200
+ + mutacja0.1
+Liczba iteracji bez poprawy 100
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 200
+=========================
+19 38 37 31 22 26 25 27 28 33 34 35 40 39 12 13 14 15 75 10 11 32 30 29 44 54 50 53 55 43 23 24 2 77 76 3 4 5 6 21 36 41 42 61 60 62 63 64 65 74 73 72 58 57 56 20 7 9 8 47 49 69 68 71 70 48 46 45 51 52 67 66 59 18 16 17 
+Najlepsza odleglosc: 165841.0317563
+Generacji 10000
+ + Rozmiar populacji200
+ + mutacja0.05
+Liczba iteracji bez poprawy 100
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 200
+=========================
+76 77 2 24 23 25 50 52 65 74 73 72 71 68 69 70 51 67 66 59 60 61 42 41 35 56 57 53 54 55 43 44 45 49 48 46 47 31 32 20 6 21 27 28 29 30 33 34 36 39 37 38 19 18 12 10 9 8 4 22 26 5 7 11 13 17 16 75 15 14 40 62 63 64 58 3 
+Najlepsza odleglosc: 162120.83927800006
+Generacji 10000
+ + Rozmiar populacji200
+ + mutacja0.2
+Liczba iteracji bez poprawy 100
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 200
+=========================
+46 47 55 54 53 56 59 60 61 42 41 35 33 34 44 29 30 21 6 11 13 10 7 3 76 77 2 25 26 22 20 32 31 27 28 43 50 51 52 67 66 57 58 63 64 65 68 69 70 71 72 73 74 62 37 38 17 16 14 15 75 9 8 4 24 23 5 12 18 19 39 40 36 45 49 48 
+Najlepsza odleglosc: 160821.92600399998
+Generacji 10000
+ + Rozmiar populacji200
+ + mutacja0.1
+Liczba iteracji bez poprawy 1000
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 200
+=========================
+42 41 40 39 37 38 19 18 17 16 75 15 14 13 12 36 33 30 31 22 26 25 27 28 70 69 71 68 51 54 55 43 44 29 34 35 61 64 65 74 73 72 58 59 60 62 63 57 56 32 20 21 6 11 10 7 4 5 45 46 47 23 24 3 8 9 76 77 2 53 52 50 49 48 67 66 
+Najlepsza odleglosc: 165270.6285805
+Generacji 10000
+ + Rozmiar populacji200
+ + mutacja0.1
+Liczba iteracji bez poprawy 1000
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 200
+=========================
+49 48 70 69 51 50 28 31 14 15 75 9 8 7 6 11 10 13 12 36 59 64 65 58 43 44 29 30 32 20 21 5 3 4 19 38 39 40 60 62 63 66 67 52 53 46 47 25 26 22 23 24 77 76 2 27 55 54 56 57 68 71 72 73 74 34 33 35 61 42 41 37 18 17 16 45 
+Najlepsza odleglosc: 182271.30502490004
+Generacji 10000
+ + Rozmiar populacji200
+ + mutacja0.05
+Liczba iteracji bez poprawy 1000
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 200
+=========================
+66 64 65 74 73 72 71 69 70 48 68 51 50 54 44 43 55 53 52 57 56 58 59 11 10 9 76 77 3 4 5 20 32 36 37 38 19 18 17 13 12 21 25 47 46 28 29 34 41 35 33 6 7 8 2 24 23 22 26 30 42 61 60 63 62 40 39 16 75 15 14 31 27 45 49 67 
+Najlepsza odleglosc: 173051.8061595
+Generacji 10000
+ + Rozmiar populacji200
+ + mutacja0.01
+Liczba iteracji bez poprawy 1000
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 200
+=========================
+49 48 70 69 68 71 72 66 67 52 57 56 53 51 50 45 46 47 28 27 20 21 6 5 24 23 25 26 22 4 7 8 9 10 11 36 35 64 74 73 65 58 59 41 39 40 42 61 60 62 63 54 55 43 44 29 30 31 32 33 37 38 19 17 16 14 15 75 76 77 2 3 13 12 18 34 
+Najlepsza odleglosc: 156611.8304133
+Generacji 8000
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40000
+Liczba Krzy¿ówek: 1000
+Populacja Pocz¹tkowa: 50
+=========================
+45 42 61 60 63 62 40 39 37 38 19 18 17 16 14 15 75 9 8 7 6 20 32 33 36 35 41 59 56 57 52 67 74 73 72 66 71 69 68 51 54 55 30 31 5 4 3 76 77 2 24 23 22 26 25 27 28 46 47 21 11 10 13 12 34 29 44 43 58 64 65 53 50 70 48 49 
+Najlepsza odleglosc: 155512.3219848
+Generacji 8000
+ + Rozmiar populacji200
+ + mutacja0.1
+Liczba iteracji bez poprawy 40000
+Liczba Krzy¿ówek: 1000
+Populacja Pocz¹tkowa: 200
+=========================
+35 40 39 37 38 19 17 16 75 15 14 13 10 9 8 7 21 20 29 44 43 55 54 53 52 57 58 64 65 74 73 72 71 69 70 48 49 50 56 59 63 62 60 61 33 32 31 30 34 42 41 36 18 12 11 6 23 24 2 77 76 3 4 5 27 28 45 68 66 67 51 26 22 25 47 46 
+Najlepsza odleglosc: 153933.98438620003
+Generacji 8000
+ + Rozmiar populacji200
+ + mutacja0.1
+Liczba iteracji bez poprawy 40000
+Liczba Krzy¿ówek: 1000
+Populacja Pocz¹tkowa: 200
+=========================
+73 74 63 62 42 40 39 19 18 12 13 14 15 75 76 77 3 4 5 6 21 20 32 11 10 7 8 9 2 24 23 22 26 27 30 33 36 35 41 61 60 59 56 57 52 51 50 54 44 43 55 53 67 66 68 71 69 70 48 49 45 28 31 37 38 17 16 25 47 46 29 34 58 64 65 72 
+Najlepsza odleglosc: 148783.2897552
+Generacji 8000
+ + Rozmiar populacji350
+ + mutacja0.1
+Liczba iteracji bez poprawy 40000
+Liczba Krzy¿ówek: 1000
+Populacja Pocz¹tkowa: 350
+=========================
+6 12 11 7 8 20 32 30 31 34 28 27 5 21 4 3 77 76 2 24 23 26 22 25 47 49 70 69 51 57 67 74 72 73 64 65 56 53 54 50 52 66 68 71 48 46 45 55 43 44 29 33 40 39 42 61 59 58 63 62 60 41 35 36 37 38 18 75 14 13 10 19 17 16 15 9 
+Najlepsza odleglosc: 161982.0737053
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+59 58 60 41 61 35 34 30 29 28 54 43 44 27 32 31 33 36 10 7 4 77 76 3 2 24 22 23 5 21 20 8 9 11 14 15 75 13 12 17 16 18 38 39 40 37 19 6 26 47 25 46 48 49 45 50 51 70 69 71 68 66 65 73 72 74 64 57 56 53 52 67 55 62 63 42 
+Najlepsza odleglosc: 166462.30655079999
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+64 72 58 65 74 73 63 53 51 50 43 34 60 42 41 35 33 27 31 21 9 8 4 5 7 10 11 6 76 77 3 2 24 23 47 46 25 26 22 32 20 12 19 17 15 14 16 75 38 36 37 18 13 39 40 61 62 59 29 28 30 44 55 54 56 57 52 67 66 68 48 45 49 69 70 71 
+Najlepsza odleglosc: 178056.53007480002
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+59 62 61 42 41 35 34 44 54 52 51 49 45 48 71 69 68 70 46 47 22 27 30 33 39 38 15 75 11 12 19 17 13 14 16 37 18 40 60 36 31 6 32 20 21 5 10 8 7 4 9 2 77 76 3 24 23 25 26 28 29 43 55 53 50 67 66 57 56 65 72 73 74 63 64 58 
+Najlepsza odleglosc: 167566.99871310004
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+35 59 64 72 57 52 53 50 70 71 68 49 45 28 29 19 38 37 36 34 33 21 5 4 6 13 14 15 75 11 12 16 17 18 20 32 30 27 26 25 23 31 22 24 2 3 10 9 7 8 76 77 47 46 48 54 55 56 51 69 67 66 60 62 74 73 65 58 63 61 42 41 40 39 43 44 
+Najlepsza odleglosc: 187946.56335739998
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+42 35 39 40 38 37 36 33 34 43 28 21 11 8 3 77 76 2 20 32 27 26 47 70 69 68 71 66 67 72 73 63 59 56 29 44 31 10 6 7 4 5 9 15 14 75 13 18 19 16 17 12 30 23 22 24 25 46 48 49 45 55 53 50 51 52 54 57 58 65 74 64 62 61 60 41 
+Najlepsza odleglosc: 178065.99328979995
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+60 42 59 61 63 65 64 57 66 72 58 73 74 62 35 41 39 40 36 33 29 54 53 52 50 51 67 56 30 32 21 31 20 4 9 3 8 7 75 15 14 16 17 12 18 38 37 19 13 11 10 6 5 2 76 77 24 26 23 25 47 22 27 49 48 68 71 69 70 46 45 28 44 34 55 43 
+Najlepsza odleglosc: 174690.642904
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+10 4 7 11 13 14 15 12 37 38 31 27 20 21 6 22 25 26 23 24 2 76 77 3 5 8 9 75 16 17 18 19 39 40 36 35 33 34 32 30 49 48 46 45 54 44 43 56 55 29 28 47 70 68 69 71 66 67 52 51 50 53 59 41 60 61 42 62 57 58 64 65 72 73 74 63 
+Najlepsza odleglosc: 167170.1207317
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+39 35 28 30 34 60 41 42 27 26 22 24 4 7 6 21 49 69 71 72 73 74 65 64 59 63 62 37 29 48 70 68 67 66 25 2 3 9 8 36 40 19 38 10 11 20 32 31 44 43 56 53 52 45 46 47 23 76 77 5 14 17 13 12 33 54 51 50 55 57 58 61 18 15 75 16 
+Najlepsza odleglosc: 220601.8818638
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+15 75 14 11 34 52 67 66 63 62 58 59 37 18 13 21 7 16 17 65 74 73 56 57 68 69 70 55 53 22 23 3 77 76 26 25 47 46 48 71 45 49 54 33 20 9 8 4 5 6 36 41 42 61 60 64 72 51 50 43 29 44 28 24 2 10 32 31 27 30 39 40 35 38 19 12 
+Najlepsza odleglosc: 219490.7127098
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+19 18 13 12 14 9 6 27 31 34 41 39 40 37 38 11 20 25 46 47 23 48 70 68 49 29 33 30 28 56 53 52 67 66 54 57 61 62 42 36 35 60 59 63 64 74 73 58 65 72 55 43 44 50 51 69 71 45 26 22 24 3 77 76 2 4 5 21 32 8 10 7 75 15 16 17 
+Najlepsza odleglosc: 195124.64010699998
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.05
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+77 4 25 22 30 27 44 55 43 59 57 53 52 56 58 73 72 74 65 63 64 61 62 60 35 42 40 39 36 41 12 18 38 37 19 16 75 9 10 11 17 14 15 13 34 29 28 49 45 68 67 66 51 54 50 48 70 69 71 47 46 24 5 3 2 23 26 31 7 6 21 20 33 32 8 76 
+Najlepsza odleglosc: 196825.1858892
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.05
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+68 69 48 46 47 25 22 23 24 2 77 76 3 9 8 7 11 6 4 5 26 27 30 31 32 21 20 33 34 29 44 43 55 53 56 57 59 60 42 41 39 37 38 19 17 16 75 15 14 10 13 12 18 36 35 40 61 62 63 58 64 65 74 73 72 66 67 52 51 50 54 28 45 49 70 71 
+Najlepsza odleglosc: 129634.62333880001
+Generacji 1000
+ + Rozmiar populacji50
+ + mutacja0.05
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+71 69 70 49 45 48 46 47 25 23 24 2 77 76 3 22 26 27 28 30 29 44 43 50 51 53 54 55 34 33 31 32 20 21 6 5 4 7 8 9 10 11 13 14 15 75 16 17 12 18 19 38 37 36 39 40 35 41 42 61 60 59 62 63 64 65 74 73 72 58 56 57 52 67 66 68 
+Najlepsza odleglosc: 117146.1424509
+Generacji 1000
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+126 114 65 59 101 92 62 63 117 10 7 25 24 5 23 22 18 109 21 15 37 42 38 17 13 32 31 39 40 35 44 41 36 3 52 122 57 125 53 6 51 14 116 11 121 2 8 106 115 107 16 12 4 91 61 60 105 86 87 89 88 111 110 97 70 71 72 69 74 75 68 9 20 73 19 78 80 79 77 76 120 64 103 102 84 83 127 85 82 118 81 28 27 34 26 30 33 123 29 43 96 94 128 124 98 99 108 112 113 47 50 119 49 95 104 45 46 55 58 54 48 56 67 66 100 93 90 
+Najlepsza odleglosc: 140207.1747989
+Generacji 1000
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+26 124 29 123 33 80 79 77 85 82 118 127 83 84 102 103 64 120 89 86 88 110 97 70 76 71 72 74 75 68 5 32 35 3 2 115 10 101 23 73 22 18 107 109 21 7 25 9 69 111 87 105 90 100 66 114 93 126 92 60 63 117 91 62 61 4 59 65 67 53 51 46 104 122 52 58 55 36 41 40 31 39 44 37 38 17 42 13 15 45 94 96 98 99 128 108 113 112 95 47 119 49 54 50 48 56 125 57 6 116 14 106 16 8 121 11 12 24 20 19 78 81 28 43 27 34 30 
+Najlepsza odleglosc: 169520.2557214
+Generacji 100
+ + Rozmiar populacji500
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 2500
+Populacja Pocz¹tkowa: 500
+=========================
+99 29 30 123 34 26 81 32 28 31 40 43 104 46 45 41 37 13 15 42 44 35 27 80 127 83 64 102 103 84 82 85 76 77 74 78 69 72 111 88 87 97 89 86 120 110 71 70 79 118 33 39 38 36 107 7 16 21 23 5 9 68 75 19 61 60 59 105 126 90 93 100 65 101 92 63 91 117 4 12 106 109 20 10 62 114 66 67 57 6 52 3 116 2 17 18 25 22 73 24 115 11 121 8 51 14 122 58 55 49 50 119 47 54 125 53 56 48 96 128 108 112 113 95 94 124 98 
+Najlepsza odleglosc: 181387.8042679
+Generacji 100
+ + Rozmiar populacji500
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 2500
+Populacja Pocz¹tkowa: 500
+=========================
+115 28 81 80 79 77 9 22 21 24 12 73 8 116 48 67 61 117 63 10 18 15 39 34 29 123 26 27 40 42 32 3 101 126 93 66 114 100 20 23 2 13 35 44 31 78 121 7 109 37 41 17 50 46 104 45 58 6 56 125 57 54 49 119 112 128 94 43 30 99 98 82 83 102 103 120 97 111 71 72 68 91 59 65 62 92 74 110 89 88 86 87 64 70 105 90 60 75 69 85 118 76 84 127 33 124 96 55 122 108 113 95 47 52 53 51 106 36 38 11 14 4 5 25 107 19 16 
+Najlepsza odleglosc: 245625.2061894
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50
+=========================
+28 34 104 8 121 12 107 22 61 68 72 70 97 88 86 87 105 100 114 101 59 62 60 91 4 63 92 111 110 118 82 120 83 98 27 13 73 5 7 78 33 26 29 124 99 123 127 85 9 10 3 51 2 24 16 21 106 35 15 37 36 52 31 79 71 76 84 102 103 64 89 93 90 126 67 57 122 58 45 41 42 43 40 39 30 44 32 19 74 80 25 109 115 6 14 116 38 17 53 46 55 49 50 119 47 95 108 112 94 128 96 113 48 54 56 125 66 65 11 117 75 18 23 77 69 20 81 
+Najlepsza odleglosc: 256835.26774739995
+Generacji 100
+ + Rozmiar populacji50
+ + mutacja0.1
+Liczba iteracji bez poprawy 40
+Liczba Krzy¿ówek: 250
+Populacja Pocz¹tkowa: 50

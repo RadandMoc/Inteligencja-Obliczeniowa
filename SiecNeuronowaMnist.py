@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from enum import Enum
 import random
 import csv
+import copy
 
 class InitializationMethod(Enum):
     RANDOM = "random"
@@ -15,6 +16,12 @@ class TrainingSetSelection(Enum):
     STRATIFIEDSAMPLING = "stratified_sampling" #dobór losowy, ale z zachowaniem proporcji danych (odpowiedzi)
     BOOTSTRAPPING = "bootstrapping" #dobór losowy, ale z możliwością wielokrotnego wyboru tych samych danych
     RANDOMWITHIMPORTANCE = "random_with_importance" #dobór w pełni losowy, po którym następnie powtórzenie najmniej licznych danych (odpowiedzi) tyle razy, żeby wyrównać wszystkie zbiory 
+
+class ActivationFunction(Enum):
+    Relu = "relu"
+    Softmax = "softmax"
+    Tanh = "tanh"
+    Sigmoid = "sigmoid"
 
 # Funkcja przekształca array tworząc macierz odpowiedzi
 def extend_array(array):
@@ -32,6 +39,49 @@ def extend_array(array):
 
     return result
 
+def add_random_data(how_much_data_add, index_of_col, data, labels, return_only_new_data):
+    try:
+        indeksy = np.where(labels[:, index_of_col] == 1)[0]
+    except IndexError:
+        labels = extend_array(labels)
+        indeksy = np.where(labels[:, index_of_col] == 1)[0]
+    wanted_data = data[indeksy]
+    wanted_labels = labels[indeksy]
+    num_of_labels = np.shape(wanted_labels)[0]
+    
+    if return_only_new_data:
+        new_data = wanted_data.copy()  # Tworzenie kopii danych
+        new_labels = wanted_labels.copy()  # Tworzenie kopii etykiet
+        indices_for_train =  random.sample(range(0, new_data.shape[0]), int(how_much_data_add))
+        indices_for_test = [x for x in range(new_data.shape[0]) if x not in indices_for_train]
+        new_test_data = new_data[indices_for_test,:]
+        new_data = new_data[indices_for_train,:]
+        new_test_labels = new_labels[indices_for_test]
+        new_labels = new_labels[indices_for_train]
+        return new_data, new_labels, new_test_data, new_test_labels
+    else:
+        new_data = data.copy()  # Tworzenie kopii danych
+        new_labels = labels.copy()  # Tworzenie kopii etykiet
+        for _ in range(how_much_data_add):
+            index_of_adding_row = random.randint(0, (num_of_labels-1))
+            new_data = np.vstack([new_data, wanted_data[index_of_adding_row]])
+            new_labels = np.vstack([new_labels, wanted_labels[index_of_adding_row]])
+            return new_data, new_labels
+
+# Dzielenie danych na zbior uczacy i walidacyjny
+def split_data_for_validation(data,labels,test_sample_percent):
+    numbers_of_datas = list(range(10))
+    for i in range(0,10):
+        numbers_of_datas[i] = np.count_nonzero(labels[:, i] == 1)
+    train_data, train_label, test_data, test_label = add_random_data((numbers_of_datas[0] * (1-test_sample_percent)), 0, data, labels, True)
+    for i in range(1,10):
+        train_data2, train_label2, test_data2, test_label2 = add_random_data((numbers_of_datas[i] * (1-test_sample_percent)), i, data, labels, True)
+        train_data = np.vstack([train_data,train_data2])
+        train_label = np.vstack([train_label,train_label2])
+        test_data = np.vstack([test_data, test_data2])
+        test_label = np.vstack([test_label, test_label2])
+    return train_data, train_label, test_data, test_label
+
 # Dzielenie danych na zbior uczacy i testowy
 def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
     data_length = data.shape[0]
@@ -42,21 +92,40 @@ def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
         returner2 = extend_array(labels[indices_for_test])
         return data[indices_for_train,:], returner1, data[indices_for_test,:], returner2
     elif TrainingSetSelection.STRATIFIEDSAMPLING == type_of_split:
-        return 0
+        numbers_of_datas = list(range(10))
+        for i in range(0,10):
+            numbers_of_datas[i] = np.count_nonzero(labels == i)
+        train_data, train_label, test_data, test_label = add_random_data((numbers_of_datas[0] * (1-test_sample_percent)), 0, data, labels, True)
+        for i in range(1,10):
+            train_data2, train_label2, test_data2, test_label2 = add_random_data((numbers_of_datas[i] * (1-test_sample_percent)), i, data, labels, True)
+            train_data = np.vstack([train_data,train_data2])
+            train_label = np.vstack([train_label,train_label2])
+            test_data = np.vstack([test_data, test_data2])
+            test_label = np.vstack([test_label, test_label2])
+        return train_data, train_label, test_data, test_label
     elif TrainingSetSelection.BOOTSTRAPPING == type_of_split:
-        test_sample_size = int(test_sample_percent * data_length)
+        train_sample_size = int((1-test_sample_percent) * data_length)
         unique_numbers = set()
         random_numbers = []
-        while len(unique_numbers) < test_sample_size:
+        while len(unique_numbers) < train_sample_size:
             new_number = random.randint(0, data_length - 1)
             if new_number not in unique_numbers:
                 unique_numbers.add(new_number)
             random_numbers.append(new_number)
+        numbers_for_test = [x for x in range(data_length) if x not in unique_numbers]
         returner1 = extend_array(labels[random_numbers])
-        returner2 = extend_array(labels[random_numbers])
-        return data[random_numbers,:], returner1, data[random_numbers,:], returner2
+        returner2 = extend_array(labels[numbers_for_test])
+        print(str(np.shape(data[random_numbers,:])))
+        print(str(np.shape(data[random_numbers,:])))
+        return data[random_numbers,:], returner1, data[numbers_for_test,:], returner2
     elif TrainingSetSelection.RANDOMWITHIMPORTANCE == type_of_split:
-        return 0
+        train_data, train_label, test_data, test_label = get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split = TrainingSetSelection.RANDOM)
+        numbers_of_datas = list(range(10))
+        for i in range(0,10):
+            numbers_of_datas[i] = np.count_nonzero(train_label[:, i] == 1)
+        for i in range(0,10):
+            train_data, train_label = add_random_data(max(numbers_of_datas) - numbers_of_datas[i], i, train_data, train_label, False)
+        return train_data, train_label, test_data, test_label
     else:
         split_index = int((1-test_sample_percent) * data_length)
         returner1 = extend_array(labels[:split_index])
@@ -78,86 +147,121 @@ def save_array_as_csv(array, file_path):
 
 # Definicja funkcji aktywacji i ich pochodnych
 def relu(neurons):
-    A = np.maximum(0, neurons)
-    activation_history = neurons
-    return A, activation_history
-
-def relu_backward(dA, activation_history):
-    dZ = np.copy(dA)
-    dZ[activation_history <= 0] = 0
-    return dZ
+    return np.maximum(0, neurons)
 
 def softmax(neurons):
-    e_x = np.exp(neurons - np.max(neurons))
+    e_x = np.exp(neurons - np.max(neurons, axis=0, keepdims=True))
     A = e_x / np.sum(e_x, axis=0, keepdims=True)
-    return A, neurons
+    return A
 
-def softmax_backward(dA, activation_history):
-    s, _ = softmax(activation_history)
+def sigmoid(neurons):
+    A = 1 / (1 + np.exp(-neurons))
+    return A
+
+def sigmoid_backward(dA, Z):
+    s = sigmoid(Z)
+    dZ = dA * s * (1 - s)
+    return dZ
+
+def tanh(neurons):
+    A = np.tanh(neurons)
+    return A
+
+def tanh_backward(dA, Z):
+    t = tanh(Z)
+    dZ = dA * (1 - np.square(t))
+    return dZ
+
+def relu_backward(dA, Z):
+    dZ = np.copy(dA)
+    dZ[Z <= 0] = 0
+    return dZ
+
+def softmax_backward(dA, Z):
+    s = softmax(Z)
     dZ = np.zeros_like(s)
     
     for i in range(dA.shape[1]):
         dZ[:, i] = (np.diag(s[:, i]) @ dA[:, i]) - np.outer(s[:, i], s[:, i]) @ dA[:, i]
-    
     return dZ
 
 
-# Inicjalizacja parametrów sieci neuronowej
-def initialize_parameters_deep(layer_dims):
-    parameters = {}
-    length_of_layers = len(layer_dims)
-    
-    for l in range(1, length_of_layers):
-        parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l-1]) / np.sqrt(layer_dims[l-1])
-        parameters['b' + str(l)] = np.zeros((layer_dims[l], 1))
-    
-    return parameters
 
-def linear_forward(A, W, b):
+def activation_function_forward(A_prev, weights, bias, activation):
     """
+    Implement forward activation for a single network layer.
 
-    Przekazywanie przez warstwy w przód
-    
-    Parametry:
-    
-    A - aktywacja poprzedniej warstwy
-    
-    W - wagi
-    
-    b - bias
-    
+    Arguments:
+    A_prev -- activations from previous layer (or input data)
+    weights -- weights matrix for this layer
+    bias -- bias vector for this layer
+    activation -- activation function to be used (from ActivationFunction enum)
+
+    Returns:
+    A -- output of the activation function for this layer
+    Z -- linear component (weighted input) for this layer
     """
-    #print("W shape="+str(np.shape(W)))
-    #print("A_prev shape="+str(np.shape(A)))
-    #print("b shape ="+str(np.shape(b)))
-    neurons = W @ A + b
-    activation_history = (A, W, b)
-    return neurons, activation_history
+    # Obliczanie liniowej części (Z = W * A_prev + b)
+    Z = weights @ A_prev + bias
+    A = 0
+    # Aplikacja funkcji aktywacji
+    if activation == ActivationFunction.Relu:
+        A = relu(Z)
+    elif activation == ActivationFunction.Softmax:
+        A = softmax(Z)
+    elif activation == ActivationFunction.Sigmoid:
+        A = sigmoid(Z)
+    elif activation == ActivationFunction.Tanh:
+        A = tanh(Z)
+    else:
+        raise ValueError("Nieznana funkcja aktywacji")
 
-def linear_activation_forward(A_prev, W, b, activation): 
-    """activation na enum i zmienić mu nazwę. można dodać więcej funkcji aktywacji"""
-    if activation == "relu":
-        neurons, linear_forward_history = linear_forward(A_prev, W, b)
-        A, activation_history = relu(neurons)
-    elif activation == "softmax":
-        neurons, linear_forward_history = linear_forward(A_prev, W, b)
-        A, activation_history = softmax(neurons)
-    activations_history = (linear_forward_history, activation_history)
-    return A, activations_history
+    return A, (A_prev,Z)
 
 # Obliczanie entropii krzyżowej
 def compute_cost(model_results, Y):
-    number_of_data = Y.shape[1]
-    cost = (-1 / number_of_data) * np.sum(Y * np.log(model_results) + (1 - Y) * np.log(1 - model_results))
+    cost = -np.sum(Y * np.log(model_results + 1e-4))/Y.shape[1]
     return cost
 
+def get_function_activation_order(layer_dims, want_defult_setup=True, input = None):
+    if want_defult_setup == True:
+        function_activation_order =  [ActivationFunction.Relu for x in range(len(layer_dims)-2)]
+        function_activation_order.append(ActivationFunction.Softmax)
+        return function_activation_order 
+    else:
+        translate_function_order(layer_dims,input)
+
+def translate_function_order(layer_dims,function_activation_order):
+    activation_order = []
+    for tupl in function_activation_order:
+        if type(tupl[0]) is not ActivationFunction or type(tupl[1]) is not int:
+            raise Exception("Niepoprawne dane wejściowe. Dane powinny być w postaci List(tuple(ActivationFunction,int))")
+        for _ in range(tupl[1]):
+            activation_order.append(tupl[0])
+    if len(activation_order) != len(layer_dims)-2:
+        raise Exception("Niepoprawne długosc tablicy wejsciowej. Funkcji aktywacji powinny byc tyle ile warstw ukrytych, gdyz ostatnia musi byc softmax")
+    activation_order.append(ActivationFunction.Softmax) 
+    return activation_order
+
 # Wsteczna propagacja przez warstwy
-def linear_backward(dZ, activation_history):
-    A_prev, W, b = activation_history
-    number_of_data = A_prev.shape[1]
-    dW = (1 / number_of_data) * (dZ @ A_prev.T)
-    db = (1 / number_of_data) * np.sum(dZ, axis=1, keepdims=True)
-    dA_prev = W.T @ dZ
+def linear_backward(dZ, A_prev, weights):
+    m = A_prev.shape[1]
+    dW = (1 / m) * (dZ @ A_prev.T)
+    db = (1 / m) * np.sum(dZ, axis=1, keepdims=True)
+    dA_prev = weights.T @ dZ
+    return dA_prev, dW, db
+
+def calculate_layer_gradients(dA, activations_history, weights, activation):
+    A_prev, Z = activations_history  # Rozpakowanie krotki
+    if activation == ActivationFunction.Relu:
+        dZ = relu_backward(dA, Z)
+    elif activation == ActivationFunction.Softmax:
+        dZ = softmax_backward(dA, Z)
+    elif activation == ActivationFunction.Sigmoid:
+        dZ = sigmoid_backward(dA, Z)
+    elif activation == ActivationFunction.Tanh:
+        dZ = tanh_backward(dA, Z)
+    dA_prev, dW, db = linear_backward(dZ, A_prev, weights)
     return dA_prev, dW, db
 
 def linear_activation_backward(dA, activations_history, activation):
@@ -171,34 +275,34 @@ def linear_activation_backward(dA, activations_history, activation):
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
     return dA_prev, dW, db
 
-def backward_propagation(actual_layers, Y,  activations_history):
-    gradient = {}
-    L = len(activations_history)
-    dAL = - ((Y / actual_layers) - ((1 - Y) / (1 - actual_layers)))
-    number_of_layers=len(layers_dims)
-    current_cache =  activations_history[number_of_layers-2]
-    gradient["dA"+str(number_of_layers-1)], gradient["dW"+str(number_of_layers-1)], gradient["db"+str(number_of_layers-1)] = linear_activation_backward(dAL, current_cache, activation = "softmax")
-    for l in reversed(range(L-1)):
-        current_cache =  activations_history[l]
-        dA_prev_temp, dW_temp, db_temp = linear_activation_backward(gradient["dA" + str(l + 2)], current_cache, activation = "relu")
-        gradient["dA" + str(l + 1)] = dA_prev_temp
-        gradient["dW" + str(l + 1)] = dW_temp
-        gradient["db" + str(l + 1)] = db_temp
-    return gradient
+def backward_propagation(Y, actual_layers, activations_history, parameters, function_activation_order):
+    gradients = {}
+    L = len(activations_history)  # Liczba warstw
+    dA = - ((Y / (actual_layers + 1e-4)) - ((1 - Y) / (1 - actual_layers + 1e-4)))
+    for l in reversed(range(L)):
+        weights = parameters[0][l]
+        current_Z = activations_history[l]
+        current_activation = function_activation_order[l]
+        dA_prev, dW, db = calculate_layer_gradients(dA, current_Z, weights, current_activation)
+        gradients[f"dA{l}"] = dA_prev
+        gradients[f"dW{l}"] = dW
+        gradients[f"db{l}"] = db
+        dA = dA_prev  # Aktualizacja dA dla poprzedniej warstwy
+
+    return gradients
 
 def update_parameters(parameters, grads, learning_rate):
-    L = len(layers_dims) - 1
+    weights = parameters[0]
+    bias = parameters[1]
+    L = len(weights)
     for l in range(L):
-        #print("Oto sprawdzane LLLLLLLLLLLLLLLLL"+str(l))
-        #print("W "+str(learning_rate * grads["dW" + str(l + 1)]))
-        #print("b "+str(learning_rate * grads["db" + str(l + 1)]))
-        parameters["W" + str(l + 1)] -= learning_rate * grads["dW" + str(l + 1)]
-        parameters["b" + str(l + 1)] -= learning_rate * grads["db" + str(l + 1)]
-    return parameters
+        weights[l] -= learning_rate * grads[f"dW{l}"]
+        bias[l] -= learning_rate * grads[f"db{l}"]
+    return weights,bias
 
 # Testowanie wytrenowanego modelu na danych testowych
-def check_test(X, params):
-    actual_layers,  activations_history = forward_propagation(X, params)
+def check_test(X, params, order):
+    actual_layers,  activations_history = forward_propagation(X, params, order)
     return actual_layers,  activations_history
 
 
@@ -211,67 +315,44 @@ def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
     method -- metoda inicjalizacji (InitializationMethod).
 
     Zwraca:
-    parameters -- słownik zawierający parametry "W0", "b0", ..., "WL", "bL".
+    parameters -- lista słowników, gdzie każdy słownik zawiera wagi i biasy dla jednej warstwy.
     """
 
-    np.random.seed(3)  # Ustawienie ziarna dla spójności wyników
-    parameters = {}
-    L = len(layers_dims)  # liczba warstw w sieci
+    weights = []
+    biases = [] 
 
-    for l in range(1, L):
+    for l in range(1, len(layers_dims)):
+        weight = 0
         if method == InitializationMethod.HE:
-            parameters['W' + str(l)] = np.random.randn(layers_dims[l], layers_dims[l-1]) * np.sqrt(2 / layers_dims[l-1])
+            weight = np.random.randn(layers_dims[l], layers_dims[l - 1]) * np.sqrt(2/layers_dims[l - 1])
+            #save_array_as_csv(weight,"wagi_grubasa.csv")
         elif method == InitializationMethod.XAVIER_GLOROT:
-            limit = np.sqrt(6 / (layers_dims[l-1] + layers_dims[l]))
-            parameters['W' + str(l)] = np.random.uniform(-limit, limit, (layers_dims[l], layers_dims[l-1]))
+            limit = np.sqrt(6 / (layers_dims[l - 1] + layers_dims[l]))
+            weight = np.random.uniform(-limit, limit, (layers_dims[l], layers_dims[l - 1]))
         else:  # DEFAULT: Random initialization
-            parameters['W' + str(l)] = np.random.randn(layers_dims[l], layers_dims[l-1]) * 0.01
+            weight = np.random.randn(layers_dims[l], layers_dims[l - 1]) * 0.01
 
-        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
+        bias = np.zeros((layers_dims[l], 1))
+        weights.append(weight)
+        biases.append(bias)
+    return weights,biases
 
-    return parameters
 
-
-def forward_propagation(X, parameters):
-    """
-    Implement forward propagation for the [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID computation.
-    
-    Arguments:
-    X -- data, numpy array of shape (input size, number of examples)
-    parameters -- output of initialize_parameters_deep()
-    
-    Returns:
-    actual_layers -- last post-activation value
-    activations_history -- list of  activations_history containing every activation_history of linear_relu_forward() (there are L-1 of them, indexed from 0 to L-2)
-    """
-
+def forward_propagation(X, parameters, function_activation_order):
     activations_history = []
     A = X
-    number_of_layers = len(parameters) // 2                  # number of layers in the neural network
-
-    # Implement [LINEAR -> RELU]*(L-1). Add "activation_history" to the " activations_history" list.
-    for l in range(1, number_of_layers):
+    #save_array_as_csv(X,"tweeter_Tomka.csv")
+    # Iteracja przez warstwy sieci
+    for layer in range(len(parameters[0])):
+        #print(str(layer) + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         A_prev = A 
-        W = parameters['W' + str(l)]
-        b = parameters['b' + str(l)]
-        #save_array_as_csv(W,'zmiennaW.csv')
-        #save_array_as_csv(A_prev,'zmiennaA.csv')
-        #save_array_as_csv(b,'zmiennaB.csv')
-        #print('W' + str(l) +" shape="+str(np.shape(W)))
-        #print("A_prev shape="+str(np.shape(A_prev)))
-        #print("b shape ="+str(np.shape(b)))
-        A, activation_history = linear_activation_forward(A_prev, W, b, "relu")
-        #Z = (W @ A_prev) + b
-        #A = relu(Z)
+        #save_array_as_csv(A_prev,"ArrajTomka.csv")
+        weights = parameters[0][layer]
+        bias = parameters[1][layer]
+        activation = function_activation_order[layer]
+        A, activation_history = activation_function_forward(A_prev, weights, bias, activation)
         activations_history.append(activation_history)
-
-    # Implement LINEAR -> SOFTMAX. Add "activation_history" to the "activations_history" list.
-    W = parameters['W' + str(number_of_layers)]
-    b = parameters['b' + str(number_of_layers)]
-    actual_layers, activation_history = linear_activation_forward(A,W,b,"softmax")
-    activations_history.append(activation_history)
-    
-    return actual_layers, activations_history
+    return A, activations_history
 
 # Tłumaczy macierz prawdopodobieństw na odpowiedzi
 def translate_matrix_of_probabilities_to_matrix_of_answers(array):
@@ -311,7 +392,7 @@ def matrix_comparison(arr1, arr2):
 
     return returner / rows if rows > 0 else 0
 
-def neural_network(X, Y, layers_dims, learning_rate, epoka):
+def neural_network(X, Y, layers_dims, learning_rate, epoka, function_activation_order, percent_of_validation_data = 0, which_worse_prediction_stop_learning = 5, initzializing_method = InitializationMethod.HE):
     """
     Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SOFTMAX.
     
@@ -320,40 +401,77 @@ def neural_network(X, Y, layers_dims, learning_rate, epoka):
     Y -- true "label" vector (containing 0 if non-cat, 1 if cat), of shape (1, number of examples)
     layers_dims -- dimensions of the layers (n_x, n_h, n_y)
     learning_rate -- learning rate of the gradient descent update rule
-    epoka -- number of iterations of the optimization loop
+    epoka -- number of iterations of the optimization loop.
+    percent_of_validation_data -- how much data want for validation data
     
     Returns:
     parameters -- parameters learnt by the model. They can then be used to predict.
     """
-
+    
     np.random.seed(1)
     costs = []                         # keep track of cost
     
     # Parameters initialization
-    parameters = initialize_parameters_deep(layers_dims)
+    parameters = initialize_parameters(layers_dims, initzializing_method)
+    old_parameters = initialize_parameters(layers_dims, initzializing_method)
 
+    if percent_of_validation_data > 0:
+        #Tutaj mają zostać stworzone dane walidacyjne na wprowadzonych podstawie danych. wystarczy zwykły podział danych na 2 części, z czego zbór walidacyjny posiada percent_of_validation_data wszystkich wprowadzonych danych.
+        X, Y, validation_data, validation_labels = split_data_for_validation(np.transpose(X),np.transpose(Y),percent_of_validation_data)
+        X = np.transpose(X)
+        Y = np.transpose(Y)
+        validation_data = np.transpose(validation_data)
+    i = 0
+    was_prediction_progres = True
+    how_many_worse_predictions = 0
     # Loop (gradient descent)
-    for i in range(0, epoka):
+    while (((i<epoka) and (percent_of_validation_data == 0)) or (((percent_of_validation_data > 0) and (i<epoka)) or ((percent_of_validation_data > 0) and was_prediction_progres))):
+    #for i in range(0, epoka):
 
         # Forward propagation
-        actual_layers,  activations_history = forward_propagation(X, parameters)
+        actual_layers,  activations_history = forward_propagation(X, parameters, function_activation_order )
         #print(np.shape(Y))
 
         # Compute cost
         cost = compute_cost(actual_layers, Y)
 
         # Backward propagation
-        grads = backward_propagation(actual_layers, Y,  activations_history)
-
+        grads = backward_propagation(Y,actual_layers,  activations_history, parameters, function_activation_order)
+        
+        if ((i>(epoka-1) and (how_many_worse_predictions == 0)) or ((epoka < 1) and (i > 0) and (how_many_worse_predictions == 0))):
+            old_parameters = copy.deepcopy(parameters)
+        
         # Update parameters
         parameters = update_parameters(parameters, grads, learning_rate)
         
         # Print the cost every 100 training example
-        if i % 100 == 0:
+        if i % 10 == 0:
             print ("Cost after iteration %i: %f" %(i, cost))
             costs.append(cost)
-            
-    return parameters
+        
+        if (i>epoka-1) and (percent_of_validation_data > 0):
+            #Tutaj powinien być kod, sprawdzający, czy nowy rezultat jest lepszy od starego. sprawdzone ma być na danych walidacyjnych.
+            #Jeżeli tak, to was_prediction_progres = True, w przeciwnym przypadku False i zwrócone mają być stare (poprzednie) parametry.
+            predictions_new, _ = check_test(validation_data, parameters, function_activation_order)
+            predictions_old, _ = check_test(validation_data, old_parameters, function_activation_order)
+            predictions_new = translate_matrix_of_probabilities_to_matrix_of_answers(np.transpose(predictions_new))
+            predictions_old = translate_matrix_of_probabilities_to_matrix_of_answers(np.transpose(predictions_old))
+            old_precision = matrix_comparison(predictions_old,validation_labels)
+            new_precision = matrix_comparison(predictions_new,validation_labels)
+            print("Starsza precyzja: " + str(old_precision) + " Nowsza precyzja: " + str(new_precision))
+            if old_precision <= new_precision:
+                how_many_worse_predictions = 0
+            else:
+                how_many_worse_predictions += 1
+                print("Predykcja jest gorsza po raz " + str(how_many_worse_predictions) + "/" + str(which_worse_prediction_stop_learning))
+                if how_many_worse_predictions >= which_worse_prediction_stop_learning:
+                    print("z tego powodu kończymy uczenie.")
+                    was_prediction_progres = False
+        i += 1
+    if percent_of_validation_data > 0:
+        return old_parameters
+    else:
+        return parameters
 
 
 
@@ -372,64 +490,26 @@ all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
 all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
 # Dzielenie danych na zbiór uczący i testowy
-percent_of_test_data = 0.1
-list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,TrainingSetSelection.RANDOM)
+percent_of_test_data = 0.2
+list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,TrainingSetSelection.STRATIFIEDSAMPLING)
 train_data = np.transpose(list_of_datas[0])
 train_label = np.transpose(list_of_datas[1])
 test_data = np.transpose(list_of_datas[2])
 test_label = np.transpose(list_of_datas[3])
 
+#print(str(np.shape(train_data)))
+#print(str(np.shape(test_data)))
 
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
+layers_dims = [784, 392, 196, 98, 49, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
+order = get_function_activation_order(layers_dims)
 
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, epoka=22)
-predictions, _ = check_test(test_data, parameters)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.002, epoka=150, percent_of_validation_data=0.25, which_worse_prediction_stop_learning = 6, function_activation_order = order, initzializing_method = InitializationMethod.HE)
+predictions, _ = check_test(test_data, parameters,order)
 #print(predictions)
-print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
-print(str(np.max(predictions)))
+#print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
+#print(str(np.max(predictions)))
 predictions = translate_matrix_of_probabilities_to_matrix_of_answers(np.transpose(predictions))
 print(str(matrix_comparison(predictions,np.transpose(test_label))))
 save_array_as_csv(predictions,'Answers.csv')
-
-
-
-# Trenowanie modelu
-#layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10]
-"""parameters1 = L_layer_model(train_data, train_label, layers_dims, learning_rate=0.0005, num_iterations=22, print_cost=True)
-print("Trenowanie zakończone")
-
-
-
-predictions, _ = check_test(test_data, parameters1)
-
-print(predictions)
-
-print(str(np.max(predictions)))
-save_array_as_csv(np.transpose(predictions),'Answers.csv')
-
-
-
-results = []
-
-# Tworzenie wyników na podstawie predykcji
-for i in range(28000):
-    tmp = {}
-    for j in range(10):
-        tmp[j] = predictions[j, i]
-    max_key = max(tmp, key=tmp.get)
-    results.append(max_key)
-
-# Wyświetlenie histogramu wyników testowych
-plt.hist(results, edgecolor='black', linewidth=1.2)
-plt.title("Histogram danych testowych")
-plt.axis([0, 9, 0, 5000])
-plt.xlabel("Cyfra")
-plt.ylabel("Wystąpienia w zestawie testowym")
-plt.show()
-
-# Zapisanie wyników do pliku submission.csv
-np.savetxt('submission.csv', np.c_[range(1, 28001), results], delimiter=',', header='ImageId,Label', comments='', fmt='%d')
-print("Testowanie zakończone")
-"""

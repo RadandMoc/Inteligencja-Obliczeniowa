@@ -1,0 +1,204 @@
+Dane_TSP_76
+
+crossover1 -metoda krzyżowania
+tournament_selection -metoda doboru rodziców
+[population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]-parametry
+Wykonało 391/5000 iteracji z kryterium stopu
+Best Route: [58 62 61 59 60 41 40 39 38 16 15 14 13 11 17 18 37 36 35 34 32 33 28 43
+ 27 26 25 21 22 23 24 46 45  4 10  9  8  7  6  5 20 19 31 30 44 48 49 50
+ 52 55 56 57 63 64 73 72 71 65 66 51 67 70 68 69 47 29 12 74 75 76  1  2
+  3 42 54 53]
+Best Distance: 150929.98454819998
+
+crossover1 
+tournament_selection 
+[population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+294/5000 
+Best Route: [46 24 25 21 22  5 10 11 15 16 17 18 37 36 38 39 41 61 62 64 63 57 58 55
+ 56 51 50 48 44 45 47 69 68 70 67 49 28 29 76 75  3  4 30 33 32 31 19 20
+  6  7  8  9 12 13 14 74 35 34 40 60 59 73 72 71 65 66 23  1  2 26 27 43
+ 42 54 53 52]
+Best Distance: 163581.7560242
+
+crossover1 
+tournament_selection 
+[population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+310/5000 
+Best Route: [52 51 56 57 62 61 39 38 10  6  5 35 34 58 63 64 73 72 71 65 66 50 49 29
+ 30 31 19 32 33 42 55 59 60 41 40 36 37 18 17 11  9  8  7  2 75 76  1 23
+  4  3 74 14 13 12 20 26 25 24 22 21 15 16 54 53 67 70 68 69 43 28 27 44
+ 48 47 45 46]
+Best Distance: 174952.39190699998
+
+crossover1 
+tournament_selection 
+population_size=150,generations=3000,mutation_rate=0.2, number_of_crossover = 1500, elite_percent=0.1, iteration_without_improvement=100
+270/3000 
+Best Route: [50 49 24 25 21 22 23  1 76 75  2  3  4 20 30 26 27 43 42 54 53 48 44 45
+ 46 47 69 68 70 67 56 55 57 58 59 60 41 39 38 18 17 11 12 13  9 10 31 29
+ 32 35 36 37 16 15 14 74  8  7  6  5 19 28 33 34 40 61 62 63 64 73 72 71
+ 65 66 51 52]
+Best Distance: 133489.0630851
+
+crossover1 
+tournament_selection 
+population_size=150,generations=3000,mutation_rate=0.4, number_of_crossover = 1500, elite_percent=0.1, iteration_without_improvement=100
+274/3000 
+Best Route: [75  2  3  5 20 19 58 57 63 64 71 72 73 62 61 59 60 41 40 35 18 16 15 74
+ 14 13 12  9  8  7  6 10 11 17 37 36 38 39 34 53 49 50 51 52 33 32 29 22
+ 23 46 45 44 48 47 69 68 70 67 65 66 56 55 54 42 43 28 27 26 24 25 21 30
+ 31  4  1 76]
+Best Distance: 142369.86117370002
+
+crossover1 
+tournament_selection 
+population_size=200,generations=3000,mutation_rate=0.3, number_of_crossover = 1500, elite_percent=0.1, iteration_without_improvement=100
+227/3000
+Best Route: [33 28 26 25 21 22 23  1 76 75  2  3  4 10 17 18 37 36 35 34 41 61 62 63
+ 64 73 72 71 56 55 51 52 53 54 42 43 24 46 45 44 48 27 29 30 31 19 13 14
+ 74 15 16 47 69 68 70 67 66 65 57 58 59 60 32 20  5  6  7  8  9 12 11 49
+ 50 40 39 38]
+Best Distance: 158723.80139500002
+
+crossover1 
+tournament_selection 
+population_size=450,generations=3000,mutation_rate=0.3, number_of_crossover = 1500, elite_percent=0.1, iteration_without_improvement=100
+268/3000 
+Best Route: [12 11 35 34 40 41 61 62 64 63 57 55 54 42 45 46 22 23  4  3  6  9 10  5
+ 20 21 25 24 26 29 33 60 59 58 56 51 67 70 68 69 47 48 44 27 30 31 19  7
+  8 36 38 39 73 72 71 65 66 50 49 52 53 43 28 32 37 18 17 16 15  2  1 76
+ 75 74 14 13]
+Best Distance: 159524.9487181
+
+
+crossover2
+tournament_selection 
+[population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+589/5000 
+Best Route: [ 3  7  8 74 14 13 20 47 69 68 50 49 35 36 37 38 39 34 40 41 60 59 58 57
+ 63 64 71 72 73 62 61 55 56 67 70 22 21  4  5 12 15 16 19 31 32 33 29 30
+ 26 27 43 42 54 53 44 48 66 65 51 52 25 24 46 45 28 18 17 11 10  9  6  2
+ 75 76  1 23]
+Best Distance: 174875.79556270002
+
+crossover2
+tournament_selection 
+[population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+710/5000 
+Best Route: [46 24 25 21 19 31 30 26 27 29 17 15 14 13 12 10  5  3  2  1  4 20 40 41
+ 60 62 73 72 71 64 63 61 59  6  7  8  9 11 35 52 51 49 22 23 76 75 74 16
+ 18 37 36 38 39 34 32 33 28 43 42 54 55 56 57 58 53 44 48 50 66 65 67 70
+ 68 69 47 45]
+Best Distance: 169847.5232001
+
+crossover2
+tournament_selection 
+[population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+610/5000 
+Best Route: [64 73 72 71 70 69 47 23 76 75  8  9 37 36 32 29 26 24 25 21 31 30 28 43
+ 54 51 56 58 59 60 41 42 44 48 68 67 65 66 50 49 45 46 22  4 19 35 39 38
+ 18 17 11 10 12 13 14 74 15 16 34 55 52 53 27 20  5  6  7  2  1  3 33 40
+ 61 62 57 63]
+Best Distance: 180983.8003323
+
+crossover2
+tournament_selection 
+population_size=450,generations=3000,mutation_rate=0.3, number_of_crossover = 1500, elite_percent=0.1, iteration_without_improvement=100
+390/3000 [02:40<17:51,  2.44it/s]Best Route: [ 4  3  7  8  5 30 26 27 28 29 13 14 74 20 19 31 32 35 36 37 18 17 10  6
+  9 12 15 16 11 25 21 22 24 46 45 47 69 68 70 67 50 49 23  1 76 75  2 33
+ 40 41 60 59 58 57 65 66 51 53 54 42 43 44 48 52 55 56 71 72 73 64 63 62
+ 61 39 38 34]
+Best Distance: 161962.7535804
+
+crossover2
+tournament_selection 
+population_size=450,generations=3000,mutation_rate=0.3, number_of_crossover = 1500, elite_percent=0.1, iteration_without_improvement=100
+387/3000 
+Best Route: [52 33 19 20  5 10 29 28 42 54 53 43 27 25 21  4  9 13 14 74  8  7  6  3
+ 24 22 23  1 76 75  2 34 41 40 37 11 12 15 16 17 18 31 30 26 44 48 65 71
+ 72 73 64 63 57 62 61 58 59 60 39 38 36 35 32 46 45 47 69 68 70 67 50 49
+ 51 66 56 55]
+Best Distance: 160295.69835559998
+
+crossover2
+tournament_selection 
+population_size=300,generations=3000,mutation_rate=0.5, number_of_crossover = 1500, elite_percent=0.1, iteration_without_improvement=100
+540/3000 
+Best Route: [61 59 60 39 38 36 35 33 32 30 29 28 27 26  2 75 76  1 23 43 53 52 55 56
+ 71 72 73 31 19 10  9 18 37 41 58 67 70 68 69 46 24 22  3  6  7  8 74 14
+ 13 15 16 12 11 17 34 40 42 54 51 65 66 50 49 20  5  4 21 25 45 47 48 44
+ 57 63 64 62]
+Best Distance: 176559.7621842
+
+crossover1
+roulette_wheel_selection
+[population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+376/5000 
+Best Route: [67 68 70 71 72 73 61 59 60 41 40 26 25 21 24 46 45 44 27 43 42 54 53 56
+ 57 63 64 62 58 55 52 50 69 47 48  4  3  5  6  7  8 74 14 13 15 16 18 37
+ 36 35 33 32 17 11 12 10  9  2  1 23 38 39 34 28 29 30 31 19 20 75 76 22
+ 49 51 66 65]
+Best Distance: 167581.2762297
+
+crossover1
+roulette_wheel_selection
+[population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+387/5000 
+Best Route: [13 14 74 15 16 17 18 37 36 35 34 42 54 52 50 51 56 55 58 57 63 62 61 59
+ 60 41 39 38 10  9  6  3  4  5 20 19 31 30 29 32 33 27 26 25 21 24 45 44
+ 48 49 53 43 28  7  8  2 75 76  1 23 22 46 47 69 68 70 67 66 65 71 72 73
+ 64 40 11 12]
+Best Distance: 140697.3804873
+
+crossover1
+roulette_wheel_selection
+[population_size=500,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+466/5000 
+Best Route: [27 26 30 31 11 13 14 74  8  7  6  5 29 28 43 52 55 58 57 51 50 49 48 47
+ 69 68 67 70 71 72 73 64 63 62 61 59 60 53 54 42 33 32 35 38 39 41 40 36
+ 37 18  4  3  2 75 76  1 23 22 24 46 45 44 66 65 56 34 17 16 15 12  9 10
+ 20 19 21 25]
+Best Distance: 149138.44453500002
+
+crossover1
+roulette_wheel_selection
+[population_size=300,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+365/5000 
+Best Route: [43 28 33 32 19 20  5  4  3  7  8 74 14 13 15 16 37 18 17 11 12  9  6  2
+ 75 76  1 23 22 21 25 24 26 29 35 38 39 34 42 54 53 49 50 51 66 65 47 48
+ 27 30 31 10 36 40 41 60 59 58 52 44 45 46 55 57 63 64 71 72 73 62 61 56
+ 67 70 68 69]
+Best Distance: 154915.85375429998
+
+crossover2
+roulette_wheel_selection
+[population_size=120,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+661/5000 
+Best Route: [15 13 12 11 31 30 29 26 44 48 47 49 71 72 73 64 63 57 58 34 10  9  2  1
+ 23 76 75 74 14 17 37 36 35 28 43 27 46 45 42 54 53 52 40 38 39 41 60 61
+ 62 59 33 32 19 20  5  4 25 21 22  3  7  8  6 24 69 68 70 67 50 66 65 51
+ 56 55 18 16]
+Best Distance: 175946.29295650002
+
+crossover2
+roulette_wheel_selection
+[population_size=400,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+922/5000 
+Best Route: [15 11  9 10  5 20 42 54 55 58 59 60 61 62 73 72 71 64 63 57 33 19 31 30
+ 29 28 43 49 50 48 47 69 68 70 67 65 66 51 26 25 21 22 23  4  3  2  1 76
+ 75 74 14 13 12  8  7  6 24 46 45 44 27 32 35 36 38 39 40 41 56 52 53 34
+ 37 18 17 16]
+Best Distance: 156000.6827711
+
+crossover2
+roulette_wheel_selection
+[population_size=300,generations=5000,mutation_rate=0.05, number_of_crossover = 3000, elite_percent=0.1, iteration_without_improvement=150]
+615/5000 
+Best Route: [62 61 41 40 12 13 14 74 15 16 18 37 36 38 39 34 33 29 30  5  8  7  3  4
+  6  9 10 28 42 43 26 25 21 22 23 24 27 54 53 48 47 45 44 52 55 57 63 64
+ 73 72 71 65 50 49 67 70 68 69 46  1 76 75  2 51 66 56 58 35 17 11 20 19
+ 31 32 60 59]
+Best Distance: 170636.21839350002
+
+
+
