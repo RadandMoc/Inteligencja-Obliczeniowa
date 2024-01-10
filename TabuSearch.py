@@ -262,10 +262,10 @@ def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_
     end_time = time.time()  # Koniec pomiaru czasu
     elapsed_time = end_time - start_time
     with open(output_file, "a") as file:
-        file.write(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nCritic counter: {critic_counter}\nMethod: {method}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
-        print(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nCritic counter: {critic_counter}\nMethod: {method}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
+        file.write(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nCritic counter: {critic_counter}\nMethod: {method}\nTabu tenure: {tabu_tenure}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
+        print(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nCritic counter: {critic_counter}\nMethod: {method}\nTabu tenure: {tabu_tenure}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
     return overall_best_solution
 
 # Przykładowe użycie
 # best_solution = tabu_search('Dane_TSP_127.csv', "ResultsTabuSearch.txt",iterations=400, critic_counter =500, method= Method.Insertion, tabu_tenure=100)
-best_solution = tabu_search('Dane_TSP_48.csv', "ResultsTabuSearch.txt",iterations=800, critic_counter =500, method= Method.Reverse, tabu_tenure=200)
+best_solution = tabu_search('Dane_TSP_48.csv', "ResultsTabuSearch.txt",iterations=10000, critic_counter =500, method= Method.Reverse, tabu_tenure=200)
