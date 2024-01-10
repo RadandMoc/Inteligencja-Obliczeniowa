@@ -242,20 +242,21 @@ def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_
                 best_solution = current_solution
                 best_distance = current_distance
                 update_tabu_list(tabu_list, best_move, tabu_tenure)
-            elif best_distance_in_tabu < best_distance:
+                #print(f"First condition: {best_distance}\nList: {tabu_list}\nMove: {best_move}")
+            elif best_distance_in_tabu < overall_best_distance: #and random.random() < 0.2:
                 best_solution = best_solution_in_tabu
                 best_distance = best_distance_in_tabu
                 update_tabu_list(tabu_list, [], tabu_tenure) #pusta tablica po to, żeby odjęło 1 od kolejki tabu
+                #print(f"Second condition: {best_distance}\nList: {tabu_list}\nMove: {best_move}")
             else:
                 best_solution = current_solution
                 best_distance = current_distance
                 update_tabu_list(tabu_list, best_move, tabu_tenure)
-            print(best_distance, tabu_list)
+                #print(f"Third condition: {best_distance}\nList: {tabu_list}\nMove: {best_move}")
 
         if(best_distance < overall_best_distance):
             overall_best_distance = best_distance
             overall_best_solution = best_solution
-
     # Zapisz wynik do pliku tx
     #end timer
     end_time = time.time()  # Koniec pomiaru czasu
@@ -266,4 +267,5 @@ def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_
     return overall_best_solution
 
 # Przykładowe użycie
-best_solution = tabu_search('Dane_TSP_127.csv', "ResultsTabuSearch.txt",iterations=400, critic_counter =500, method= Method.Reverse, tabu_tenure=10)
+# best_solution = tabu_search('Dane_TSP_127.csv', "ResultsTabuSearch.txt",iterations=400, critic_counter =500, method= Method.Insertion, tabu_tenure=100)
+best_solution = tabu_search('Dane_TSP_48.csv', "ResultsTabuSearch.txt",iterations=800, critic_counter =500, method= Method.Reverse, tabu_tenure=200)
