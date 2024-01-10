@@ -115,6 +115,21 @@ def genetic_algorithm(distances, population_size=100, generations=100, mutation_
 
 
 
+def saveData(best_route, distance, population_size, generation_size ,number_of_crossover, mutation, iteration_without_improvement,filename = "genetic_algorithm_results.txt" ):
+        with open(filename, 'a') as resultFile:
+            resultFile.write("\n" + "=" * 25 + "\n")
+            for element in best_route:
+                resultFile.write(str(element+1) + ' ')
+            resultFile.write("\n" + "Najlepsza odleglosc: " + str(distance))
+            resultFile.write("\n" + "Generacji " + str(generation_size))
+            resultFile.write("\n + Rozmiar populacji" + str(population_size))
+            resultFile.write("\n + mutacja" + str(mutation))
+            resultFile.write("\n" + "Liczba iteracji bez poprawy " + str(iteration_without_improvement))
+            resultFile.write("\n" + "Liczba Krzyżówek: " + str(number_of_crossover))
+            resultFile.write("\n" + "Populacja Początkowa: " + str(population_size))
+
+
+
 
 
 
@@ -191,7 +206,7 @@ def mutate(individual, mutation_rate):
 
 # Optimized Genetic Algorithm
 
-def genetic_algorithm(distances, population_size=100, generations=100, mutation_rate=0.01, number_of_crossover=900, elite_percent=0.1, iteration_without_improvement=20):
+def genetic_algorithm(distances, population_size=100, generations=500, mutation_rate=0.01, number_of_crossover=900, elite_percent=0.1, iteration_without_improvement=200):
     num_cities = distances.shape[0]
     population = initialize_population(population_size, num_cities)
     fitness_scores = calculate_fitness_vectorized(population, distances)
@@ -246,7 +261,9 @@ def genetic_algorithm(distances, population_size=100, generations=100, mutation_
         best_score_of_pregeneration = fitness_scores[best_index_of_generation]
 
     # Find the best solution in the final population
+
     best_index = np.argmin(fitness_scores)
+    saveData(population[best_index],fitness_scores[best_index],population_size,generations,number_of_crossover,mutation_rate,iteration_without_improvement)
     return population[best_index], fitness_scores[best_index]
 
 
@@ -262,8 +279,8 @@ def genetic_algorithm(distances, population_size=100, generations=100, mutation_
 
 
 # Read distances from the provided Excel file
-readData=pd.read_csv("Dane_TSP_127.csv",sep=";", decimal=',')
-#readData=pd.read_csv("Dane_TSP_76.csv",sep=";", decimal=',')
+#readData=pd.read_csv("Dane_TSP_127.csv",sep=";", decimal=',')
+readData=pd.read_csv("Dane_TSP_76.csv",sep=";", decimal=',')
 
 #readData=pd.read_csv("Miasta29.csv",sep=";", decimal=',')
 
@@ -272,7 +289,7 @@ distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
 
 #print(crossover([[12, 18, 17, 14, 15, 26, 3, 6, 8, 28, 27, 23, 25, 7, 11, 22, 10, 24, 19, 4, 16, 9, 21, 2, 20, 5, 1, 13, 29],[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,21,23,24,25,26,27,28,29]]))
 # Run the genetic algorithm
-best_route, best_distance = genetic_algorithm(distance_matrix,50,generations=10000,mutation_rate=0.05, number_of_crossover = 250, elite_percent=0.1, iteration_without_improvement=100)
+best_route, best_distance = genetic_algorithm(distance_matrix,500,generations=8000,mutation_rate=0.1, number_of_crossover = 1000, elite_percent=0.1, iteration_without_improvement=40000)
 
 print("Best Route:", best_route)
 print("Best Distance:", best_distance)

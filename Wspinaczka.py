@@ -112,12 +112,16 @@ def checkRouteWithNeighbour(distanceMatrix,cityOrder,index):
     return distanceMatrix[cityOrder[index],cityOrder[index-1]]+distanceMatrix[cityOrder[index],cityOrder[0]]
 """
 
-def ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIterationWithoutImprovement,cities, method="swapping" ):
+def ClimbingAlghoritm(distanceMatrix,cityOrder,howManyIterationWithoutImprovement,cities, method="reverse", howManyIteration = None ):
 
     i = 0
     k = 0
+    iteration = howManyIterationWithoutImprovement
+    if howManyIteration is not None:
+        iteration = howManyIteration
 
-    while i < howManyIterationWithoutImprovement:
+
+    while i < iteration:
         #newCityOrder = swapCities(cityOrder)
 
         indexOfTable = random.sample(cities, 2)
@@ -139,7 +143,7 @@ def ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIterationWithout
         cityOrder = changeCityOrder[0]
         i = i+1
         k= k+1
-        if changeCityOrder[1] == True: #If change city order
+        if changeCityOrder[1] == True and howManyIteration is None: #If change city order
             i = 0
     #print(k)
     return cityOrder    
@@ -152,11 +156,11 @@ def getSumOfCities(distanceMatrix,cityOrders):
     return sum
         
 
-def makeIteration(repetition,distanceMatrix,howManyIterationWithoutImprovem,acceptanceValue,method="swapping"):
+def makeIteration(repetition,distanceMatrix,howManyIterationWithoutImprovem,acceptanceValue,method="reverse", howManyIteration = None):
     for i in range (repetition):
         cityOrder = getRandomRouteCities(distanceMatrix.shape[0]) #ile wierszy
         cities = range(len(cityOrder))
-        finalCitiesOrder = ClimbingAlghoritmBySwapping(distanceMatrix,cityOrder,howManyIterationWithoutImprovem,cities,method)
+        finalCitiesOrder = ClimbingAlghoritm(distanceMatrix,cityOrder,howManyIterationWithoutImprovem,cities,method,howManyIteration)
         sumOfFinalResult = getSumOfCities(distanceMatrix,finalCitiesOrder)
         print(sumOfFinalResult)
         print(finalCitiesOrder)
@@ -284,7 +288,7 @@ start_time = time.time()
 
 
 
-makeIteration(100,distance_matrix,2200,2000,method="reverse")
+makeIteration(1,distance_matrix,2200,2000,method="reverse",howManyIteration = 1000000)
 
 
 
