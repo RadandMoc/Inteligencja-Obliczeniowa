@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from enum import Enum
 import random
 import csv
-from tqdm import tqdm
+
 class InitializationMethod(Enum):
     RANDOM = "random"
     HE = "he"
@@ -333,7 +333,7 @@ def neural_network(X, Y, layers_dims, learning_rate, epoka):
     parameters = initialize_parameters_deep(layers_dims)
 
     # Loop (gradient descent)
-    for i in tqdm(range(0, epoka)):
+    for i in range(0, epoka):
 
         # Forward propagation
         actual_layers,  activations_history = forward_propagation(X, parameters)
@@ -381,10 +381,10 @@ test_label = np.transpose(list_of_datas[3])
 
 
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-layers_dims = [784, 70, 60, 50, 40, 30, 20, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
+layers_dims = [784, 700, 600, 500, 400, 300, 200, 100, 50, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.005, epoka=100)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.0005, epoka=22)
 predictions, _ = check_test(test_data, parameters)
 #print(predictions)
 print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))

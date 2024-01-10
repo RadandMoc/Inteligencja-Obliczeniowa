@@ -171,12 +171,6 @@ def crossover2(parents):
     child2 = c2.tolist()
     return child1, child2
 
-# def crossover(parents):
-#     crossover_point = random.randint(1, len(parents[0]) - 1)
-#     child1 = parents[0][:crossover_point] + [city for city in parents[1] if city not in parents[0][:crossover_point]]
-#     child2 = parents[1][:crossover_point] + [city for city in parents[0] if city not in parents[1][:crossover_point]]
-#     return child1, child2
-
 def mutate(individual, mutation_rate):
     # No change needed here, the function is efficient
     if random.random() < mutation_rate:
@@ -241,7 +235,7 @@ distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
 
 #print(crossover([[12, 18, 17, 14, 15, 26, 3, 6, 8, 28, 27, 23, 25, 7, 11, 22, 10, 24, 19, 4, 16, 9, 21, 2, 20, 5, 1, 13, 29],[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,21,23,24,25,26,27,28,29]]))
 # Run the genetic algorithm
-best_route, best_distance = genetic_algorithm(distance_matrix,50,generations=1000,mutation_rate=0.05, number_of_crossover = 250, elite_percent=0.1)
+best_route, best_distance = genetic_algorithm(distance_matrix,50,generations=10000,mutation_rate=0.05, number_of_crossover = 250, elite_percent=0.1)
 
 print("Best Route:", best_route)
 print("Best Distance:", best_distance)
