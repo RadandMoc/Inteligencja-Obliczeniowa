@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import random
 from tqdm import tqdm
-
+import datetime
 
 #Zwykly
 """
@@ -198,15 +198,35 @@ def crossover2(parents):
     return child1, child2
 
 def mutate(individual, mutation_rate):
-    # No change needed here, the function is efficient
     if random.random() < mutation_rate:
         idx1, idx2 = np.random.choice(len(individual), 2, replace=False)
-        individual[idx1], individual[idx2] = individual[idx2], individual[idx1]
+        #individual[idx1], individual[idx2] = individual[idx2], individual[idx1]
+    
+        if idx1 > idx2:
+            idx1, idx2 = idx2 , idx1
+        individual = reverse_subarray(individual,idx1,idx2)
+        
     return individual
+
+
+def reverse_subarray(arr, i, j):
+    reverseArray = arr.copy()
+    reverseArray[i:j + 1] = reverseArray[i:j + 1][::-1]
+    return reverseArray
+
+
+def save_the_best_individual(individual, total_route_length, generation ,filename):
+    with open(filename, 'a') as file:
+        for element in individual:
+            file.write(str(element+1) + ' ')
+        file.write(f"\n Całkowita Długość trasy dla najlepszego osobnika generacji {generation} to {total_route_length}\n")
+        
+        
+
 
 # Optimized Genetic Algorithm
 
-def genetic_algorithm(distances, population_size=100, generations=500, mutation_rate=0.01, number_of_crossover=900, elite_percent=0.1, iteration_without_improvement=200):
+def genetic_algorithm(distances, population_size=100, generations=500, mutation_rate=0.01, number_of_crossover=900, elite_percent=0.1, iteration_without_improvement=200, history_of_best_results_for_generation = False):
     num_cities = distances.shape[0]
     population = initialize_population(population_size, num_cities)
     fitness_scores = calculate_fitness_vectorized(population, distances)
@@ -215,6 +235,22 @@ def genetic_algorithm(distances, population_size=100, generations=500, mutation_
     best_index_of_first_population = np.argmin(fitness_scores)
     first_best_score = fitness_scores[best_index_of_first_population]
     number_without_improvement = 0
+
+    current_time = datetime.datetime.now()
+
+        # Formatowanie daty i czasu jako łańcucha znaków (np. '2024-01-10_15-30-45')
+    formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+
+    # Nazwa pliku z datą i czasem
+    file_name = f"plik_{formatted_time}_for_{num_cities}.txt"
+
+    formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+    if history_of_best_results_for_generation == True:
+        with open(file_name, 'a') as file:
+            file.write("Historia najlepszych osobników dla podanych parametrów: \n")
+            file.write(f"population_size = {population_size}, liczba generacji = {generations}, mutacja = {mutation_rate}, liczba krzyżówek = {number_of_crossover}, elite_percent={elite_percent}, iteracje bez poprawy = {iteration_without_improvement}  \n")
+
+
 
     for generation in tqdm(range(generations)):
         # Tournament selection for parents
@@ -259,6 +295,9 @@ def genetic_algorithm(distances, population_size=100, generations=500, mutation_
                 break
         # Save best score of generation for the next checking 
         best_score_of_pregeneration = fitness_scores[best_index_of_generation]
+        if history_of_best_results_for_generation == True and number_without_improvement == 0:
+            save_the_best_individual(population[best_index_of_generation], best_score_of_pregeneration, generation ,file_name )
+
 
     # Find the best solution in the final population
 
@@ -279,8 +318,8 @@ def genetic_algorithm(distances, population_size=100, generations=500, mutation_
 
 
 # Read distances from the provided Excel file
-#readData=pd.read_csv("Dane_TSP_127.csv",sep=";", decimal=',')
-readData=pd.read_csv("Dane_TSP_76.csv",sep=";", decimal=',')
+readData=pd.read_csv("Dane_TSP_127.csv",sep=";", decimal=',')
+#readData=pd.read_csv("Dane_TSP_76.csv",sep=";", decimal=',')
 
 #readData=pd.read_csv("Miasta29.csv",sep=";", decimal=',')
 
@@ -289,7 +328,7 @@ distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
 
 #print(crossover([[12, 18, 17, 14, 15, 26, 3, 6, 8, 28, 27, 23, 25, 7, 11, 22, 10, 24, 19, 4, 16, 9, 21, 2, 20, 5, 1, 13, 29],[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,21,23,24,25,26,27,28,29]]))
 # Run the genetic algorithm
-best_route, best_distance = genetic_algorithm(distance_matrix,500,generations=8000,mutation_rate=0.1, number_of_crossover = 1000, elite_percent=0.1, iteration_without_improvement=40000)
+best_route, best_distance = genetic_algorithm(distance_matrix,50,generations=100,mutation_rate=0.1, number_of_crossover = 250, elite_percent=0.1, iteration_without_improvement=40, history_of_best_results_for_generation=True)
 
 print("Best Route:", best_route)
 print("Best Distance:", best_distance)
