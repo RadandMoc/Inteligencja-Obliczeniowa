@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 import pandas as pd
 import random
@@ -184,7 +186,9 @@ def calculate_distance(neighborhood_moves, current_route, current_distance, citi
     city2 = route[idx2]
     new_route = np.copy(current_route)
     new_distance, new_route = get_difference(method, new_route, current_route, cities_df, current_distance, idx1, idx2)
-    return new_distance, new_route, city1, city2
+    return new_distance, new_route, idx1, idx2
+
+
 # Aktualizacja listy tabu
 def update_tabu_list(tabu_list, new_solution, tabu_tenure):
     tabu_list.append(new_solution)
@@ -193,56 +197,60 @@ def update_tabu_list(tabu_list, new_solution, tabu_tenure):
 
 def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_tenure=7):
     start_time = time.time()  # Początek pomiaru czasu
-
-    readData = pd.read_csv(csv_file, sep=";", decimal=',')
-    cities_df = readData.iloc[:, 1:].astype(float).to_numpy()
+    read_data = pd.read_csv(csv_file, sep=";", decimal=',')
+    cities_df = read_data.iloc[:, 1:].astype(float).to_numpy()
 
     num_cities = len(cities_df)
-    overall_best_solution = list(range(0, num_cities))
+    current_solution = list(range(0, num_cities))
+    random.shuffle(current_solution)
+    overall_best_solution = current_solution
     overall_best_distance = calculate_route_distance(overall_best_solution, cities_df)
-    random.shuffle(overall_best_solution)
+
+    tabu_list = []
 
     for n in tqdm(range(iterations)):
-        current_solution = list(range(0, num_cities))
-        random.shuffle(current_solution)
+        neighbor_current_distance = sys.maxsize
+        best_distance_in_tabu = sys.maxsize
+        best_solution_in_tabu = []
         best_solution = current_solution
-        best_distance = calculate_route_distance(best_solution, cities_df)
-        tabu_list = []
-        rep_counter = 0
-        i = 0
-        #for i in range(iterations):
-        while True:
-            neighborhood_moves = generate_neighborhood(best_solution)
-            current_route = current_solution
-            current_distance = calculate_route_distance(current_route, cities_df)
-            best_move = []
-            best_neighbor = None
-            for neighbor in neighborhood_moves:
-                new_distance, new_route, city1, city2 = calculate_distance(neighbor, current_route, current_distance, cities_df, method)
-                if (city1 > city2):
-                    city1, city2 = city2, city1
-                neighbor_move = [city1, city2]
-                if (new_distance < current_distance):  # Sprawdzam czy dystans jest mniejszy
-                    current_distance = new_distance
-                    current_route = new_route
-                    best_neighbor = new_route
-                    best_move = neighbor_move
-            update_tabu_list(tabu_list, best_move, tabu_tenure)
+        best_distance = calculate_route_distance(current_solution, cities_df)
+        neighborhood_moves = generate_neighborhood(best_solution)
+        best_move = []
+        best_neighbor = None
+        for neighbor in neighborhood_moves:
+            new_distance, new_route, idx1, idx2 = calculate_distance(neighbor, best_solution, best_distance, cities_df, method)
+            if (idx1 > idx2):
+                idx1, idx2 = idx2, idx1
+            neighbor_move = [idx1, idx2]
 
-            if best_neighbor is not None:
-                current_solution = best_neighbor
-                current_distance = calculate_route_distance(current_solution, cities_df)
-                if current_distance < best_distance:
-                    best_solution = current_solution
-                    best_distance = current_distance
-                    #print(best_distance)
-                    rep_counter = 0
+            if (neighbor_move in tabu_list):
+                if(new_distance < best_distance_in_tabu):
+                    best_distance_in_tabu = new_distance
+                    best_solution_in_tabu = new_route
+                continue
+            if (new_distance < neighbor_current_distance):  # Sprawdzam czy dystans jest mniejszy
+                neighbor_current_distance = new_distance
+                best_neighbor = new_route
+                best_neighbor_distance = new_distance
+                best_move = neighbor_move
+
+
+        if best_neighbor is not None and best_move is not None:
+            current_solution = best_neighbor
+            current_distance = best_neighbor_distance
+            if current_distance < best_distance:
+                best_solution = current_solution
+                best_distance = current_distance
+                update_tabu_list(tabu_list, best_move, tabu_tenure)
+            elif best_distance_in_tabu < best_distance:
+                best_solution = best_solution_in_tabu
+                best_distance = best_distance_in_tabu
+                update_tabu_list(tabu_list, [], tabu_tenure) #pusta tablica po to, żeby odjęło 1 od kolejki tabu
             else:
-                rep_counter += 1
-
-            if rep_counter == critic_counter:
-
-                break
+                best_solution = current_solution
+                best_distance = current_distance
+                update_tabu_list(tabu_list, best_move, tabu_tenure)
+            print(best_distance, tabu_list)
 
         if(best_distance < overall_best_distance):
             overall_best_distance = best_distance
@@ -253,9 +261,9 @@ def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_
     end_time = time.time()  # Koniec pomiaru czasu
     elapsed_time = end_time - start_time
     with open(output_file, "a") as file:
-        file.write(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
-        print(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
+        file.write(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nCritic counter: {critic_counter}\nMethod: {method}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
+        print(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nCritic counter: {critic_counter}\nMethod: {method}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
     return overall_best_solution
 
 # Przykładowe użycie
-best_solution = tabu_search('Dane_TSP_76.csv', "ResultsTabuSearch.txt",iterations=40000, critic_counter=10, method= Method.Reverse, tabu_tenure=10)
+best_solution = tabu_search('Dane_TSP_127.csv', "ResultsTabuSearch.txt",iterations=400, critic_counter =500, method= Method.Reverse, tabu_tenure=10)
