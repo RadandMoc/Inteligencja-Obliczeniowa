@@ -223,13 +223,13 @@ def compute_cost(model_results, Y):
     cost = -np.sum(Y * np.log(model_results + 1e-4))/Y.shape[1]
     return cost
 
-def get_function_activation_order(layer_dims, want_defult_setup=True, input = None):
-    if want_defult_setup == True:
+def get_function_activation_order(layer_dims,want_default_setup=True,input = None):
+    if want_default_setup == True:
         function_activation_order =  [ActivationFunction.Relu for x in range(len(layer_dims)-2)]
         function_activation_order.append(ActivationFunction.Softmax)
         return function_activation_order 
     else:
-        translate_function_order(layer_dims,input)
+        return translate_function_order(layer_dims,input)
 
 def translate_function_order(layer_dims,function_activation_order):
     activation_order = []
@@ -501,11 +501,12 @@ test_label = np.transpose(list_of_datas[3])
 #print(str(np.shape(test_data)))
 
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-layers_dims = [784, 392, 196, 98, 49, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
+layers_dims = [784, 392, 196, 98, 49, 24 ,10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
+#layers_dims = [784, 320, 160, 80, 40, 20 ,10]
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-order = get_function_activation_order(layers_dims)
+order = get_function_activation_order(layers_dims,False,input=[(ActivationFunction.Sigmoid,3),(ActivationFunction.Relu,2)])
 
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.002, epoka=150, percent_of_validation_data=0.25, which_worse_prediction_stop_learning = 6, function_activation_order = order, initzializing_method = InitializationMethod.HE)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.005, epoka=150, percent_of_validation_data=0.1, which_worse_prediction_stop_learning = 6, function_activation_order = order)
 predictions, _ = check_test(test_data, parameters,order)
 #print(predictions)
 #print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
