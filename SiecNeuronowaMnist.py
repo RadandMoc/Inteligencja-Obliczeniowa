@@ -218,17 +218,6 @@ def activation_function_forward(A_prev, weights, bias, activation):
 
     return A, (A_prev,Z)
 
-def linear_activation_forward(A_prev, W, b, activation): 
-    """activation na enum i zmienić mu nazwę. można dodać więcej funkcji aktywacji"""
-    if activation == "relu":
-        neurons, linear_forward_history = linear_forward(A_prev, W, b)
-        A, activation_history = relu(neurons)
-    elif activation == "softmax":
-        neurons, linear_forward_history = linear_forward(A_prev, W, b)
-        A, activation_history = softmax(neurons)
-    activations_history = (linear_forward_history, activation_history)
-    return A, activations_history
-
 # Obliczanie entropii krzyżowej
 def compute_cost(model_results, Y):
     cost = -np.sum(Y * np.log(model_results + 1e-4))/Y.shape[1]
@@ -335,7 +324,7 @@ def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
     for l in range(1, len(layers_dims)):
         weight = 0
         if method == InitializationMethod.HE:
-            weight = np.random.randn(layers_dims[l], layers_dims[l - 1]) / np.sqrt(layers_dims[l - 1])
+            weight = np.random.randn(layers_dims[l], layers_dims[l - 1]) * np.sqrt(2/layers_dims[l - 1])
             #save_array_as_csv(weight,"wagi_grubasa.csv")
         elif method == InitializationMethod.XAVIER_GLOROT:
             limit = np.sqrt(6 / (layers_dims[l - 1] + layers_dims[l]))
@@ -501,7 +490,7 @@ all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
 all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
 
 # Dzielenie danych na zbiór uczący i testowy
-percent_of_test_data = 0.4
+percent_of_test_data = 0.2
 list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,TrainingSetSelection.STRATIFIEDSAMPLING)
 train_data = np.transpose(list_of_datas[0])
 train_label = np.transpose(list_of_datas[1])
@@ -516,7 +505,7 @@ layers_dims = [784, 392, 196, 98, 49, 10] # Do każdego debila który będzie to
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 order = get_function_activation_order(layers_dims)
 
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.002, epoka=150, percent_of_validation_data=0.2, which_worse_prediction_stop_learning = 6, function_activation_order = order)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.002, epoka=150, percent_of_validation_data=0.25, which_worse_prediction_stop_learning = 6, function_activation_order = order, initzializing_method = InitializationMethod.HE)
 predictions, _ = check_test(test_data, parameters,order)
 #print(predictions)
 #print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
