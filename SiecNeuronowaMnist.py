@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from enum import Enum
 import random
 import csv
@@ -266,17 +265,6 @@ def calculate_layer_gradients(dA, activations_history, weights, activation):
     dA_prev, dW, db = linear_backward(dZ, A_prev, weights)
     return dA_prev, dW, db
 
-def linear_activation_backward(dA, activations_history, activation):
-    """activation na enum i zmienić mu nazwę. można dodać więcej funkcji aktywacji"""
-    linear_cache, activation_history = activations_history
-    if activation == "relu":
-        dZ = relu_backward(dA, activation_history)
-        dA_prev, dW, db = linear_backward(dZ, linear_cache)
-    elif activation == "softmax":
-        dZ = softmax_backward(dA, activation_history)
-        dA_prev, dW, db = linear_backward(dZ, linear_cache)
-    return dA_prev, dW, db
-
 def backward_propagation(Y, actual_layers, activations_history, parameters, function_activation_order):
     gradients = {}
     L = len(activations_history)  # Liczba warstw
@@ -327,7 +315,6 @@ def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
         weight = 0
         if method == InitializationMethod.HE:
             weight = np.random.randn(layers_dims[l], layers_dims[l - 1]) * np.sqrt(2/layers_dims[l - 1])
-            #save_array_as_csv(weight,"wagi_grubasa.csv")
         elif method == InitializationMethod.XAVIER_GLOROT:
             limit = np.sqrt(6 / (layers_dims[l - 1] + layers_dims[l]))
             weight = np.random.uniform(-limit, limit, (layers_dims[l], layers_dims[l - 1]))
@@ -343,12 +330,9 @@ def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
 def forward_propagation(X, parameters, function_activation_order):
     activations_history = []
     A = X
-    #save_array_as_csv(X,"tweeter_Tomka.csv")
     # Iteracja przez warstwy sieci
     for layer in range(len(parameters[0])):
-        #print(str(layer) + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         A_prev = A 
-        #save_array_as_csv(A_prev,"ArrajTomka.csv")
         weights = parameters[0][layer]
         bias = parameters[1][layer]
         activation = function_activation_order[layer]
@@ -499,20 +483,11 @@ train_label = np.transpose(list_of_datas[1])
 test_data = np.transpose(list_of_datas[2])
 test_label = np.transpose(list_of_datas[3])
 
-#print(str(np.shape(train_data)))
-#print(str(np.shape(test_data)))
-
-# Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-layers_dims = [784, 392, 196, 98, 49, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-#layers_dims = [784, 320, 160, 80, 40, 20 ,10]
-# Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
+layers_dims = [784, 392, 196, 98, 49, 10]
 order = get_function_activation_order(layers_dims)
 
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.005, epoka=250, percent_of_validation_data=0, which_worse_prediction_stop_learning = 6, function_activation_order = order)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.005, epoka=250, percent_of_validation_data=0.25, which_worse_prediction_stop_learning = 8, function_activation_order = order, initzializing_method = InitializationMethod.HE)
 predictions, _ = check_test(test_data, parameters,order)
-#print(predictions)
-#print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
-#print(str(np.max(predictions)))
 predictions = translate_matrix_of_probabilities_to_matrix_of_answers(np.transpose(predictions))
 print(str(matrix_comparison(predictions,np.transpose(test_label))))
 save_array_as_csv(predictions,'Answers.csv')
