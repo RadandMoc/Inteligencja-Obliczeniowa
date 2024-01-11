@@ -178,7 +178,6 @@ def generate_neighborhood(route):
 
 # Wybieranie najlepszego sąsiedztwa spośród sąsiadów, które nie są na liście tabu
 def calculate_distance(neighborhood_moves, current_route, current_distance, cities_df, method):
-    # distance = 0
     route = neighborhood_moves[0]
     idx1 = neighborhood_moves[1][0]
     idx2 = neighborhood_moves[1][1]
@@ -195,7 +194,7 @@ def update_tabu_list(tabu_list, new_solution, tabu_tenure):
     if len(tabu_list) > tabu_tenure:
         tabu_list.pop(0)
 
-def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_tenure=7):
+def tabu_search(csv_file, output_file, iterations, iterations_without_improvement, method, tabu_tenure=7):
     start_time = time.time()  # Początek pomiaru czasu
     read_data = pd.read_csv(csv_file, sep=";", decimal=',')
     cities_df = read_data.iloc[:, 1:].astype(float).to_numpy()
@@ -207,7 +206,7 @@ def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_
     overall_best_distance = calculate_route_distance(overall_best_solution, cities_df)
 
     tabu_list = []
-
+    no_improvement_counter = 0
     for n in tqdm(range(iterations)):
         neighbor_current_distance = sys.maxsize
         best_distance_in_tabu = sys.maxsize
@@ -242,7 +241,7 @@ def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_
                 best_solution = current_solution
                 best_distance = current_distance
                 update_tabu_list(tabu_list, best_move, tabu_tenure)
-                #print(f"First condition: {best_distance}\nList: {tabu_list}\nMove: {best_move}")
+                #print(f"First condition: {best_distance}\nList: {tabu_list}\nMove: {best_move}\nRoute: {best_solution}")
             elif best_distance_in_tabu < overall_best_distance: #and random.random() < 0.2:
                 best_solution = best_solution_in_tabu
                 best_distance = best_distance_in_tabu
@@ -257,15 +256,21 @@ def tabu_search(csv_file, output_file, iterations, critic_counter, method, tabu_
         if(best_distance < overall_best_distance):
             overall_best_distance = best_distance
             overall_best_solution = best_solution
+            no_improvement_counter = 0
+        else:
+            no_improvement_counter += 1
+            if no_improvement_counter >= iterations_without_improvement:
+                break
+
     # Zapisz wynik do pliku tx
     #end timer
     end_time = time.time()  # Koniec pomiaru czasu
     elapsed_time = end_time - start_time
     with open(output_file, "a") as file:
-        file.write(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nCritic counter: {critic_counter}\nMethod: {method}\nTabu tenure: {tabu_tenure}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
-        print(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nCritic counter: {critic_counter}\nMethod: {method}\nTabu tenure: {tabu_tenure}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
+        file.write(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nIterations without improvement: {iterations_without_improvement}\nMethod: {method}\nTabu tenure: {tabu_tenure}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
+        print(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nIterations without improvement: {iterations_without_improvement}\nMethod: {method}\nTabu tenure: {tabu_tenure}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
     return overall_best_solution
 
 # Przykładowe użycie
 # best_solution = tabu_search('Dane_TSP_127.csv', "ResultsTabuSearch.txt",iterations=400, critic_counter =500, method= Method.Insertion, tabu_tenure=100)
-best_solution = tabu_search('Dane_TSP_48.csv', "ResultsTabuSearch.txt",iterations=10000, critic_counter =500, method= Method.Reverse, tabu_tenure=200)
+best_solution = tabu_search('Dane_TSP_76.csv', "ResultsTabuSearch.txt",iterations=1000, iterations_without_improvement =500, method= Method.Reverse, tabu_tenure=400)
