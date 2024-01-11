@@ -262,6 +262,8 @@ def calculate_layer_gradients(dA, activations_history, weights, activation):
         dZ = sigmoid_backward(dA, Z)
     elif activation == ActivationFunction.Tanh:
         dZ = tanh_backward(dA, Z)
+    else:
+        raise Exception("Wprowadzona funkcja nie istnieje")
     dA_prev, dW, db = linear_backward(dZ, A_prev, weights)
     return dA_prev, dW, db
 
@@ -281,7 +283,7 @@ def backward_propagation(Y, actual_layers, activations_history, parameters, func
 
     return gradients
 
-def update_parameters(parameters, grads, learning_rate):
+def get_new_parameters(parameters, grads, learning_rate):
     weights = parameters[0]
     bias = parameters[1]
     L = len(weights)
@@ -297,17 +299,6 @@ def check_test(X, params, order):
 
 
 def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
-    """
-    Inicjalizuje wagi i biasy dla każdej warstwy w sieci neuronowej zgodnie z wybraną metodą.
-
-    Argumenty:
-    layers_dims -- lista zawierająca liczbę neuronów w każdej warstwie.
-    method -- metoda inicjalizacji (InitializationMethod).
-
-    Zwraca:
-    parameters -- lista słowników, gdzie każdy słownik zawiera wagi i biasy dla jednej warstwy.
-    """
-
     weights = []
     biases = [] 
 
@@ -379,21 +370,6 @@ def matrix_comparison(arr1, arr2):
     return returner / rows if rows > 0 else 0
 
 def neural_network(X, Y, layers_dims, learning_rate, epoka, function_activation_order, percent_of_validation_data = 0, which_worse_prediction_stop_learning = 5, initzializing_method = InitializationMethod.HE):
-    """
-    Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SOFTMAX.
-    
-    Arguments:
-    X -- data, numpy array of shape (number of examples, num_px * num_px * 3)
-    Y -- true "label" vector (containing 0 if non-cat, 1 if cat), of shape (1, number of examples)
-    layers_dims -- dimensions of the layers (n_x, n_h, n_y)
-    learning_rate -- learning rate of the gradient descent update rule
-    epoka -- number of iterations of the optimization loop.
-    percent_of_validation_data -- how much data want for validation data
-    
-    Returns:
-    parameters -- parameters learnt by the model. They can then be used to predict.
-    """
-    
     np.random.seed(1)
     costs = []                         # keep track of cost
     
@@ -428,7 +404,7 @@ def neural_network(X, Y, layers_dims, learning_rate, epoka, function_activation_
             old_parameters = copy.deepcopy(parameters)
         
         # Update parameters
-        parameters = update_parameters(parameters, grads, learning_rate)
+        parameters = get_new_parameters(parameters, grads, learning_rate)
         
         # Print the cost every 100 training example
         if i % 10 == 0:
