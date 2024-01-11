@@ -66,7 +66,7 @@ def add_random_data(how_much_data_add, index_of_col, data, labels, return_only_n
             index_of_adding_row = random.randint(0, (num_of_labels-1))
             new_data = np.vstack([new_data, wanted_data[index_of_adding_row]])
             new_labels = np.vstack([new_labels, wanted_labels[index_of_adding_row]])
-            return new_data, new_labels
+        return new_data, new_labels
 
 # Dzielenie danych na zbior uczacy i walidacyjny
 def split_data_for_validation(data,labels,test_sample_percent):
@@ -116,7 +116,7 @@ def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
         returner1 = extend_array(labels[random_numbers])
         returner2 = extend_array(labels[numbers_for_test])
         print(str(np.shape(data[random_numbers,:])))
-        print(str(np.shape(data[random_numbers,:])))
+        print(str(np.shape(data[numbers_for_test,:])))
         return data[random_numbers,:], returner1, data[numbers_for_test,:], returner2
     elif TrainingSetSelection.RANDOMWITHIMPORTANCE == type_of_split:
         train_data, train_label, test_data, test_label = get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split = TrainingSetSelection.RANDOM)
@@ -125,6 +125,8 @@ def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
             numbers_of_datas[i] = np.count_nonzero(train_label[:, i] == 1)
         for i in range(0,10):
             train_data, train_label = add_random_data(max(numbers_of_datas) - numbers_of_datas[i], i, train_data, train_label, False)
+        print(str(np.shape(train_data)))
+        print(str(np.shape(test_data)))
         return train_data, train_label, test_data, test_label
     else:
         split_index = int((1-test_sample_percent) * data_length)
