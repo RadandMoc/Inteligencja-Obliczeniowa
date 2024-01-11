@@ -8,7 +8,7 @@ import time
 from tqdm import tqdm
 from enum import Enum
 
-#create enum Method with "reverse" and "swap" values
+
 class Method(Enum):
     Swap = 1
     Insertion = 2
@@ -43,6 +43,8 @@ def get_cities(cityOrder: np.array, firstIdx: int, secondIdx: int): # Funkcja, k
         firstIdx + 1)])  # Zbieram sąsiadów dla pierwszego miasta w funkcji city jest modulo by uniknac błedu wyjscia indeksu poza zakres dla firstidx=len(cityOrder)-1
     neighbourOfSecondIndex = np.array([city(secondIdx - 1), city(secondIdx + 1)])
     return neighbourOfFirstIndex, neighbourOfSecondIndex # Zwracamy dwóch sąsiadów dla dwóch indeksów (nr miast)
+
+#Obliczanie dystansu dla pełnej trasy
 def calculate_route_distance(route, cities_df):
     sum = 0
     for i in range(-1,len(route)-1):
@@ -120,7 +122,6 @@ def check_if_we_get_better_route_reverse(distanceMatrix: np.array, cityOrder: np
                    distanceMatrix[cityOrder[firstIdx], cityOrder[(secondIdx + 1) % lenOfCityOrder]]) # Działamy tak, gdyż tylko te odległości się zmieniają przy odwracaniu.
     return lengthAfter - lengthBefore
 
-# FUNKCJA DO ODWRACANIA
 def reverseMethod(order, firstIdx,secondIdx):
     reverseOrder = order.copy()
     reverseOrder[firstIdx:secondIdx + 1] = reverseOrder[firstIdx:secondIdx + 1][::-1]
@@ -176,7 +177,7 @@ def generate_neighborhood(route):
     neighborhood_moves = list(zip(neighborhood, moves))
     return neighborhood_moves
 
-# Wybieranie najlepszego sąsiedztwa spośród sąsiadów, które nie są na liście tabu
+# Obliczanie dystansu
 def calculate_distance(neighborhood_moves, current_route, current_distance, cities_df, method):
     route = neighborhood_moves[0]
     idx1 = neighborhood_moves[1][0]
@@ -195,7 +196,7 @@ def update_tabu_list(tabu_list, new_solution, tabu_tenure):
         tabu_list.pop(0)
 
 def tabu_search(csv_file, output_file, iterations, iterations_without_improvement, method, tabu_tenure=7):
-    start_time = time.time()  # Początek pomiaru czasu
+    start_time = time.time()
     read_data = pd.read_csv(csv_file, sep=";", decimal=',')
     cities_df = read_data.iloc[:, 1:].astype(float).to_numpy()
 
@@ -216,6 +217,8 @@ def tabu_search(csv_file, output_file, iterations, iterations_without_improvemen
         neighborhood_moves = generate_neighborhood(best_solution)
         best_move = []
         best_neighbor = None
+        best_neighbor_distance = 0
+
         for neighbor in neighborhood_moves:
             new_distance, new_route, idx1, idx2 = calculate_distance(neighbor, best_solution, best_distance, cities_df, method)
             if (idx1 > idx2):
@@ -227,7 +230,7 @@ def tabu_search(csv_file, output_file, iterations, iterations_without_improvemen
                     best_distance_in_tabu = new_distance
                     best_solution_in_tabu = new_route
                 continue
-            if (new_distance < neighbor_current_distance):  # Sprawdzam czy dystans jest mniejszy
+            if (new_distance < neighbor_current_distance):
                 neighbor_current_distance = new_distance
                 best_neighbor = new_route
                 best_neighbor_distance = new_distance
@@ -241,17 +244,14 @@ def tabu_search(csv_file, output_file, iterations, iterations_without_improvemen
                 best_solution = current_solution
                 best_distance = current_distance
                 update_tabu_list(tabu_list, best_move, tabu_tenure)
-                #print(f"First condition: {best_distance}\nList: {tabu_list}\nMove: {best_move}\nRoute: {best_solution}")
-            elif best_distance_in_tabu < overall_best_distance: #and random.random() < 0.2:
+            elif best_distance_in_tabu < overall_best_distance:
                 best_solution = best_solution_in_tabu
                 best_distance = best_distance_in_tabu
                 update_tabu_list(tabu_list, [], tabu_tenure) #pusta tablica po to, żeby odjęło 1 od kolejki tabu
-                #print(f"Second condition: {best_distance}\nList: {tabu_list}\nMove: {best_move}")
             else:
                 best_solution = current_solution
                 best_distance = current_distance
                 update_tabu_list(tabu_list, best_move, tabu_tenure)
-                #print(f"Third condition: {best_distance}\nList: {tabu_list}\nMove: {best_move}")
 
         if(best_distance < overall_best_distance):
             overall_best_distance = best_distance
@@ -262,9 +262,7 @@ def tabu_search(csv_file, output_file, iterations, iterations_without_improvemen
             if no_improvement_counter >= iterations_without_improvement:
                 break
 
-    # Zapisz wynik do pliku tx
-    #end timer
-    end_time = time.time()  # Koniec pomiaru czasu
+    end_time = time.time()
     elapsed_time = end_time - start_time
     with open(output_file, "a") as file:
         file.write(f"----------------\nFile: {csv_file}\nIterations: {iterations}\nIterations without improvement: {iterations_without_improvement}\nMethod: {method}\nTabu tenure: {tabu_tenure}\nBest solution: {overall_best_solution}\nDistance: {calculate_route_distance(overall_best_solution, cities_df)}\nTime: {elapsed_time}\n")
@@ -272,5 +270,4 @@ def tabu_search(csv_file, output_file, iterations, iterations_without_improvemen
     return overall_best_solution
 
 # Przykładowe użycie
-# best_solution = tabu_search('Dane_TSP_127.csv', "ResultsTabuSearch.txt",iterations=400, critic_counter =500, method= Method.Insertion, tabu_tenure=100)
-best_solution = tabu_search('Dane_TSP_76.csv', "ResultsTabuSearch.txt",iterations=1000, iterations_without_improvement =500, method= Method.Reverse, tabu_tenure=400)
+best_solution = tabu_search('Dane_TSP_76.csv', "ResultsTabuSearch.txt",iterations=10000, iterations_without_improvement =500, method= Method.Reverse, tabu_tenure=400)
