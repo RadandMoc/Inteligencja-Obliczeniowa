@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from enum import Enum
 import random
 import csv
@@ -263,18 +262,9 @@ def calculate_layer_gradients(dA, activations_history, weights, activation):
         dZ = sigmoid_backward(dA, Z)
     elif activation == ActivationFunction.Tanh:
         dZ = tanh_backward(dA, Z)
+    else:
+        raise Exception("Wprowadzona funkcja nie istnieje")
     dA_prev, dW, db = linear_backward(dZ, A_prev, weights)
-    return dA_prev, dW, db
-
-def linear_activation_backward(dA, activations_history, activation):
-    """activation na enum i zmienić mu nazwę. można dodać więcej funkcji aktywacji"""
-    linear_cache, activation_history = activations_history
-    if activation == "relu":
-        dZ = relu_backward(dA, activation_history)
-        dA_prev, dW, db = linear_backward(dZ, linear_cache)
-    elif activation == "softmax":
-        dZ = softmax_backward(dA, activation_history)
-        dA_prev, dW, db = linear_backward(dZ, linear_cache)
     return dA_prev, dW, db
 
 def backward_propagation(Y, actual_layers, activations_history, parameters, function_activation_order):
@@ -293,7 +283,7 @@ def backward_propagation(Y, actual_layers, activations_history, parameters, func
 
     return gradients
 
-def update_parameters(parameters, grads, learning_rate):
+def get_new_parameters(parameters, grads, learning_rate):
     weights = parameters[0]
     bias = parameters[1]
     L = len(weights)
@@ -309,17 +299,6 @@ def check_test(X, params, order):
 
 
 def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
-    """
-    Inicjalizuje wagi i biasy dla każdej warstwy w sieci neuronowej zgodnie z wybraną metodą.
-
-    Argumenty:
-    layers_dims -- lista zawierająca liczbę neuronów w każdej warstwie.
-    method -- metoda inicjalizacji (InitializationMethod).
-
-    Zwraca:
-    parameters -- lista słowników, gdzie każdy słownik zawiera wagi i biasy dla jednej warstwy.
-    """
-
     weights = []
     biases = [] 
 
@@ -327,7 +306,6 @@ def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
         weight = 0
         if method == InitializationMethod.HE:
             weight = np.random.randn(layers_dims[l], layers_dims[l - 1]) * np.sqrt(2/layers_dims[l - 1])
-            #save_array_as_csv(weight,"wagi_grubasa.csv")
         elif method == InitializationMethod.XAVIER_GLOROT:
             limit = np.sqrt(6 / (layers_dims[l - 1] + layers_dims[l]))
             weight = np.random.uniform(-limit, limit, (layers_dims[l], layers_dims[l - 1]))
@@ -343,12 +321,9 @@ def initialize_parameters(layers_dims, method=InitializationMethod.RANDOM):
 def forward_propagation(X, parameters, function_activation_order):
     activations_history = []
     A = X
-    #save_array_as_csv(X,"tweeter_Tomka.csv")
     # Iteracja przez warstwy sieci
     for layer in range(len(parameters[0])):
-        #print(str(layer) + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         A_prev = A 
-        #save_array_as_csv(A_prev,"ArrajTomka.csv")
         weights = parameters[0][layer]
         bias = parameters[1][layer]
         activation = function_activation_order[layer]
@@ -395,21 +370,6 @@ def matrix_comparison(arr1, arr2):
     return returner / rows if rows > 0 else 0
 
 def neural_network(X, Y, layers_dims, learning_rate, epoka, function_activation_order, percent_of_validation_data = 0, which_worse_prediction_stop_learning = 5, initzializing_method = InitializationMethod.HE):
-    """
-    Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SOFTMAX.
-    
-    Arguments:
-    X -- data, numpy array of shape (number of examples, num_px * num_px * 3)
-    Y -- true "label" vector (containing 0 if non-cat, 1 if cat), of shape (1, number of examples)
-    layers_dims -- dimensions of the layers (n_x, n_h, n_y)
-    learning_rate -- learning rate of the gradient descent update rule
-    epoka -- number of iterations of the optimization loop.
-    percent_of_validation_data -- how much data want for validation data
-    
-    Returns:
-    parameters -- parameters learnt by the model. They can then be used to predict.
-    """
-    
     np.random.seed(1)
     costs = []                         # keep track of cost
     
@@ -444,7 +404,7 @@ def neural_network(X, Y, layers_dims, learning_rate, epoka, function_activation_
             old_parameters = copy.deepcopy(parameters)
         
         # Update parameters
-        parameters = update_parameters(parameters, grads, learning_rate)
+        parameters = get_new_parameters(parameters, grads, learning_rate)
         
         # Print the cost every 100 training example
         if i % 10 == 0:
@@ -499,20 +459,11 @@ train_label = np.transpose(list_of_datas[1])
 test_data = np.transpose(list_of_datas[2])
 test_label = np.transpose(list_of_datas[3])
 
-#print(str(np.shape(train_data)))
-#print(str(np.shape(test_data)))
+layers_dims = [784, 392, 196, 98, 49, 10]
+order = get_function_activation_order(layers_dims)
 
-# Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-layers_dims = [784, 392, 196, 98, 49, 24 ,10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-#layers_dims = [784, 320, 160, 80, 40, 20 ,10]
-# Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-order = get_function_activation_order(layers_dims,False,input=[(ActivationFunction.Sigmoid,3),(ActivationFunction.Relu,2)])
-
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.005, epoka=150, percent_of_validation_data=0.1, which_worse_prediction_stop_learning = 6, function_activation_order = order)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.005, epoka=250, percent_of_validation_data=0.25, which_worse_prediction_stop_learning = 8, function_activation_order = order, initzializing_method = InitializationMethod.HE)
 predictions, _ = check_test(test_data, parameters,order)
-#print(predictions)
-#print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
-#print(str(np.max(predictions)))
 predictions = translate_matrix_of_probabilities_to_matrix_of_answers(np.transpose(predictions))
 print(str(matrix_comparison(predictions,np.transpose(test_label))))
 save_array_as_csv(predictions,'Answers.csv')
