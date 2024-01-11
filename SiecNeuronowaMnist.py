@@ -503,12 +503,12 @@ test_label = np.transpose(list_of_datas[3])
 #print(str(np.shape(test_data)))
 
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-layers_dims = [784, 392, 196, 98, 49, 24 ,10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
+layers_dims = [784, 392, 196, 98, 49, 10] # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
 #layers_dims = [784, 320, 160, 80, 40, 20 ,10]
 # Do każdego debila który będzie to zmieniał. PIERWSZA I OSTATNIA LICZBA NIE MA PRAWA SIĘ ZMIENIĆ !!!!!
-order = get_function_activation_order(layers_dims,False,input=[(ActivationFunction.Sigmoid,3),(ActivationFunction.Relu,2)])
+order = get_function_activation_order(layers_dims)
 
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.005, epoka=150, percent_of_validation_data=0.1, which_worse_prediction_stop_learning = 6, function_activation_order = order)
+parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.005, epoka=250, percent_of_validation_data=0, which_worse_prediction_stop_learning = 6, function_activation_order = order)
 predictions, _ = check_test(test_data, parameters,order)
 #print(predictions)
 #print("Macierz odpowiedzi ma rozmiary: " + str(np.shape(predictions)))
