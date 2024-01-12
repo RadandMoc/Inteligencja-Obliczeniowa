@@ -148,7 +148,6 @@ def genetic_algorithm(distances, population_size=100, generations=5000, mutation
             else:
                 number_without_improvement += 1
                 
-        # In other options
         else:
             if(fitness_scores[best_index_of_generation]<best_score_of_pregeneration): 
                 number_without_improvement = 0
@@ -166,15 +165,12 @@ def genetic_algorithm(distances, population_size=100, generations=5000, mutation
                     mutation_rate = max(mutation_rate-0.1, first_mutation_rate )
             if(number_without_improvement == iteration_without_improvement):
                 break
-        # Save best score of generation for the next checking 
         best_score_of_pregeneration = fitness_scores[best_index_of_generation]
         if history_of_best_results_for_generation == True and number_without_improvement == 0:
             average_route = sum(fitness_scores)
             save_the_best_individual(population[best_index_of_generation], best_score_of_pregeneration, generation ,file_name, average_route )
         
 
-
-    # Find the best solution in the final population
 
     best_index = np.argmin(fitness_scores)
     saveData(population[best_index],fitness_scores[best_index],population_size,generations,number_of_crossover,mutation_rate,iteration_without_improvement)
@@ -191,8 +187,6 @@ def genetic_algorithm(distances, population_size=100, generations=5000, mutation
 
 
 
-
-# Read distances from the provided Excel file
 #readData=pd.read_csv("Dane_TSP_127.csv",sep=";", decimal=',')
 #readData=pd.read_csv("Dane_TSP_76.csv",sep=";", decimal=',')
 readData=pd.read_csv("Dane_TSP_48.csv",sep=";", decimal=',')
@@ -203,10 +197,6 @@ distance_matrix = readData.iloc[:,1:].astype(float).to_numpy()
 
 
 
-
-
-#print(crossover([[12, 18, 17, 14, 15, 26, 3, 6, 8, 28, 27, 23, 25, 7, 11, 22, 10, 24, 19, 4, 16, 9, 21, 2, 20, 5, 1, 13, 29],[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,21,23,24,25,26,27,28,29]]))
-# Run the genetic algorithm
 for i in range(6):
     best_route, best_distance = genetic_algorithm(distance_matrix,50,generations=650,mutation_rate=0.05, number_of_crossover = 1000, elite_percent=0.1, iteration_without_improvement=27000)
 
