@@ -25,8 +25,8 @@ class ActivationFunction(Enum):
 # Funkcja przekształca array tworząc macierz odpowiedzi
 def extend_array(array):
     # Sprawdzenie czy w kolumnie znajdują się wartości od 0 do 9
-    unikalne_wartosci = np.unique(array)
-    if not np.array_equal(unikalne_wartosci, np.arange(10)):
+    unique_values = np.unique(array)
+    if not np.array_equal(unique_values, np.arange(10)):
         raise ValueError("Kolumna powinna zawierać wartości od 0 do 9")
 
     # Tworzenie nowego arraya z zerami o wymiarach: liczba wierszy x 10 kolumn
@@ -40,17 +40,17 @@ def extend_array(array):
 
 def add_random_data(how_much_data_add, index_of_col, data, labels, return_only_new_data):
     try:
-        indeksy = np.where(labels[:, index_of_col] == 1)[0]
+        indices = np.where(labels[:, index_of_col] == 1)[0]
     except IndexError:
         labels = extend_array(labels)
-        indeksy = np.where(labels[:, index_of_col] == 1)[0]
-    wanted_data = data[indeksy]
-    wanted_labels = labels[indeksy]
-    num_of_labels = np.shape(wanted_labels)[0]
+        indices = np.where(labels[:, index_of_col] == 1)[0]
+    selected_data = data[indices]
+    selected_labels = labels[indices]
+    num_of_labels = np.shape(selected_labels)[0]
     
     if return_only_new_data:
-        new_data = wanted_data.copy()  # Tworzenie kopii danych
-        new_labels = wanted_labels.copy()  # Tworzenie kopii etykiet
+        new_data = selected_data.copy()  # Tworzenie kopii danych
+        new_labels = selected_labels.copy()  # Tworzenie kopii etykiet
         indices_for_train =  random.sample(range(0, new_data.shape[0]), int(how_much_data_add))
         indices_for_test = [x for x in range(new_data.shape[0]) if x not in indices_for_train]
         new_test_data = new_data[indices_for_test,:]
@@ -63,39 +63,39 @@ def add_random_data(how_much_data_add, index_of_col, data, labels, return_only_n
         new_labels = labels.copy()  # Tworzenie kopii etykiet
         for _ in range(how_much_data_add):
             index_of_adding_row = random.randint(0, (num_of_labels-1))
-            new_data = np.vstack([new_data, wanted_data[index_of_adding_row]])
-            new_labels = np.vstack([new_labels, wanted_labels[index_of_adding_row]])
+            new_data = np.vstack([new_data, selected_data[index_of_adding_row]])
+            new_labels = np.vstack([new_labels, selected_labels[index_of_adding_row]])
         return new_data, new_labels
 
 # Dzielenie danych na zbior uczacy i walidacyjny
-def split_data_for_validation(data,labels,test_sample_percent):
+def split_data_for_validation(data, labels, test_sample_percent):
     numbers_of_datas = list(range(10))
-    for i in range(0,10):
+    for i in range(0, 10):
         numbers_of_datas[i] = np.count_nonzero(labels[:, i] == 1)
     train_data, train_label, test_data, test_label = add_random_data((numbers_of_datas[0] * (1-test_sample_percent)), 0, data, labels, True)
-    for i in range(1,10):
+    for i in range(1, 10):
         train_data2, train_label2, test_data2, test_label2 = add_random_data((numbers_of_datas[i] * (1-test_sample_percent)), i, data, labels, True)
-        train_data = np.vstack([train_data,train_data2])
-        train_label = np.vstack([train_label,train_label2])
+        train_data = np.vstack([train_data, train_data2])
+        train_label = np.vstack([train_label, train_label2])
         test_data = np.vstack([test_data, test_data2])
         test_label = np.vstack([test_label, test_label2])
     return train_data, train_label, test_data, test_label
 
 # Dzielenie danych na zbior uczacy i testowy
-def get_train_data_and_test_data(data,labels,test_sample_percent,type_of_split):
+def get_train_data_and_test_data(data, labels, test_sample_percent, type_of_split):
     data_length = data.shape[0]
     if TrainingSetSelection.RANDOM == type_of_split:
-        indices_for_test =  random.sample(range(0, data_length), int(test_sample_percent*data_length))
+        indices_for_test =  random.sample(range(0, data_length), int(test_sample_percent * data_length))
         indices_for_train = [x for x in range(data_length) if x not in indices_for_test]
         returner1 = extend_array(labels[indices_for_train])
         returner2 = extend_array(labels[indices_for_test])
-        return data[indices_for_train,:], returner1, data[indices_for_test,:], returner2
+        return data[indices_for_train, :], returner1, data[indices_for_test, :], returner2
     elif TrainingSetSelection.STRATIFIEDSAMPLING == type_of_split:
         numbers_of_datas = list(range(10))
-        for i in range(0,10):
+        for i in range(0, 10):
             numbers_of_datas[i] = np.count_nonzero(labels == i)
         train_data, train_label, test_data, test_label = add_random_data((numbers_of_datas[0] * (1-test_sample_percent)), 0, data, labels, True)
-        for i in range(1,10):
+        for i in range(1, 10):
             train_data2, train_label2, test_data2, test_label2 = add_random_data((numbers_of_datas[i] * (1-test_sample_percent)), i, data, labels, True)
             train_data = np.vstack([train_data,train_data2])
             train_label = np.vstack([train_label,train_label2])
@@ -436,34 +436,34 @@ def neural_network(X, Y, layers_dims, learning_rate, epoka, function_activation_
         return parameters
 
 
-
-# Wczytanie danych treningowych i testowych
-mnist_data_csv_1 = pd.read_csv("mnist1.csv", sep = ",")
-mnist_data_csv_2 = pd.read_csv("mnist2.csv", sep = ",")
-
-# Podział danych na etykiety i piksele
-mnist_labels_1 = np.array(mnist_data_csv_1.iloc[:, 0])
-mnist_labels_2 = np.array(mnist_data_csv_2.iloc[:, 0])
-mnist_data_1 = np.array(mnist_data_csv_1.iloc[:, 1:], dtype='int16')
-mnist_data_2 = np.array(mnist_data_csv_2.iloc[:, 1:], dtype='int16')
-
-# Łączenie danych do jednego arrayu
-all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
-all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
-
-# Dzielenie danych na zbiór uczący i testowy
-percent_of_test_data = 0.2
-list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,TrainingSetSelection.STRATIFIEDSAMPLING)
-train_data = np.transpose(list_of_datas[0])
-train_label = np.transpose(list_of_datas[1])
-test_data = np.transpose(list_of_datas[2])
-test_label = np.transpose(list_of_datas[3])
-
-layers_dims = [784, 392, 196, 98, 49, 10]
-order = get_function_activation_order(layers_dims)
-
-parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.005, epoka=250, percent_of_validation_data=0.25, which_worse_prediction_stop_learning = 8, function_activation_order = order, initzializing_method = InitializationMethod.HE)
-predictions, _ = check_test(test_data, parameters,order)
-predictions = translate_matrix_of_probabilities_to_matrix_of_answers(np.transpose(predictions))
-print(str(matrix_comparison(predictions,np.transpose(test_label))))
-save_array_as_csv(predictions,'Answers.csv')
+if __name__ == "__main__":
+    # Wczytanie danych treningowych i testowych
+    mnist_data_csv_1 = pd.read_csv("mnist1.csv", sep = ",")
+    mnist_data_csv_2 = pd.read_csv("mnist2.csv", sep = ",")
+    
+    # Podział danych na etykiety i piksele
+    mnist_labels_1 = np.array(mnist_data_csv_1.iloc[:, 0])
+    mnist_labels_2 = np.array(mnist_data_csv_2.iloc[:, 0])
+    mnist_data_1 = np.array(mnist_data_csv_1.iloc[:, 1:], dtype='int16')
+    mnist_data_2 = np.array(mnist_data_csv_2.iloc[:, 1:], dtype='int16')
+    
+    # Łączenie danych do jednego arrayu
+    all_mnist_labels = np.concatenate((mnist_labels_1,mnist_labels_2),axis=0)
+    all_data = np.concatenate((mnist_data_1,mnist_data_2),axis=0)
+    
+    # Dzielenie danych na zbiór uczący i testowy
+    percent_of_test_data = 0.2
+    list_of_datas = get_train_data_and_test_data(all_data,all_mnist_labels,percent_of_test_data,TrainingSetSelection.STRATIFIEDSAMPLING)
+    train_data = np.transpose(list_of_datas[0])
+    train_label = np.transpose(list_of_datas[1])
+    test_data = np.transpose(list_of_datas[2])
+    test_label = np.transpose(list_of_datas[3])
+    
+    layers_dims = [784, 392, 196, 98, 49, 10]
+    order = get_function_activation_order(layers_dims)
+    
+    parameters = neural_network(train_data, train_label, layers_dims, learning_rate=0.005, epoka=250, percent_of_validation_data=0.25, which_worse_prediction_stop_learning = 8, function_activation_order = order, initzializing_method = InitializationMethod.HE)
+    predictions, _ = check_test(test_data, parameters,order)
+    predictions = translate_matrix_of_probabilities_to_matrix_of_answers(np.transpose(predictions))
+    print(str(matrix_comparison(predictions,np.transpose(test_label))))
+    save_array_as_csv(predictions,'Answers.csv')
