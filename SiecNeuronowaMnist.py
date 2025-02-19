@@ -225,7 +225,7 @@ def compute_cost(model_results, Y):
     return cost
 
 def get_function_activation_order(layer_dims,want_default_setup=True,input = None):
-    if want_default_setup == True:
+    if want_default_setup:
         function_activation_order =  [ActivationFunction.Relu for x in range(len(layer_dims)-2)]
         function_activation_order.append(ActivationFunction.Softmax)
         return function_activation_order 
