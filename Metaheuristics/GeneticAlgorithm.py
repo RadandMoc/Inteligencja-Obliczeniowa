@@ -3,9 +3,21 @@ import numpy as np
 import random
 from tqdm import tqdm
 import datetime
+import os
 
 
-def save_data(best_route, distance, population_size, generation_size, number_of_crossover, mutation, iteration_without_improvement, filename="genetic_algorithm_results.txt"):
+def create_results_dir():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    results_dir = os.path.join(current_dir, "results")
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+    return results_dir
+
+def get_result_file_path(filename):
+    results_dir = create_results_dir()
+    return os.path.join(results_dir, filename)
+
+def save_data(best_route, distance, population_size, generation_size, number_of_crossover, mutation, iteration_without_improvement, filename=get_result_file_path("genetic_algorithm_results.txt")):
     with open(filename, 'a') as result_file:
         result_file.write("\n" + "=" * 25 + "\n")
         for element in best_route:
@@ -108,7 +120,7 @@ def genetic_algorithm(distances, population_size=100, generations=5000, mutation
 
     current_time = datetime.datetime.now()
     formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-    file_name = f"plik_{formatted_time}_for_{num_cities}.txt"
+    file_name = get_result_file_path(f"plik_{formatted_time}_for_{num_cities}.txt")
 
     if history_of_best_results_for_generation:
         with open(file_name, 'a') as file:
