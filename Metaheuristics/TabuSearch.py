@@ -6,7 +6,19 @@ import copy
 import time
 from tqdm import tqdm
 from enum import Enum
+import os
 
+
+def create_results_dir():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    results_dir = os.path.join(current_dir, "results")
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+    return results_dir
+
+def get_result_file_path(filename):
+    results_dir = create_results_dir()
+    return os.path.join(results_dir, filename)
 
 class Method(Enum):
     Swap = 1
@@ -250,4 +262,4 @@ def tabu_search(csv_file, output_file, iterations, iterations_without_improvemen
 
 if __name__ == "__main__":
     # Przykładowe użycie
-    best_solution = tabu_search('Dane_TSP_76.csv', "ResultsTabuSearch.txt", iterations=10000, iterations_without_improvement=500, method=Method.Reverse, tabu_tenure=400)
+    best_solution = tabu_search('Dane_TSP_76.csv', get_result_file_path("ResultsTabuSearch.txt"), iterations=10000, iterations_without_improvement=500, method=Method.Reverse, tabu_tenure=400)

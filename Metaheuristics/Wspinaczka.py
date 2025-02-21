@@ -1,9 +1,23 @@
 import numpy as np
 import pandas as pd
 import random
+import os
 
 
-def save_data(best_route, distance, method, num_iterations, filename=f"Wspinaczka_records48.txt"):
+def create_results_dir():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    results_dir = os.path.join(current_dir, "results")
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+    return results_dir
+
+
+def get_result_file_path(filename):
+    results_dir = create_results_dir()
+    return os.path.join(results_dir, filename)
+
+
+def save_data(best_route, distance, method, num_iterations, filename=get_result_file_path(f"Wspinaczka_records48.txt")):
     with open(filename, 'a') as resultFile:
         resultFile.write("\n" + "=" * 25 + "\n")
         for element in best_route:

@@ -4,6 +4,19 @@ import random
 import math
 import time
 import sys
+import os
+
+
+def create_results_dir():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    results_dir = os.path.join(current_dir, "results")
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+    return results_dir
+
+def get_result_file_path(filename):
+    results_dir = create_results_dir()
+    return os.path.join(results_dir, filename)
 
 # FUNKCJA DO ZAPISU DO PLIKU
 def save_data(best_overall, initial_temperature, cooling_rate, num_iterations, min_temp, temp_red, metoda, filename):
@@ -247,7 +260,7 @@ if __name__ == "__main__":
     best_distance, best_route, best_global = run_simulated_annealing_multiple_times(
         matrix, num_runs=4, initial_temperature=10000, cooling_rate=0.003,
         num_iterations=100, acc_value=130000, min_temp=0.11, temp_red='fast', method="reverse",
-        filename=f"Wyzarzanie_records_127.txt")
+        filename=get_result_file_path(f"Wyzarzanie_records_127.txt"))
 
     ### TEMP_RED = slow jest dla wolnej redukcji temperatury, fast dla szybkiej, wg wykładu dla wolnej redukcji temperatury liczba iteracji jest równa 1.
     ### METHOD : REVERSE, SWAP, ISERTION
